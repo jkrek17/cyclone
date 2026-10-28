@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Working output of the realtime tools (GRIB caches, exports, renders)
+cyclone_phase_space/realtime/out/
+
+# Agent worktrees created for isolated subagent runs
+.claude/worktrees/

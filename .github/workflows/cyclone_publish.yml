@@ -1,0 +1,111 @@
+# Publishes this repository's site with GitHub Pages: the live global map at
+# the root, with its data under data/ (the latest/ and storms/ trees of the
+# cps-live branch), the globe kit it loads at globe-kit/, the article with
+# its figures at article/ and the forecasters' guide at forecasters/. The
+# site is built here and deployed through the Pages deployment action, so no
+# token or second repository is involved; the first successful run turns
+# Pages on by itself (configure-pages with enablement). The map is then at
+# https://jkrek17.github.io/cyclone/, the article at .../cyclone/article/
+# and the guide at .../cyclone/forecasters/. Nothing on the site links
+# anywhere else.
+#
+# Runs after every live data export and daily collection, on a push that
+# changes the pages, and by hand.
+
+name: Publish cyclone site
+
+on:
+  workflow_run:
+    workflows: ["CPS live map data", "CPS daily collection"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths:
+      - 'cyclone_phase_space/article/live/**'
+      - 'cyclone_phase_space/article/forecasters/**'
+      - 'cyclone_phase_space/article/index.html'
+      - 'cyclone_phase_space/article/style.css'
+      - 'cyclone_phase_space/article/figures/**'
+      - 'globe_kit/**'
+      - '.github/workflows/cyclone_publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: cyclone-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Fetch the live data branch
+        run: |
+          git fetch --depth 1 origin cps-live || echo "no cps-live branch yet"
+          rm -rf "$RUNNER_TEMP/live"
+          mkdir -p "$RUNNER_TEMP/live"
+          if git rev-parse --verify -q origin/cps-live >/dev/null; then
+            git --work-tree="$RUNNER_TEMP/live" checkout origin/cps-live -- . 2>/dev/null || true
+            git reset -q
+          fi
+
+      - name: Assemble the site
+        run: |
+          site="$RUNNER_TEMP/site"
+          rm -rf "$site"
+          mkdir -p "$site/data" "$site/globe-kit" "$site/article/figures" "$site/forecasters"
+          # The live map is the root page; it loads the kit as globe-kit/.
+          cp -r cyclone_phase_space/article/live/. "$site/"
+          cp -r globe_kit/. "$site/globe-kit/"
+          if [ -d "$RUNNER_TEMP/live/latest" ]; then
+            cp -r "$RUNNER_TEMP/live/latest" "$site/data/latest"
+          fi
+          if [ -d "$RUNNER_TEMP/live/storms" ]; then
+            cp -r "$RUNNER_TEMP/live/storms" "$site/data/storms"
+          fi
+          # The article with its figures (the interactive 3-D phase space is
+          # figures/phase_space_3d.html) and the forecasters' guide, which
+          # link to the map as ../ and to each other.
+          cp cyclone_phase_space/article/index.html cyclone_phase_space/article/style.css "$site/article/"
+          cp -r cyclone_phase_space/article/figures/. "$site/article/figures/"
+          cp -r cyclone_phase_space/article/forecasters/. "$site/forecasters/"
+          # Stamp the map's script, style and kit links with the commit so a
+          # browser holding a cached index.html never pairs it with stale
+          # files (Pages serves everything with a 10 minute max-age).
+          v="${GITHUB_SHA::8}"
+          kit='globe-kit/(globe-kit\.js|globe-kit\.css|lib/maplibre-gl\.js|lib/maplibre-gl\.css)'
+          sed -i -E "s#(href|src)=\"(style\.css|card\.js|storms\.js|space3d\.js|app\.js|$kit)\"#\1=\"\2?v=$v\"#g" "$site/index.html"
+          grep -c "?v=$v" "$site/index.html"
+          touch "$site/.nojekyll"
+          # Nothing on this site may point at another site of the account.
+          if grep -rl "jkrek17.github.io/web" "$site" --include=*.html --include=*.js --include=*.css; then
+            echo "::error::a page links to another site"; exit 1
+          fi
+          du -sh "$site"
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/site
+
+      - name: Deploy to Pages
+        id: deploy
+        uses: actions/deploy-pages@v4
