@@ -1,0 +1,656 @@
+{
+ "generated": "2026-10-28T01:35Z",
+ "pairs": "/home/user/cyclone/cyclone_phase_space/realtime/data/validation/fsu_pairs.csv",
+ "verified_rows": 517,
+ "near_boundary_m": 5.0,
+ "cells": {
+  "standard+steer_925": {
+   "n": 505,
+   "agree": 275,
+   "rate": 0.545,
+   "kappa": 0.434,
+   "majority_baseline": 0.347,
+   "b_side_agree": 0.679,
+   "vtl_sign_agree": 0.844,
+   "vtu_sign_agree": 0.929,
+   "disagreements": {
+    "b_only": 115,
+    "vtl_only": 46,
+    "vtu_only": 22,
+    "several": 47
+   },
+   "disagreements_near_boundary": 125,
+   "confusion_ours_rows_fsu_cols": [
+    [
+     49,
+     14,
+     2,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     4,
+     91,
+     0,
+     9,
+     14,
+     11,
+     0
+    ],
+    [
+     9,
+     0,
+     15,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     5,
+     59,
+     2,
+     41,
+     25,
+     10,
+     0
+    ],
+    [
+     0,
+     9,
+     0,
+     8,
+     67,
+     36,
+     0
+    ],
+    [
+     0,
+     2,
+     0,
+     0,
+     0,
+     12,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     8,
+     0
+    ]
+   ],
+   "freq_ours": [
+    66,
+    129,
+    25,
+    142,
+    120,
+    14,
+    9
+   ],
+   "freq_fsu": [
+    67,
+    175,
+    19,
+    60,
+    107,
+    77,
+    0
+   ],
+   "timing": {
+    "onset_n": 6,
+    "onset_within_6h": 2,
+    "onset_median_h": -9.0,
+    "completion_n": 10,
+    "completion_within_6h": 7,
+    "completion_median_h": 6.0
+   }
+  },
+  "standard+track_925": {
+   "n": 515,
+   "agree": 326,
+   "rate": 0.633,
+   "kappa": 0.538,
+   "majority_baseline": 0.346,
+   "b_side_agree": 0.775,
+   "vtl_sign_agree": 0.849,
+   "vtu_sign_agree": 0.93,
+   "disagreements": {
+    "b_only": 75,
+    "vtl_only": 53,
+    "vtu_only": 20,
+    "several": 41
+   },
+   "disagreements_near_boundary": 113,
+   "confusion_ours_rows_fsu_cols": [
+    [
+     64,
+     11,
+     2,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     3,
+     123,
+     0,
+     9,
+     13,
+     13,
+     0
+    ],
+    [
+     3,
+     3,
+     15,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     6,
+     30,
+     2,
+     41,
+     25,
+     8,
+     0
+    ],
+    [
+     0,
+     3,
+     0,
+     7,
+     55,
+     20,
+     0
+    ],
+    [
+     0,
+     8,
+     0,
+     1,
+     11,
+     28,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     8,
+     0
+    ]
+   ],
+   "freq_ours": [
+    78,
+    161,
+    22,
+    112,
+    85,
+    48,
+    9
+   ],
+   "freq_fsu": [
+    76,
+    178,
+    19,
+    60,
+    105,
+    77,
+    0
+   ],
+   "timing": {
+    "onset_n": 9,
+    "onset_within_6h": 4,
+    "onset_median_h": 0.0,
+    "completion_n": 9,
+    "completion_within_6h": 7,
+    "completion_median_h": 6.0
+   }
+  },
+  "standard+track_900": {
+   "n": 515,
+   "agree": 342,
+   "rate": 0.664,
+   "kappa": 0.571,
+   "majority_baseline": 0.346,
+   "b_side_agree": 0.823,
+   "vtl_sign_agree": 0.849,
+   "vtu_sign_agree": 0.93,
+   "disagreements": {
+    "b_only": 59,
+    "vtl_only": 59,
+    "vtu_only": 23,
+    "several": 32
+   },
+   "disagreements_near_boundary": 86,
+   "confusion_ours_rows_fsu_cols": [
+    [
+     65,
+     11,
+     3,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     6,
+     140,
+     0,
+     11,
+     12,
+     19,
+     0
+    ],
+    [
+     2,
+     3,
+     14,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     3,
+     13,
+     2,
+     39,
+     26,
+     2,
+     0
+    ],
+    [
+     0,
+     4,
+     0,
+     7,
+     55,
+     19,
+     0
+    ],
+    [
+     0,
+     7,
+     0,
+     1,
+     11,
+     29,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     8,
+     0
+    ]
+   ],
+   "freq_ours": [
+    80,
+    188,
+    20,
+    85,
+    85,
+    48,
+    9
+   ],
+   "freq_fsu": [
+    76,
+    178,
+    19,
+    60,
+    105,
+    77,
+    0
+   ],
+   "timing": {
+    "onset_n": 6,
+    "onset_within_6h": 5,
+    "onset_median_h": 3.0,
+    "completion_n": 9,
+    "completion_within_6h": 7,
+    "completion_median_h": 6.0
+   }
+  },
+  "hart+steer_925": {
+   "n": 505,
+   "agree": 307,
+   "rate": 0.608,
+   "kappa": 0.511,
+   "majority_baseline": 0.347,
+   "b_side_agree": 0.679,
+   "vtl_sign_agree": 0.905,
+   "vtu_sign_agree": 0.966,
+   "disagreements": {
+    "b_only": 136,
+    "vtl_only": 24,
+    "vtu_only": 9,
+    "several": 29
+   },
+   "disagreements_near_boundary": 116,
+   "confusion_ours_rows_fsu_cols": [
+    [
+     50,
+     5,
+     2,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     3,
+     94,
+     0,
+     6,
+     8,
+     2,
+     0
+    ],
+    [
+     10,
+     0,
+     16,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     4,
+     58,
+     1,
+     39,
+     6,
+     0,
+     0
+    ],
+    [
+     0,
+     10,
+     0,
+     11,
+     87,
+     54,
+     0
+    ],
+    [
+     0,
+     5,
+     0,
+     3,
+     6,
+     21,
+     0
+    ],
+    [
+     0,
+     3,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "freq_ours": [
+    58,
+    113,
+    26,
+    108,
+    162,
+    35,
+    3
+   ],
+   "freq_fsu": [
+    67,
+    175,
+    19,
+    60,
+    107,
+    77,
+    0
+   ],
+   "timing": {
+    "onset_n": 6,
+    "onset_within_6h": 2,
+    "onset_median_h": -9.0,
+    "completion_n": 12,
+    "completion_within_6h": 11,
+    "completion_median_h": 0.0
+   }
+  },
+  "hart+track_925": {
+   "n": 515,
+   "agree": 359,
+   "rate": 0.697,
+   "kappa": 0.62,
+   "majority_baseline": 0.346,
+   "b_side_agree": 0.775,
+   "vtl_sign_agree": 0.907,
+   "vtu_sign_agree": 0.967,
+   "disagreements": {
+    "b_only": 94,
+    "vtl_only": 31,
+    "vtu_only": 6,
+    "several": 25
+   },
+   "disagreements_near_boundary": 100,
+   "confusion_ours_rows_fsu_cols": [
+    [
+     64,
+     2,
+     2,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     3,
+     125,
+     0,
+     5,
+     6,
+     2,
+     0
+    ],
+    [
+     5,
+     3,
+     16,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     4,
+     30,
+     1,
+     40,
+     8,
+     0,
+     0
+    ],
+    [
+     0,
+     3,
+     0,
+     9,
+     72,
+     33,
+     0
+    ],
+    [
+     0,
+     12,
+     0,
+     5,
+     19,
+     42,
+     0
+    ],
+    [
+     0,
+     3,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "freq_ours": [
+    69,
+    141,
+    24,
+    83,
+    117,
+    78,
+    3
+   ],
+   "freq_fsu": [
+    76,
+    178,
+    19,
+    60,
+    105,
+    77,
+    0
+   ],
+   "timing": {
+    "onset_n": 9,
+    "onset_within_6h": 4,
+    "onset_median_h": 0.0,
+    "completion_n": 11,
+    "completion_within_6h": 11,
+    "completion_median_h": 0.0
+   }
+  },
+  "hart+track_900": {
+   "n": 515,
+   "agree": 384,
+   "rate": 0.746,
+   "kappa": 0.676,
+   "majority_baseline": 0.346,
+   "b_side_agree": 0.823,
+   "vtl_sign_agree": 0.907,
+   "vtu_sign_agree": 0.967,
+   "disagreements": {
+    "b_only": 69,
+    "vtl_only": 30,
+    "vtu_only": 7,
+    "several": 25
+   },
+   "disagreements_near_boundary": 75,
+   "confusion_ours_rows_fsu_cols": [
+    [
+     67,
+     2,
+     3,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     4,
+     142,
+     0,
+     8,
+     7,
+     2,
+     0
+    ],
+    [
+     2,
+     3,
+     15,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     3,
+     13,
+     1,
+     37,
+     7,
+     0,
+     0
+    ],
+    [
+     0,
+     4,
+     0,
+     10,
+     74,
+     26,
+     0
+    ],
+    [
+     0,
+     11,
+     0,
+     4,
+     17,
+     49,
+     0
+    ],
+    [
+     0,
+     3,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   ],
+   "freq_ours": [
+    73,
+    163,
+    20,
+    61,
+    114,
+    81,
+    3
+   ],
+   "freq_fsu": [
+    76,
+    178,
+    19,
+    60,
+    105,
+    77,
+    0
+   ],
+   "timing": {
+    "onset_n": 6,
+    "onset_within_6h": 5,
+    "onset_median_h": 3.0,
+    "completion_n": 11,
+    "completion_within_6h": 10,
+    "completion_median_h": 0.0
+   }
+  }
+ }
+}
