@@ -64,13 +64,16 @@
       images, at 517 hours timed on both diagrams. With Hart's bands and
       the track motion the asymmetry agrees with the diagrams to a bias
       of +0.8&nbsp;m and 11&nbsp;m root mean square, the thermal wind
-      terms to 51 and 39&nbsp;m, the joint class 75% of the time and
-      completion within 6&nbsp;h in 10 of 11 storms. The standard-level
-      bands of the AWIPS fields read the lower term about 17&nbsp;m
-      higher than Hart's bands on the same tracks and agree with the
-      diagrams in class 55% of the time, and the steering-flow
-      asymmetry of the gridded field carries a +5&nbsp;m bias against
-      the track-motion value, largest for slow storms. On a synthetic
+      terms to 51 and 39&nbsp;m, the joint class 75% of the time
+      (Cohen's kappa 0.68) and completion within 6&nbsp;h in 10 of 11
+      storms. The gridded fields' choices, the standard-level bands and
+      the steering-flow asymmetry, agree with the diagrams in class 55%
+      of the time; separating the two, the bands cost 6 to 9 points at
+      any choice of <i>B</i>, the steering flow 8 points at either band
+      choice, and the lower term reads about 17&nbsp;m higher on the
+      standard band. Both sides of the comparison are evaluations of
+      the GFS, so it is a check of one implementation against another,
+      not of either against observed structure. On a synthetic
       life cycle evaluated with both methods, the class sequence is the
       same, the asymmetry parameter matches Hart's to 1%, and onset and
       completion fall at the same hours.
@@ -796,7 +799,9 @@
 
   <h2 id="data">3. Data</h2>
   <p>
-    The real cases are GFS 0.25&deg; forecasts from five cycles: 2026
+    The CAVE cases of Section 6, the first checks made on the display
+    before the archive existed, are GFS 0.25&deg; forecasts from five
+    cycles: 2026
     September 17 1200&nbsp;UTC, September 19 1200 and 1800&nbsp;UTC,
     September 20 0600&nbsp;UTC and September 24 0600&nbsp;UTC. Each was
     evaluated in the CAVE D2D display at the Ocean Prediction Center, with
@@ -1002,10 +1007,12 @@
 
   <h2 id="results">6. Results</h2>
   <p>
-    Validation to date is a small log of real GFS cases from five cycles
-    (Section 3; table below), sampled at the MSLP center where values
-    were recorded, and constitutes a check that the fields behave as
-    designed rather than a calibration.
+    The first checks were a small log of real GFS cases read on the
+    CAVE display from five cycles (Section 3; table below), sampled at
+    the MSLP center where values were recorded, with the method as it
+    stood at the time. They show the fields behaving as designed and
+    stand as illustrations; the comparison in numbers, over the archive
+    of 26 cycles, follows them.
   </p>
   <table>
     <caption>The real cases evaluated to date, GFS 0.25&deg; forecasts of 2026 displayed in CAVE (Section 3). Forecast hours are hours from the cycle. Every case was sampled with the former first-order <i>B</i>, the closed-low detector on 1000&nbsp;hPa height and the former square window; the values and detections in this log predate the semicircle means, the MSLP detector and the circular window and are to be re-sampled.</caption>
@@ -1362,22 +1369,52 @@
     good stand-in for a storm that moves with it and a poor one for a
     storm that does not, which is why the live map reads a tracked
     low's class from the track-motion value and keeps the steering-flow
-    field for the untracked lows and for CAVE. Third, the class and the
-    timing: the joint class agrees with the diagram's at 75% of the
-    verified hours with Hart's bands and the track motion, and at
-    55% with the gridded fields' choices, with the symmetric
-    against asymmetric side alone at 82 and 68%; among the
-    storms that both sides start on the near side of a threshold and
-    both carry across it, completion falls within 6&nbsp;h of the
-    diagram's in 10 of 11 with Hart's bands and
-    7 of 10 with the standard bands, median
-    differences 0 and +6&nbsp;h, and onset, which
-    depends on <i>B</i> alone, in 5 of 6 and 2
-    of 6, with the standard choices early by 9&nbsp;h
-    at the median. The timing counts are small because few storms in
-    four weeks cross a threshold inside a run on both sides.
-    Figure 18 shows the pairs and Figure 19 the timing.
+    field for the untracked lows and for CAVE. Third, the class. The
+    two rows of the table change two things at once, the bands and the
+    way <i>B</i> is taken, so the table below separates them: every
+    combination of the two band choices with three <i>B</i> choices,
+    the steering-flow <i>B</i> on the rescaled 925 to 700&nbsp;hPa
+    thickness, the track-motion <i>B</i> on the same thickness, and the
+    track-motion <i>B</i> on the 900 to 600&nbsp;hPa thickness. The
+    joint class agrees with the diagram's at 55% of the verified hours
+    with the gridded fields' choices and at 75% with the live map's,
+    with Cohen's kappa 0.43 and 0.68 against a majority-class baseline
+    of 35%, the diagrams' most common class being the symmetric shallow
+    warm core. Taking the motion from the track instead of the steering
+    flow is worth 8 points at either band choice, the 900 to
+    600&nbsp;hPa thickness for <i>B</i> 3 to 5 more, and Hart's bands 6
+    to 9 points at any <i>B</i> choice; neither substitution accounts
+    for the difference alone. The three signs that make the class agree
+    separately at 82, 91 and 97% in the best cell (<i>B</i> side, lower
+    and upper term), and of its 131 disagreements 69 are the <i>B</i>
+    side alone, 30 the lower sign alone, 7 the upper sign alone and 25
+    more than one, with 57% of all of them within 5&nbsp;m of the
+    boundary crossed on one side or the other; the confusions are
+    mostly asymmetric against symmetric cold core (classes 4 and 5) and
+    asymmetric against symmetric shallow warm core (3 and 1), that is,
+    the <i>B</i> wall. For the timing, among the storms that both sides
+    start on the near side of a threshold and both carry across it,
+    completion falls within 6&nbsp;h of the diagram's in 10 of 11 with
+    the live map's choices and 7 of 10 with the gridded fields', median
+    differences 0 and +6&nbsp;h, and onset, which depends on <i>B</i>
+    alone, in 5 of 6 and 2 of 6, with the steering-flow <i>B</i> early
+    by 9&nbsp;h at the median at either band choice. The timing counts
+    are small because few storms in four weeks cross a threshold inside
+    a run on both sides. Figure 18 shows the pairs and Figure 19 the
+    timing.
   </p>
+  <table>
+    <caption>Joint class agreement with the Florida State diagrams at the verified hours, for every combination of the thermal wind bands and the way <i>B</i> is taken. Kappa is Cohen's; the baseline is the share of the diagrams' most common class, 35% in every cell; the sign columns are the separate agreement of the <i>B</i> side (<i>B</i> above 10&nbsp;m), the lower and the upper thermal wind sign; near is the share of the disagreements within 5&nbsp;m of the boundary crossed, on either side. The first row is the gridded fields' choices (CAVE), the last the live map's.</caption>
+    <thead><tr><th scope="col">Bands</th><th scope="col"><i>B</i></th><th scope="col">Hours</th><th scope="col">Class</th><th scope="col">Kappa</th><th scope="col"><i>B</i> side</th><th scope="col">Lower sign</th><th scope="col">Upper sign</th><th scope="col">Near</th></tr></thead>
+    <tbody>
+      <tr><td>standard</td><td>steering flow, 925 to 700&nbsp;hPa rescaled</td><td>505</td><td>55%</td><td>0.43</td><td>68%</td><td>84%</td><td>93%</td><td>54%</td></tr>
+      <tr><td>standard</td><td>track motion, 925 to 700&nbsp;hPa rescaled</td><td>515</td><td>63%</td><td>0.54</td><td>78%</td><td>85%</td><td>93%</td><td>60%</td></tr>
+      <tr><td>standard</td><td>track motion, 900 to 600&nbsp;hPa</td><td>515</td><td>66%</td><td>0.57</td><td>82%</td><td>85%</td><td>93%</td><td>50%</td></tr>
+      <tr><td>Hart's</td><td>steering flow, 925 to 700&nbsp;hPa rescaled</td><td>505</td><td>61%</td><td>0.51</td><td>68%</td><td>90%</td><td>97%</td><td>59%</td></tr>
+      <tr><td>Hart's</td><td>track motion, 925 to 700&nbsp;hPa rescaled</td><td>515</td><td>70%</td><td>0.62</td><td>78%</td><td>91%</td><td>97%</td><td>64%</td></tr>
+      <tr><td>Hart's</td><td>track motion, 900 to 600&nbsp;hPa</td><td>515</td><td>75%</td><td>0.68</td><td>82%</td><td>91%</td><td>97%</td><td>57%</td></tr>
+    </tbody>
+  </table>
   <p>
     The comparison has limits of its own. The pairs are not
     independent: consecutive hours of one storm and the same storm on
@@ -1439,10 +1476,11 @@
       module as well, but has no derived-parameter definition in AWIPS,
       since only the GFS could feed it; a GFS-only Hart-band product in
       CAVE is one definition away. The comparison of Section 6 is the
-      measurement of the band
-      difference on real storms: 17&nbsp;m in the lower term on average,
-      and a class agreement with the Florida State diagrams of 55%
-      against 75%. Morphing a profile from deep warm
+      measurement of the band difference on real storms: 17&nbsp;m in
+      the lower term on average, and 6 to 9 points of class agreement
+      with the Florida State diagrams at any choice of <i>B</i>, the
+      rest of the gap between 55% and 75% being the way <i>B</i> is
+      taken. Morphing a profile from deep warm
       through the transition shape to deep cold core, completion falls
       at progress 0.71 on Hart's band and 0.77 on the band in use, about
       3&nbsp;h late on a 48&nbsp;h transition, against 0.59 on the
@@ -1664,7 +1702,7 @@
   <h2 id="extensions">8. Candidate extensions</h2>
   <p>
     Four candidate extensions were tested on synthetic fields with the
-    operational code (Figure 17a to 19c), as parallel products that would
+    operational code (Figure 17a to 17c), as parallel products that would
     leave Hart's parameters as the reference. Figure 17d checks the
     semicircle means that replaced the former <i>B</i>: at the center of a
     wavenumber-one thickness dipole the semicircle form tracks Hart's
@@ -1757,10 +1795,11 @@
     <li>The standard-level bands of the AWIPS fields read the lower
       term 17&nbsp;m above Hart's bands on the same tracks,
       12&nbsp;m above the diagrams where Hart's bands read
-      14&nbsp;m below, and agree with the diagrams in class
-      55% of the time against 75%, which is why the live map and the
-      daily collection evaluate Hart's layers and only the AWIPS fields
-      keep the standard levels; on synthetic profiles the standard
+      14&nbsp;m below, and cost 6 to 9 points of class agreement with
+      the diagrams at any choice of <i>B</i>, which is why the live map
+      and the daily collection evaluate Hart's layers and only the
+      AWIPS fields keep the standard levels; on synthetic profiles the
+      standard
       band reads a deep warm core about 12% high and a shallow warm
       seclusion two to three times Hart's value. The window is Hart's
       500&nbsp;km circle; the square used before read cold cores about
@@ -1770,9 +1809,10 @@
       1% on the synthetic life cycle and to 0.1% on a storm-scale dipole
       at every scale tested. The steering flow in place of the track
       motion, the one substitution a single frame forces, is worth
-      +5.4&nbsp;m on average against the track-motion value and
-      a class change at 17% of the hours of slow storms; on
-      the live map a tracked low is read from its own motion.</li>
+      +5.4&nbsp;m on average against the track-motion value, a class
+      change at 17% of the hours of slow storms and 8 points of class
+      agreement with the Florida State diagrams at either band choice;
+      on the live map a tracked low is read from its own motion.</li>
     <li>The environment's height gradient lowers both thermal wind terms
       as a storm enters a baroclinic zone. That is the transition signal
       by design, and it is shared with Hart's method.</li>
@@ -2125,7 +2165,12 @@
       figure are written to <code>realtime/data/validation/</code>, with
       48 hand-read points on five diagrams
       (<code>hand_digitized.csv</code>) as the check on the
-      digitizer.</dd>
+      digitizer. The class table of the same section, every band choice
+      against every <i>B</i> choice with Cohen's kappa, the sign
+      agreements, the confusion matrices and the split of the
+      disagreements, is <code>realtime/class_cells.py</code> on the
+      pairs file (<code>class_cells.md</code> and
+      <code>class_cells.json</code> beside it).</dd>
     <dt id="src-fig19">Figure 19</dt>
     <dd><code>realtime/fsu_stats.py</code>
       (<code>fig_fsu_timing.png</code>, copied to

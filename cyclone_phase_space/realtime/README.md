@@ -430,7 +430,15 @@ plots are saved beside its track; `hand_digitized.csv` holds 48 points
 read by hand on five plots as the check on the digitizer (0.2 m in B,
 0.07 m in the thermal wind). The verified set is the headline; points
 timed on one plot only carry an estimated 12% timing error. The
-article's Figures 20 and 21 are these two figures.
+article's Figures 18 and 19 are these two figures. `class_cells.py` then
+takes the pairs file apart by band choice and B choice (steering-flow B
+on the rescaled 925-700 hPa thickness, track-motion B on the same,
+track-motion B on the 900-600 hPa thickness; six cells) and writes
+`class_cells.md` and `class_cells.json`: joint class agreement, Cohen's
+kappa, the majority-class baseline, the agreement of each of the three
+signs, the confusion matrices, the split of the disagreements and the
+timing per cell, so the effect of the bands and of the B method are
+separated.
 
 ### Example: 2026092412
 
