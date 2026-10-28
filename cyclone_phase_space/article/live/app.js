@@ -99,7 +99,7 @@ const narrow = () => K.isMobile();
 
 const S = {
   base: null, index: null, legend: null, classes: new Map(),
-  i: 0, field: 'class', playing: false, timer: 0, token: 0,
+  i: 0, field: 'class', marker: 'class', playing: false, timer: 0, token: 0,
   speed: 'normal', bust: '',
   opacity: { hb: 0.7, hvtl: 0.7, hvtu: 0.7 },  // the ramps are opaque from 10% of the half range
   layers: { contours: true, circles: true, footprint: false, tracks: true, terrain: false, fade: true,
@@ -419,17 +419,27 @@ function buildMap(start) {
     // the field's steering-flow class: a thin ring in the field's color
     // just outside the dot, a dark band between the two.
     map.addLayer({ id: 'lows-alt', type: 'circle', source: 'lows', filter: ['has', 'alt'], paint: {
-      'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, ['case', ['get', 'deep'], 6.8, 5.2], LABEL_ZOOM, ['case', ['get', 'deep'], 8.8, 7]],
+      'circle-radius': ['interpolate', ['linear'], ['zoom'],
+        0, ['case', ['has', 'glyph'], 10.5, ['get', 'deep'], 6.8, 5.2], LABEL_ZOOM, ['case', ['has', 'glyph'], 13.5, ['get', 'deep'], 8.8, 7]],
       'circle-color': 'rgba(11,18,32,0.85)',
       'circle-stroke-color': ['get', 'alt'],
       'circle-stroke-width': 1.4,
     } });
+    // The dot, and the hit target for every marker style; clear under a glyph.
     map.addLayer({ id: 'lows', type: 'circle', source: 'lows', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, ['case', ['get', 'deep'], 4.8, 3.2], LABEL_ZOOM, ['case', ['get', 'deep'], 6.5, 4.8]],
-      'circle-color': ['case', ['get', 'terrain'], 'rgba(0,0,0,0)', ['get', 'hex']],
-      'circle-stroke-color': ['case', ['get', 'terrain'], '#a3b3c9', '#0b1220'],
+      'circle-color': ['case', ['any', ['get', 'terrain'], ['has', 'glyph']], 'rgba(0,0,0,0)', ['get', 'hex']],
+      'circle-stroke-color': ['case', ['get', 'terrain'], '#a3b3c9', ['has', 'glyph'], 'rgba(0,0,0,0)', '#0b1220'],
       'circle-stroke-width': ['case', ['get', 'terrain'], 1.2, 1],
     } });
+    // The phase space glyphs (glyphs.js): A's tail under the disc, then the glyph.
+    addGlyphImages(map);
+    const glyphSize = ['interpolate', ['linear'], ['zoom'], 0, GLYPH_SIZE[0], LABEL_ZOOM, GLYPH_SIZE[1]];
+    const free = { 'icon-allow-overlap': true, 'icon-ignore-placement': true };
+    map.addLayer({ id: 'lows-tail', type: 'symbol', source: 'lows', filter: ['has', 'tail'], layout: {
+      'icon-image': 'g-tail', 'icon-size': glyphSize, 'icon-rotate': ['get', 'tail'], 'icon-rotation-alignment': 'map', ...free } });
+    map.addLayer({ id: 'lows-glyph', type: 'symbol', source: 'lows', filter: ['has', 'glyph'], layout: {
+      'icon-image': ['get', 'glyph'], 'icon-size': glyphSize, ...free } });
     map.addLayer({ id: 'sel', type: 'circle', source: 'sel',
       paint: { 'circle-radius': 12, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#e7eef8', 'circle-stroke-width': 1.6 } });
     S.mapReady = true;
@@ -604,9 +614,12 @@ function drawLows() {
     const deep = isDeep(c);
     const props = { k, hex, deep, terrain: c.terrain };
     if (!c.terrain && classDiffers(c)) props.alt = cls(c.cls).hex;
+    // a phase space glyph in place of the dot, its halo in the lower core's color
+    const g = c.terrain ? null : glyphProps(c);
+    if (g) Object.assign(props, g);
     lows.push({ type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [c.lon, c.lat] } });
     if (S.layers.circles && !c.terrain) {
-      halos.push({ type: 'Feature', properties: { hex, deep }, geometry: { type: 'Polygon', coordinates: [circle(c.lat, c.lon, +c.radius_km || HALO_KM)] } });
+      halos.push({ type: 'Feature', properties: { hex: g ? g.halo : hex, deep }, geometry: { type: 'Polygon', coordinates: [circle(c.lat, c.lon, +c.radius_km || HALO_KM)] } });
     }
   });
   setData('lows', { type: 'FeatureCollection', features: lows });
@@ -864,7 +877,7 @@ function goView(key) {
   setView(key);
 }
 
-// #t=hour&f=field&v=lat,lon,zoom&l=layers[&s=storm]. Links from the older
+// #t=hour&f=field&v=lat,lon,zoom&l=layers[&m=marker][&s=storm]. Links from the older
 // flat map also carry b= (its basemap) and a zoom one step deeper, since
 // its tiles were half the size.
 function readHash() {
@@ -876,6 +889,7 @@ function readHash() {
   if (v.length === 3 && v.every(Number.isFinite)) out.view = [v[0], v[1], q.has('b') ? Math.max(0, v[2] - 1) : v[2]];
   if (q.get('s')) out.storm = q.get('s');
   if (q.has('l')) out.layers = q.get('l');
+  if (MARKERS.includes(q.get('m'))) out.marker = q.get('m');
   return out;
 }
 
@@ -890,7 +904,7 @@ function viewHash() {
   const c = map.getCenter();
   const l = Object.entries(LAYER_KEYS).filter(([k]) => (INVERTED_KEYS.has(k) ? !S.layers[k] : S.layers[k])).map(([, v]) => v).join('');
   return `#t=${S.index.hours[S.i]}&f=${S.field}&v=${c.lat.toFixed(2)},${K.wrapLon(c.lng).toFixed(2)},${map.getZoom().toFixed(2)}` +
-    `&l=${l || '-'}${S.follow ? `&s=${encodeURIComponent(followShare())}` : ''}`;
+    `&l=${l || '-'}${S.marker === 'class' ? '' : `&m=${S.marker}`}${S.follow ? `&s=${encodeURIComponent(followShare())}` : ''}`;
 }
 
 async function share() {
@@ -973,6 +987,7 @@ function buildControls() {
   $('next').addEventListener('click', () => step(1));
   $('play').addEventListener('click', () => play(!S.playing));
   document.querySelectorAll('[data-speed]').forEach((b) => b.addEventListener('click', () => setSpeed(b.dataset.speed)));
+  document.querySelectorAll('[data-marker]').forEach((b) => b.addEventListener('click', () => setMarker(b.dataset.marker)));
   $('opacity').addEventListener('input', (e) => setOpacity(+e.target.value));
   document.querySelectorAll('[data-layer]').forEach((c) => c.addEventListener('change', () => setLayer(c.dataset.layer, c.checked)));
   document.querySelectorAll('[data-view]').forEach((a) => a.addEventListener('click', () => goView(a.dataset.view)));
@@ -1003,6 +1018,7 @@ function buildControls() {
     else if (/^[1-4]$/.test(e.key)) setField(FIELDS[+e.key - 1]);
     else if (k === 'f') toggleFollow();
     else if (k === 'l') K.setPanelOpen(!K.panelOpen());
+    else if (k === 'm') setMarker(MARKERS[(MARKERS.indexOf(S.marker) + 1) % MARKERS.length]);
     else if (e.key === '?') $('helpDialog').showModal();
     else if (HOTKEYS[k]) setLayer(HOTKEYS[k], !S.layers[HOTKEYS[k]]);
     else hit = false;
@@ -1079,6 +1095,7 @@ async function boot() {
   const hi = ix.hours.indexOf(want.hour);
   S.i = hi >= 0 ? hi : 0;
   setField(want.field || S.field, false);
+  setMarker(want.marker || S.marker);
   paintRamps();
   initStorms();
   $('foot-b').hidden = !ST.trackB;

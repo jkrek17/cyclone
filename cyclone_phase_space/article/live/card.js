@@ -106,8 +106,9 @@ function renderLegend() {
   const f = S.field;
   const el = $('legend');
   let h;
+  const glyph = S.marker !== 'class';
   if (f === 'class') {
-    h = `<div class="legend-head"><span>${TITLES.class}</span></div><ul class="legend-classes">${[...S.classes.values()].map((c) =>
+    h = `<div class="legend-head"><span>${TITLES.class}</span></div><ul class="legend-classes${glyph ? ' glyphs' : ''}">${glyph ? glyphLegendRows(S.marker) : [...S.classes.values()].map((c) =>
       `<li title="${esc(c.name)}"><i style="--c:${c.hex}"></i><b>${c.code}</b>${esc(SHORT[c.code] ?? c.name)}</li>`).join('')}</ul>`;
   } else {
     const { range: [lo, hi] } = stopsOf(f);
@@ -120,11 +121,12 @@ function renderLegend() {
       `<div class="legend-labels">${RAMP_LABELS[f].map((v) => `<span style="left:${pct(v)}%">${fmt(v)}</span>`).join('')}</div>` +
       `<p class="legend-ends"><span>${MINUS} ${ENDS[f][0]}</span><span>${ENDS[f][1]} +</span></p>`;
   }
-  const help = f === 'class' ? HELP[f] : `${HELP[f]} ${clearText(f)}`;
+  const help = f === 'class' ? (glyph ? MARKER_HELP[S.marker] : HELP[f]) : `${HELP[f]} ${clearText(f)}`;
   const dim = +S.index?.raster?.mask_dim;
   const fade = f !== 'class' && fadeOn() ? ` Faded to ${Math.round((dim > 0 ? dim : 0.35) * 100)}% beyond about 300 km from the lows.` : '';
   h += `<p class="legend-note">${esc(help)}${fade}</p>`;
   const keys = [];
+  if (glyph && f !== 'class') keys.push(`<span class="full">${glyphSVG(S.marker, { lo: 1, up: 0, asym: false }, { size: 20 })}${esc(MARKER_HELP[S.marker])}</span>`);
   if (ST.trackB) {
     keys.push('<span class="full"><i class="k-dot"></i>Low center, by class; a tracked low\'s B is from its own motion, the field\'s from the steering flow</span>',
       '<span class="full"><i class="k-ring"></i>The field\'s class where it differs, so a dot may not match the field under it</span>');
