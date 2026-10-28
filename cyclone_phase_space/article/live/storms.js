@@ -373,16 +373,15 @@ function drawNames(ctx, z) {
     at.set(c, p);
     // a dot with the differing-class ring (app.js, lows-alt) is wider
     const ring = !c.terrain && classDiffers(c) ? 3 : 0;
-    // a phase space glyph (glyphs.js) is wider than the dot, and the pressure
-    // goes left of it where A's tail points right
+    // a phase space glyph (glyphs.js) is wider than the old dot
     const g = glyphReach(c, z);
-    const half = g ? g.r + ring : 6 + ring;
+    const half = (g ?? 6) + ring;
     taken.push([p.x - half, p.y - half, p.x + half, p.y + half]);
     if (!wide && !blank(c.mslp)) {
       const t = String(Math.round(+c.mslp));
       ctx.font = `600 10.5px ${FAM}`;
       const w = ctx.measureText(t).width;
-      const x = g ? (g.tailRight ? p.x - half - 3 - w : p.x + half + 3) : p.x + (isDeep(c) ? 10 : 8) + ring;
+      const x = p.x + half + 5;
       taken.push([x - 2, p.y - 7, x + w + 2, p.y + 7]);
       ctx.lineWidth = 3;
       ctx.strokeStyle = 'rgba(7,13,25,0.85)';
@@ -413,7 +412,7 @@ function drawNames(ctx, z) {
     const rg = classDiffers(e) ? 3 : 0;  // clear of the differing-class ring
     const c = at.size && [...at.keys()].find((x) => x.track != null && String(x.track) === s.id);
     const gr = c ? glyphReach(c, z) : null;
-    const up = gr ? Math.max(0, gr.r - 7) : 0;  // clear of a glyph's top and bottom
+    const up = gr ? Math.max(0, gr - 7) : 0;  // clear of a glyph's top and bottom
     const spots = [[p.x + 6, p.y - 22 - rg - up], [p.x - 6 - w, p.y - 22 - rg - up], [p.x + 6, p.y + 8 + rg + up]].map(([x, y]) => [x, y, x + w, y + 15]);
     const r = spots.find(free) || (on ? spots[0] : null);
     if (!r) continue;
