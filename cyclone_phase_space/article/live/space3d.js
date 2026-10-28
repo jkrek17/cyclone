@@ -12,21 +12,22 @@
    Figure 1 ranges of the 2-D diagrams (FIG1). The planes B = 10 m,
    -V_T^L = 0 and -V_T^U = 0 cut the space into eight boxes; the two with a
    cold lower and warm upper layer (either B) are one cell, class 6, so
-   there are seven, in legend.json's class colors.
+   there are seven, tinted as the map's markers (glyphs.js): red where the
+   lower core is warm, blue where it is cold, stronger where deep.
 
    Drawn on a canvas by hand: a rotation about the vertical (azimuth, as
    matplotlib's azim) and a tilt (elevation), then a mild perspective
    (DIST, the eye's distance in half box widths). Back to front: the far
    panes' grid, the cell faces (translucent, sorted by depth), the box
    edges and the dividing planes, the class numbers, the axes, then the
-   track on top, colored by class per segment as on the map, with a dot
-   every 6 h sized by central pressure as Hart's diagrams size their
-   markers (deeper is bigger; SIZE, radius, a key of three sizes), the
-   start and end marked, a label every 12 h and a ring at the hour on
-   screen (S.i). Points with a missing value are skipped, and values
-   beyond the box are drawn on its wall as hollow dots, as the 2-D
-   diagrams do. B is Hart's, from the storm's own motion, where the track
-   has it (storms.js, bOf), else the field's; the class colouring the
+   track on top, colored by the lower core per segment as on the map,
+   with the map's marker every 6 h sized by central pressure as Hart's
+   diagrams size their markers (deeper is bigger; SIZE, radius, a key of
+   three sizes), the start and end marked, a label every 12 h and a ring
+   at the hour on screen (S.i). Points with a missing value are skipped,
+   and values beyond the box are drawn on its wall, faded (CLIP_A), as the
+   2-D diagrams do. B is Hart's, from the storm's own motion, where the track
+   has it (storms.js, bOf), else the field's; the class marking the
    track is the held one (clsOf: clsh, else clst or cls), and the readout
    quotes the margin to the nearest wall.
 
@@ -43,16 +44,17 @@ const Space3D = (() => {
   const ZOOM = [0.8, 1.8];        // modest
   const DIST = 9;                 // eye distance: a mild perspective
   const ASPECT_Z = 0.9;           // the article's box aspect (1, 1, 0.9)
-  const FACE_A = 0.085;           // cell face alpha
+  const FACE_A = [0.11, 0.045];   // cell face alpha, deep and shallow
+  const CLIP_A = 0.4;             // a marker held on the wall of the box
   const cam = { ...DEFAULT };     // shared by every view, for the session
   // The 3-D cube or Hart's two 2-D diagrams, kept across lows and sessions.
   const VIEW_KEY = 'cps-live.phaseView';
   let view = '3d';
   try { const v = localStorage.getItem(VIEW_KEY); if (v === '2d' || v === '3d') view = v; } catch { /* no storage */ }
-  // Dot radius (CSS px) by central pressure (hPa), as Hart's diagrams size
+  // Marker radius (CSS px) by central pressure (hPa), as Hart's diagrams size
   // their markers by intensity: deeper is bigger, linear between SIZE.p[0]
   // and SIZE.p[2] and clamped beyond; the key shows the three.
-  const SIZE = { p: [1010, 990, 960], r: [1.9, 4.8] };
+  const SIZE = { p: [1010, 990, 960], r: [2.6, 6] };  // a glyph's circle; its triangle reaches 1.3 r
   function radius(mslp) {
     const t = blank(mslp) ? 0.5 : (SIZE.p[0] - Math.max(SIZE.p[2], Math.min(SIZE.p[0], +mslp))) / (SIZE.p[0] - SIZE.p[2]);
     return SIZE.r[0] + t * (SIZE.r[1] - SIZE.r[0]);
@@ -197,7 +199,7 @@ const Space3D = (() => {
         </div></div>
       <canvas class="s3d-canvas" tabindex="0" role="img"></canvas>
       <ul class="s3d-key"></ul>
-      <ul class="s3d-size" title="Deeper lows get bigger dots, as in Hart's diagrams"></ul>
+      <ul class="s3d-size" title="Deeper lows get bigger markers, as in Hart's diagrams"></ul>
       <p class="s3d-note" id="${hintId}"></p>`;
     host.append(wrap);
     const canvas = wrap.querySelector('canvas');
@@ -208,7 +210,7 @@ const Space3D = (() => {
     const key = wrap.querySelector('.s3d-key');
     for (let c = 0; c < 7; c++) {
       const li = document.createElement('li');
-      li.innerHTML = `<i style="--c:${cls(c).hex}"></i><b>${c}</b><span></span>`;
+      li.innerHTML = `${glyphSVG(axesOfCls(c, c === 6 ? 0 : null), 18)}<b>${c}</b><span></span>`;
       li.querySelector('span').textContent = SHORT[c];
       li.title = cls(c).name;
       key.append(li);
@@ -220,8 +222,8 @@ const Space3D = (() => {
     function describe() {
       const flat = view === '2d';
       note.innerHTML = flat
-        ? `Hart's (2003) two diagrams, the faces of his three-dimensional phase space: B against the lower thermal wind, with the B = 10&nbsp;m line and the lower term's zero line, over the upper against the lower thermal wind, with both zero lines. Values in m; dots sized by central pressure, labelled every 12 h.${bNote} Click a dot for its hour.`
-        : `Hart's (2003) three-dimensional phase space; his two diagrams are its faces. Cells cut by B = 10&nbsp;m, ${TERM.hvtl.sym} = 0 and ${TERM.hvtu.sym} = 0; class 6 spans both sides of B = 10&nbsp;m. Values in m; dots sized by central pressure, labelled every 12 h.${bNote} Drag to rotate, double click to reset; once it has focus, the wheel zooms and the arrow keys rotate. Click a dot for its hour.`;
+        ? `Hart's (2003) two diagrams, the faces of his three-dimensional phase space: B against the lower thermal wind, with the B = 10&nbsp;m line and the lower term's zero line, over the upper against the lower thermal wind, with both zero lines. Values in m; markers sized by central pressure, labelled every 12 h, faded where held on the wall.${bNote} Click a marker for its hour.`
+        : `Hart's (2003) three-dimensional phase space; his two diagrams are its faces. Cells cut by B = 10&nbsp;m, ${TERM.hvtl.sym} = 0 and ${TERM.hvtu.sym} = 0; class 6 spans both sides of B = 10&nbsp;m. Values in m; markers sized by central pressure, labelled every 12 h, faded where held on the wall.${bNote} Drag to rotate, double click to reset; once it has focus, the wheel zooms and the arrow keys rotate. Click a marker for its hour.`;
       hint.textContent = flat ? 'Hart\'s two diagrams' : 'Hart\'s three-dimensional space';
       canvas.setAttribute('aria-label', flat
         ? `${s.label}, track on Hart's two phase diagrams: thermal asymmetry against the lower thermal wind, and the upper against the lower thermal wind`
@@ -338,15 +340,15 @@ const Space3D = (() => {
         const v = [[x0, y0, z0], [x1, y0, z0], [x1, y1, z0], [x0, y1, z0], [x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1]].map((p) => N(...p));
         for (const f of [[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [2, 3, 7, 6], [1, 2, 6, 5], [0, 3, 7, 4]]) {
           const q = f.map((j) => v[j]);
-          faces.push({ q, d: q.reduce((a, p) => a + p.d, 0) / 4, hex: cls(c).hex });
+          faces.push({ q, d: q.reduce((a, p) => a + p.d, 0) / 4, hex: coreHexOf(c), a: FACE_A[deepCls(c) ? 0 : 1] });
         }
       }
       faces.sort((a, b) => a.d - b.d);
-      for (const { q, hex } of faces) {
+      for (const { q, hex, a } of faces) {
         ctx.beginPath();
         q.forEach((p, j) => (j ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
         ctx.closePath();
-        ctx.fillStyle = rgba(hex, FACE_A);
+        ctx.fillStyle = rgba(hex, a);
         ctx.fill();
       }
 
@@ -389,7 +391,7 @@ const Space3D = (() => {
         const p = spots.find(clear) || spots.find((q) => nums.every((n) => Math.hypot(q.x - n.x, q.y - n.y) >= 26)) || spots[0];
         nums.push(p);
         ctx.strokeText(String(c), p.x, p.y);
-        ctx.fillStyle = cls(c).hex;
+        ctx.fillStyle = coreHexOf(c);
         ctx.fillText(String(c), p.x, p.y);
       }
 
@@ -476,7 +478,7 @@ const Space3D = (() => {
           if (!e || blank(e.hvtl) || blank(e.hvtu) || blank(b)) return null;
           const vy = ay === 'y' ? +b : +e.hvtu;
           const x = clampv(+e.hvtl, ...X), y = clampv(vy, ...Y);
-          return { k, x: px(x), y: py(y), d: 0, f: 1, r: radius(e.mslp), hex: cls(clsOf(e)).hex,
+          return { k, x: px(x), y: py(y), d: 0, f: 1, r: radius(e.mslp), hex: coreHexOf(clsOf(e)), g: axesOf(e),
             clipped: x !== +e.hvtl || y !== vy || clampv(+e.hvtu, ...L.z) !== +e.hvtu || clampv(+b, ...L.y) !== +b };
         });
         proj.push(...drawTrack(pts, [x0, y0, x0 + w, y0 + h], placed, msg));
@@ -575,7 +577,7 @@ const Space3D = (() => {
       drawAxes.placed = placed;
     }
 
-    // The track: segments by class, dots, start and end, labels every 24 h, the ring.
+    // The track: segments by lower core, markers, start and end, labels every 12 h, the ring.
     // Each hour's point on screen, null where a value is missing; values
     // beyond the box are held on its wall and flagged.
     function trackPoints(N) {
@@ -585,7 +587,7 @@ const Space3D = (() => {
         if (!e || blank(e.hvtl) || blank(e.hvtu) || blank(b)) return null;
         const x = clampv(+e.hvtl, ...L.x), y = clampv(+b, ...L.y), z = clampv(+e.hvtu, ...L.z);
         const p = N(x, y, z);
-        return { k, ...p, r: radius(e.mslp), hex: cls(clsOf(e)).hex, clipped: x !== +e.hvtl || y !== +b || z !== +e.hvtu };
+        return { k, ...p, r: radius(e.mslp), hex: coreHexOf(clsOf(e)), g: axesOf(e), clipped: x !== +e.hvtl || y !== +b || z !== +e.hvtu };
       });
     }
 
@@ -616,15 +618,15 @@ const Space3D = (() => {
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
         ctx.strokeStyle = a.hex; ctx.lineWidth = 1.75; ctx.stroke();
       }
-      // Dots by central pressure (radius), deeper bigger, far ones first.
+      // The map's markers sized by central pressure (radius), deeper
+      // bigger, far ones first; faded where held on the wall.
       for (const p of [...live].sort((a, b) => a.d - b.d)) {
+        const r = p.r * p.f;
+        if (p.g) { glyphDraw(ctx, p.g, p.x, p.y, r, p.clipped ? CLIP_A : 1); continue; }
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r * p.f, 0, 2 * Math.PI);
-        ctx.fillStyle = p.clipped ? rgba(C.bg, 1) : p.hex;
+        ctx.arc(p.x, p.y, r, 0, 2 * Math.PI);
+        ctx.fillStyle = rgba(p.hex, p.clipped ? CLIP_A : 1);
         ctx.fill();
-        ctx.lineWidth = p.clipped ? 1.25 : 0.75;
-        ctx.strokeStyle = p.clipped ? p.hex : '#0d0d0f';
-        ctx.stroke();
       }
       // Start: an open square. End: an arrowhead along the last step.
       const first = live[0];
