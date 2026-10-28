@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Cyclone Phase Space at Every Closed Low</title>
+<title>Hart's Cyclone Phase Space for the Forecast Desk</title>
 <meta name="description" content="An article on evaluating Hart's cyclone phase space at every closed low on every forecast frame, delivered as a live global map and as AWIPS II derived parameters, with a comparison against the Florida State diagrams and reproducible synthetic-field figures.">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
@@ -11,9 +11,9 @@
 <body>
 <div class="page">
 
-  <h1>Hart's Cyclone Phase Space Evaluated at Every Closed Low on Every
-  Forecast Frame, as a Live Global Map and as AWIPS Derived
-  Parameters</h1>
+  <h1>Hart's Cyclone Phase Space Presented for the Forecast Desk: the
+  Same Three Parameters at Every Closed Low on Every Forecast Frame, as
+  a Live Global Map and as AWIPS Derived Parameters</h1>
 
   <p class="byline">Jason Krekeler, NOAA/NWS Ocean Prediction Center &middot; 2026-10-28 (first version 2026-09-18)</p>
   <p class="meta">Code:
@@ -30,11 +30,16 @@
       thermal wind parameters, from the vertical change of the height
       perturbation within 500&nbsp;km of the center, and a low-level
       thermal asymmetry <i>B</i>, from which Evans and Hart (2003) read
-      the onset and completion of extratropical transition. Published
-      evaluations follow a storm tracker. Here the three parameters are
-      evaluated on every forecast frame at every grid point and reported
-      at every closed low a 5&nbsp;hPa ring test on mean sea level
-      pressure finds, so that a low is classified before any tracking.
+      the onset and completion of extratropical transition. Nothing in
+      the method is changed here: the parameters, the 500&nbsp;km circle,
+      the layers, the thresholds and the onset and completion rules are
+      Hart's and Evans and Hart's. What changes is the presentation.
+      Published evaluations follow a storm tracker and show one storm's
+      diagram; here the same three parameters are evaluated on every
+      forecast frame at every grid point and reported at every closed
+      low a 5&nbsp;hPa ring test on mean sea level pressure finds, so
+      that a forecaster sees every low of a run classified on the chart
+      they already read.
       Hart's circle is evaluated by sliding extrema along the chords of
       the disk, which costs about 6&nbsp;s per global 0.25&deg; frame on
       his 50&nbsp;hPa layers; <i>B</i> is the difference of semicircle
@@ -107,25 +112,30 @@
     500&nbsp;hPa difference (Bieli et al. 2020).
   </p>
   <p>
-    The step taken here is to evaluate the three parameters on every
-    frame at every grid point before any tracking, and to report them at
-    every closed low a ring test on MSLP finds. A per-frame detector of
-    closed lows is the first half of any feature tracker, and
-    TempestExtremes has one; what is new, to our knowledge, is the
-    evaluation of Hart's parameters at the detector's output on every
-    frame, cheaply enough for a global grid, so that a workstation can
-    show them for any low on any model with nothing run in advance, and
-    a map can show every low of a run at once. The live map does link
-    its lows from frame to frame, a tracker of the simplest kind, but
-    only to carry a path and Hart's motion-relative asymmetry. The
-    per-frame evaluation carries one cost: a single frame has no track
+    This article adds no diagnostic to that list. The three parameters,
+    the circle, the layers, the thresholds and the onset and completion
+    rules are used exactly as Hart (2003) and Evans and Hart (2003)
+    defined them. What is done here is to present them differently for
+    the forecaster: evaluated on every frame at every grid point rather
+    than along a track, reported at every closed low a ring test on MSLP
+    finds, and shown on the chart the forecaster already reads, in the
+    workstation on any model with nothing run in advance, and on a map
+    of every low in a run at once. A per-frame detector of closed lows
+    is the first half of any feature tracker, and TempestExtremes has
+    one; evaluating Hart's parameters at its output on every frame is,
+    as far as we can find, only a matter of nobody having had reason to
+    do it cheaply enough for a global grid before. The live map does
+    link its lows from frame to frame, a tracker of the simplest kind,
+    but only to carry a path and Hart's motion-relative asymmetry. The
+    per-frame presentation carries one cost: a single frame has no track
     from which to take the storm motion that <i>B</i> is defined across,
     so the gridded <i>B</i> takes its direction from the steering flow
     (Section 2), a substitution we found no earlier test of, measured in
-    Section 5. The seven classes used here are the cells cut by Hart's
-    thresholds from the space he defined; they are not the seven
-    data-derived clusters of Arnott et al. (2004) and Studholme et al.
-    (2015), which share the number by coincidence.
+    Section 5. The seven classes are the cells cut by Hart's thresholds
+    from the space he defined, given a color each so that the state can
+    be shown as one field; they are not the seven data-derived clusters
+    of Arnott et al. (2004) and Studholme et al. (2015), which share the
+    number by coincidence.
   </p>
   <p>
     Operational access to the parameters has been through the
@@ -319,10 +329,11 @@
     <i>B</i>, &minus;V<sub>T</sub><sup>L</sup> and
     &minus;V<sub>T</sub><sup>U</sup> on its axes, and shows it as two
     cross-sections that share the &minus;V<sub>T</sub><sup>L</sup> axis
-    because two planes read better on paper than a box. The space is
-    his; what is added here is a categorical field read from it and,
-    on the live map, a rendering of the box with the two diagrams
-    beside it. Classifying on all three parameters at once keeps the
+    because two planes read better on paper than a box. The space and
+    its thresholds are his; HCPSclass only names the cell a low falls
+    in, so that the state can be drawn as one colored field, and the
+    live map renders the box with the two diagrams beside it.
+    Classifying on all three parameters at once keeps the
     asymmetry of one diagram and the warm-core depth of the other, and
     reduces the task to sampling one field at the low. HCPSclass uses
     Hart's thresholds, <i>B</i> against 10&nbsp;m and both thermal wind
@@ -896,13 +907,15 @@
 
   <h2 id="summary">8. Summary of findings</h2>
   <ol>
-    <li>Hart's three phase-space parameters can be evaluated on every
-      forecast frame at every grid point, on his own layers in about
-      6&nbsp;s per global 0.25&deg; frame, and reported at every closed
-      low before any tracking: as a live map on which every low of the
-      current GFS run is classified and the persisting lows carry a path
-      through Hart's space and his own motion-relative <i>B</i>, and as
-      AWIPS derived parameters on any model in the inventory.</li>
+    <li>Nothing in Hart's method is changed. His three parameters, on
+      his own layers and thresholds, can be evaluated on every forecast
+      frame at every grid point in about 6&nbsp;s per global 0.25&deg;
+      frame and reported at every closed low before any tracking, which
+      lets them be presented where the forecaster works: as a live map
+      on which every low of the current GFS run is classified and the
+      persisting lows carry a path through Hart's space and his own
+      motion-relative <i>B</i>, and as AWIPS derived parameters on any
+      model in the inventory.</li>
     <li>Over 26 GFS cycles and 517 verified hours, the tracked lows
       evaluated with Hart's layers and the track motion agree with the
       Florida State diagrams to +0.8&nbsp;m bias and 11&nbsp;m root mean
