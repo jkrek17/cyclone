@@ -91,12 +91,13 @@ function clearText(f) {
 
 // The small swatch of each field in the layers panel.
 function paintRamps() {
-  const list = [...S.classes.values()];
   document.querySelectorAll('[data-ramp]').forEach((el) => {
     const f = el.dataset.ramp;
-    el.style.background = f === 'class'
-      ? `linear-gradient(90deg, ${list.map((c, k) => `${c.hex} ${(k / list.length * 100).toFixed(1)}% ${((k + 1) / list.length * 100).toFixed(1)}%`).join(', ')})`
-      : gradient(f);
+    if (f === 'class') {
+      // the markers themselves: warm deep, warm shallow asymmetric, cold deep asymmetric
+      el.classList.add('glyph-ramp');
+      el.innerHTML = [{ lo: 1, up: 1, asym: false }, { lo: 1, up: 0, asym: true }, { lo: 0, up: 0, asym: true }].map((a) => glyphSVG(a, 13)).join('');
+    } else el.style.background = gradient(f);
   });
 }
 
@@ -127,10 +128,10 @@ function renderLegend() {
   const dotKey = glyphSVG({ lo: 1, up: 1, asym: true }, 16);
   if (ST.trackB) {
     keys.push(`<span class="full">${dotKey}Low center, by class${f === 'class' ? '' : ` (${GLYPH_HELP.charAt(0).toLowerCase()}${GLYPH_HELP.slice(1, -1)})`}; a tracked low's B is from its own motion, the field's from the steering flow</span>`,
-      '<span class="full"><i class="k-ring"></i>The field\'s class where it differs, so a dot may not match the field under it</span>');
+      '<span class="full"><i class="k-ring"></i>The field\'s class where it differs, so a marker may not match the field under it</span>');
     if (ST.hyst) {
       const h = hyst();
-      keys.push(`<span class="full"><i class="k-held"></i>A tracked low keeps its class until B is ${fmt(h.b_hi - FIG1.onset)} m past its wall or a thermal wind term is ${fmt(h.vt_m)} m past zero, so the colour does not flicker; the margin quoted is the distance to the nearest wall</span>`);
+      keys.push(`<span class="full"><i class="k-held"></i>A tracked low keeps its class until B is ${fmt(h.b_hi - FIG1.onset)} m past its wall or a thermal wind term is ${fmt(h.vt_m)} m past zero, so the marker does not flicker; the margin quoted is the distance to the nearest wall</span>`);
     }
   } else {
     keys.push(`<span class="full">${dotKey}Low center, by class${f === 'class' ? '' : ` (${GLYPH_HELP.charAt(0).toLowerCase()}${GLYPH_HELP.slice(1, -1)})`}</span>`);
@@ -143,7 +144,7 @@ function renderLegend() {
     keys.push(`<span class="wide">250 mb jet, kt ${j.bands_kt.map((b, k) => `<i style="width:10px;height:8px;border:0;border-radius:2px;margin:0 3px 0 6px;vertical-align:-1px;background:${j.colors[k]}"></i>${b}${k === j.bands_kt.length - 1 ? '+' : ''}`).join('')}</span>`);
   }
   if (S.layers.circles) keys.push('<span><i class="k-halo"></i>200 km circle</span>');
-  if (S.layers.tracks) keys.push('<span><i style="border-top:2px solid #fad91a"></i>Selected track, by class</span>',
+  if (S.layers.tracks) keys.push('<span><i class="k-track"></i>Selected track, by lower core, a marker every 6 h</span>',
     '<span><i style="border-top:1px solid rgba(231,238,248,0.55)"></i>Last 24 h of motion</span>');
   if (S.layers.footprint) keys.push('<span><i style="border-top:1px dashed #e7eef8"></i>Product footprint</span>');
   if (S.layers.terrain) keys.push('<span><i class="k-terrain"></i>Terrain minimum</span>');
@@ -153,14 +154,9 @@ function renderLegend() {
 
 /* ---------- tooltip ---------- */
 
-// The class dot, with the differing-class ring and its title where the
+// The class glyph, with the differing-class ring and its title where the
 // class from the storm's motion and the field's steering-flow class disagree.
-function clsDot(e) {
-  const hex = cls(clsOf(e)).hex;
-  return classDiffers(e)
-    ? `<i class="alt" style="--c:${hex};--c2:${cls(e.cls).hex}" title="${esc(diffTitle(e))}"></i>`
-    : `<i style="--c:${hex}"></i>`;
-}
+const clsDot = (e) => glyphDot(e);
 
 // Motion as "14 kt toward NE (045°)", from spd and hdg.
 function motionText(e) {
@@ -277,7 +273,7 @@ function bLines(v, s) {
     const diff = classDiffers(v);
     if (diff || fmt(v.hb, 1) !== fmt(v.hbt, 1)) {
       rows.push(`<dt class="alt">B, steering flow (field)</dt><dd class="alt"><b>${fmt(v.hb, 1, 'm', true)}</b>` +
-        (diff ? `, <span class="alt-cls" title="${esc(diffTitle(v))}"><i style="--c2:${cls(v.cls).hex}"></i>${short(v.cls)}</span>` : ', same class') + '</dd>');
+        (diff ? `, <span class="alt-cls" title="${esc(diffTitle(v))}">${fieldGlyph(v)}${short(v.cls)}</span>` : ', same class') + '</dd>');
     }
   } else {
     rows.push(`<dt>B, steering flow (field)</dt><dd><b>${fmt(v.hb, 1, 'm', true)}</b>` +

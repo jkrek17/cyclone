@@ -19,8 +19,8 @@ sup { vertical-align: 0.6em; margin-left: 0.5px; }
 .swatch-z500 { height: 2px; background: #6b8cff; }
 .swatch-thick { height: 0; border-radius: 0; border-top: 2px dashed #ef4444; box-shadow: 0 3px 0 -1px #3b82f6; }
 .swatch-jet { height: 8px; background: linear-gradient(90deg, #b9f6ca, #5fdc8a, #1f9d55, #f5d90a); }
-.swatch-track { height: 0; border-radius: 0; border-top: 2px solid #fad91a; box-shadow: 0 3px 0 -1px #2680e6; }
-.swatch-halo { width: 12px; height: 12px; margin: 0 2px; border-radius: 50%; border: 1px solid #fad91a; background: rgba(250, 217, 26, .1); }
+.swatch-track { height: 0; border-radius: 0; border-top: 2px solid #e0362c; box-shadow: 0 3px 0 -1px #2f74e0; }
+.swatch-halo { width: 12px; height: 12px; margin: 0 2px; border-radius: 50%; border: 1px solid #e0362c; background: rgba(224, 54, 44, .1); }
 .swatch-foot { background: transparent; border: 1px dashed #e7eef8; border-radius: 1px; }
 .swatch-terrain { width: 10px; height: 10px; margin: 0 3px; border-radius: 50%; border: 1.2px solid var(--text-2); }
 .swatch-fade { background: linear-gradient(90deg, rgba(219, 149, 100, 1), rgba(219, 149, 100, .2)); }
@@ -104,7 +104,8 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .ph-links { font-size: 12px; margin: 6px 0 2px; }
 .ph-cube:empty { display: none; }
 .cls-chip { display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-weight: 600; }
-.cls-chip i, .tip-cls i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(5, 10, 20, .8); flex: none; }
+.cls-chip .glyph, .tip-cls .glyph, .s3d-c .glyph, .deep-row .glyph { flex: none; margin: -4px; }
+.alt-cls .glyph { vertical-align: -3px; margin: -3px 1px -3px -3px; }
 .tag { font-size: 10.5px; font-weight: 700; letter-spacing: .3px; color: var(--accent); border: 1px solid rgba(56, 189, 248, .45); border-radius: 999px; padding: 0 7px; white-space: nowrap; }
 .btn-sm { height: 26px; padding: 0 10px; font-size: 11.5px; }
 .btn[aria-pressed="true"] { color: var(--accent); background: var(--accent-soft); border-color: rgba(56, 189, 248, .45); }
@@ -122,11 +123,10 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 }
 .deep-row:hover { background: var(--surface-hover); }
 .deep-row[aria-current="true"] { background: var(--accent-soft); border-color: rgba(56, 189, 248, .45); }
-.deep-row i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); box-shadow: 0 0 0 1px rgba(5, 10, 20, .8); }
 /* the class from the storm's motion differs from the CAVE field's: a thin
-   ring in the field's class color round the dot, as on the map */
-.cls-chip i.alt, .tip-cls i.alt, .deep-row i.alt, .s3d-c i.alt { box-shadow: 0 0 0 1.5px rgba(5, 10, 20, .9), 0 0 0 2.7px var(--c2); }
-.deep-row i.alt { width: 8px; height: 8px; margin: 1px; }
+   gray ring round the glyph, as on the map */
+.glyph-alt { display: inline-flex; flex: none; border-radius: 50%; box-shadow: 0 0 0 1px rgba(5, 10, 20, .9), 0 0 0 2.2px #8b97a8; }
+.glyph-alt .glyph { margin: -4px; }
 .d-mslp { font-weight: 700; font-variant-numeric: tabular-nums; }
 .d-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
 .d-where { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -138,7 +138,6 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 /* ---------- Legend ---------- */
 .legend-classes { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; margin: 0; padding: 0; list-style: none; font-size: 11.5px; color: var(--text-2); }
 .legend-classes li { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-.legend-classes i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); flex: none; box-shadow: 0 0 0 1px rgba(5, 10, 20, .8); }
 .legend-classes.glyphs { gap: 1px 12px; }
 .legend-classes .glyph { flex: none; margin: -3px -3px -3px -5px; }
 .legend-keys .glyph { vertical-align: -4px; margin: 0 5px 0 0; }
@@ -150,11 +149,14 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .legend-note { margin-top: 8px; font-size: 11px; line-height: 1.45; color: var(--text-3); }
 .legend-sub { margin: -5px 0 7px; font-size: 11px; color: var(--text-3); }
 .legend-keys .full { grid-column: 1 / -1; padding-left: 23px; text-indent: -23px; }
-.legend-keys .k-ring { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #2680e6;
-  box-shadow: 0 0 0 1.5px #0b1220, 0 0 0 2.7px #5938b8; }
-.legend-keys .k-held { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #2680e6; box-shadow: 0 0 0 1px #0b1220, 0 0 0 2.5px rgba(38, 128, 230, .35); }
-.legend-keys .k-dot { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #fad91a; box-shadow: 0 0 0 1px #0b1220; }
-.legend-keys .k-halo { width: 12px; height: 12px; border: 1px solid #fad91a; border-radius: 50%; vertical-align: -2px; margin: 0 8px 0 2px; }
+.legend-keys .k-ring { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #2f74e0;
+  box-shadow: 0 0 0 1px #0b1220, 0 0 0 2.2px #8b97a8; }
+.legend-keys .k-held { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #2f74e0; box-shadow: 0 0 0 1px #0b1220, 0 0 0 2.5px rgba(47, 116, 224, .35); }
+.legend-keys .k-halo { width: 12px; height: 12px; border: 1px solid #e0362c; border-radius: 50%; vertical-align: -2px; margin: 0 8px 0 2px; }
+.legend-keys .k-track { height: 0; border: 0; border-radius: 0; border-top: 2px solid #e0362c; box-shadow: 0 3px 0 -1px #2f74e0; vertical-align: 3px; }
+/* the class field's swatch in the layers panel: the markers themselves */
+.product-ramp.glyph-ramp { display: inline-flex; align-items: center; justify-content: center; height: 13px; box-shadow: none; overflow: visible; }
+.glyph-ramp .glyph { flex: none; margin: 0 -2.5px; }
 .legend-keys .k-terrain { width: 9px; height: 9px; border: 1.2px solid var(--text-2); border-radius: 50%; vertical-align: -1px; margin: 0 10px 0 3px; }
 
 /* ---------- Low tooltip ---------- */
@@ -183,7 +185,7 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .s3d-h { font: 600 11px/16px var(--mono); color: var(--text); }
 .s3d-at { font: 11px/16px var(--font); color: var(--text-3); }
 .s3d-c { display: inline-flex; align-items: center; gap: 4px; min-width: 0; white-space: nowrap; }
-.s3d-c i, .s3d-key i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.s3d-key .glyph { flex: none; margin: -3px -3px -3px -5px; }
 .s3d-v { grid-column: 1 / -1; display: flex; gap: 12px; white-space: nowrap; }
 .s3d-t b { font: 11px/16px var(--mono); color: var(--text); font-weight: 600; }
 .s3d-t sub, .s3d-t sup { font-size: 8px; }
@@ -203,7 +205,7 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .s3d-canvas.on-dot { cursor: pointer; }
 .s3d-canvas.flat { cursor: default; touch-action: pan-y; }
 .s3d-canvas.flat.on-dot { cursor: pointer; }
-/* dot size by central pressure, as Hart's diagrams: three sizes */
+/* marker size by central pressure, as Hart's diagrams: three sizes */
 .s3d-size { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 11px; line-height: 16px; color: var(--text-3); }
 .s3d-size li { display: flex; align-items: center; gap: 5px; }
 .s3d-size i { display: inline-block; border-radius: 50%; background: var(--text-2); }

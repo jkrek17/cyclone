@@ -23,9 +23,8 @@
    low's B or class it uses hbt and clst (bOf, clsOf), and falls back to
    hb and cls where they are missing: untracked lows, points without
    motion, the collection's storms and older exports. Where the two
-   classes differ the page marks it quietly (classDiffers): a thin ring in
-   the field's class color round the map dot and the list dot, a line on
-   the card.
+   classes differ the page marks it quietly (classDiffers): a thin gray
+   ring round the map glyph and the list glyph, a line on the card.
 
    The class held, and the margin. Half of the archive's fixes sit within
    10 m of the B = 10 m wall and the raw class changes at 21% of 6 h
@@ -281,11 +280,10 @@ function renderDeepest() {
     const s = stormOf(c, S.i);
     const li = document.createElement('li');
     const on = S.sel?.c === c;
-    const alt = classDiffers(c);
     // the class, its margin to the nearest wall, and this hour's raw class where the held one differs
     const held = heldDiffers(c) ? `<span class="d-raw" title="${esc(heldTitle(c))}">this hour ${esc(SHORT[rawClsOf(c)] ?? cls(rawClsOf(c)).name)}</span>` : '';
     const mg = marginHTML(c);
-    li.innerHTML = `<button type="button" class="deep-row"${on ? ' aria-current="true"' : ''}><i${alt ? ` class="alt" style="--c:${cls(clsOf(c)).hex};--c2:${cls(c.cls).hex}" title="${esc(diffTitle(c))}"` : ` style="--c:${cls(clsOf(c)).hex}"`}></i>
+    li.innerHTML = `<button type="button" class="deep-row"${on ? ' aria-current="true"' : ''}>${glyphDot(c)}
       <span class="d-mslp">${hpa(c.mslp)}</span><span class="d-name"></span><span class="d-where">${pos(c.lat, c.lon)}</span>${mg || held ? `<span class="d-margin">${esc(SHORT[clsOf(c)] ?? '')}${mg ? `, ${mg}` : ''}${held ? ` · ${held}` : ''}</span>` : ''}</button>`;
     li.querySelector('.d-name').textContent = s ? s.label : SHORT[clsOf(c)] ?? 'untracked';
     li.querySelector('button').addEventListener('click', () => {
@@ -299,7 +297,7 @@ function renderDeepest() {
 /* ---------- tracks on the map ---------- */
 
 // The followed, the selected (clicked) and the hovered storm get the
-// whole track, colored by class with a dot at each point; every other
+// whole track, colored by the lower core with a glyph at each point; every other
 // storm present at this hour gets only its last 24 h, thin and faint, as
 // a motion cue.
 const focusKeys = () => [S.follow, ST.selected, ST.hover].filter(Boolean);
@@ -325,8 +323,11 @@ function drawTracks() {
       if (!s) continue;
       const pts = unwrap(s.at.filter(Boolean).map((e) => ({ ...e })));
       const w = S.follow === key || ST.selected === key ? 2.2 : 1.8;
-      for (let k = 0; k + 1 < pts.length; k++) lines.push(seg(pts[k], pts[k + 1], { hex: cls(clsOf(pts[k])).hex, w }));
-      for (const a of pts) dots.push({ type: 'Feature', properties: { hex: cls(clsOf(a)).hex }, geometry: { type: 'Point', coordinates: [a.lon, a.lat] } });
+      for (let k = 0; k + 1 < pts.length; k++) lines.push(seg(pts[k], pts[k + 1], { hex: coreHexOf(clsOf(pts[k])), w }));
+      for (const a of pts) {
+        const g = axesOf(a);
+        dots.push({ type: 'Feature', properties: g ? { glyph: glyphName(g) } : { hex: coreHexOf(null) }, geometry: { type: 'Point', coordinates: [a.lon, a.lat] } });
+      }
     }
   }
   setData('track', { type: 'FeatureCollection', features: lines });
@@ -346,7 +347,7 @@ function drawTails() {
       for (let k = i; k >= 0 && k >= i - TAIL_STEPS && s.at[k]; k--) pts.unshift({ ...s.at[k] });
       if (pts.length < 2) continue;
       unwrap(pts);
-      for (let k = 0; k + 1 < pts.length; k++) segs.push(seg(pts[k], pts[k + 1], { hex: cls(clsOf(pts[k])).hex }));
+      for (let k = 0; k + 1 < pts.length; k++) segs.push(seg(pts[k], pts[k + 1], { hex: coreHexOf(clsOf(pts[k])) }));
     }
   }
   setData('tails', { type: 'FeatureCollection', features: segs });

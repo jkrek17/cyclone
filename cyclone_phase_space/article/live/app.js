@@ -413,16 +413,17 @@ function buildMap(start) {
       paint: { 'line-color': 'rgba(5,10,20,0.75)', 'line-width': ['+', ['get', 'w'], 2.2] } });
     map.addLayer({ id: 'track', type: 'line', source: 'track', layout: { 'line-cap': 'round' },
       paint: { 'line-color': ['get', 'hex'], 'line-width': ['get', 'w'] } });
-    map.addLayer({ id: 'trackpts', type: 'circle', source: 'trackpts',
+    // Each 6-hourly point of a track: its glyph, small; a gray dot where the class is missing.
+    map.addLayer({ id: 'trackpts', type: 'circle', source: 'trackpts', filter: ['!', ['has', 'glyph']],
       paint: { 'circle-radius': 2.4, 'circle-color': ['get', 'hex'], 'circle-stroke-color': '#0b1220', 'circle-stroke-width': 0.8 } });
-    // Where a tracked low's class from its own motion (the dot) differs from
-    // the field's steering-flow class: a thin ring in the field's color
-    // just outside the dot, a dark band between the two.
+    // Where a tracked low's class from its own motion (the glyph) differs from
+    // the field's steering-flow class: a thin gray ring just outside the
+    // glyph, a dark band between the two; the card names both.
     map.addLayer({ id: 'lows-alt', type: 'circle', source: 'lows', filter: ['has', 'alt'], paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'],
         0, ['case', ['has', 'glyph'], 10.5, 5.2], LABEL_ZOOM, ['case', ['has', 'glyph'], 13.5, 7]],
       'circle-color': 'rgba(11,18,32,0.85)',
-      'circle-stroke-color': ['get', 'alt'],
+      'circle-stroke-color': GLYPH_ALT,
       'circle-stroke-width': 1.4,
     } });
     // The hit target of every low, and the ring of a terrain minimum; clear under a glyph.
@@ -437,6 +438,8 @@ function buildMap(start) {
     const glyphSize = ['interpolate', ['linear'], ['zoom'], 0, GLYPH_SIZE[0], LABEL_ZOOM, GLYPH_SIZE[1]];
     map.addLayer({ id: 'lows-glyph', type: 'symbol', source: 'lows', filter: ['has', 'glyph'], layout: {
       'icon-image': ['get', 'glyph'], 'icon-size': glyphSize, 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
+    map.addLayer({ id: 'trackpts-glyph', type: 'symbol', source: 'trackpts', filter: ['has', 'glyph'], layout: {
+      'icon-image': ['get', 'glyph'], 'icon-size': 0.7, 'icon-allow-overlap': true, 'icon-ignore-placement': true } }, 'lows-alt');
     map.addLayer({ id: 'sel', type: 'circle', source: 'sel',
       paint: { 'circle-radius': 12, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#e7eef8', 'circle-stroke-width': 1.6 } });
     S.mapReady = true;
@@ -607,10 +610,10 @@ function drawLows() {
   S.centers.forEach((c, k) => {
     if (!shown(c)) return;
     // a tracked low by its class from its own motion, else the field's
-    const hex = cls(clsOf(c)).hex;
+    const hex = coreHexOf(clsOf(c));
     const deep = isDeep(c);
     const props = { k, hex, deep, terrain: c.terrain };
-    if (!c.terrain && classDiffers(c)) props.alt = cls(c.cls).hex;
+    if (!c.terrain && classDiffers(c)) props.alt = true;
     // a phase space glyph in place of the dot, its halo in the lower core's color
     const g = c.terrain ? null : glyphProps(c);
     if (g) Object.assign(props, g);
@@ -626,7 +629,7 @@ function drawLows() {
 // The product's own square footprint, as CAVE draws it: a dashed outline.
 function drawFootprints() {
   const feats = !S.lows || !S.layers.footprint ? [] : S.lows.features.filter((f) => f.geometry?.type !== 'Point')
-    .map((f) => ({ ...f, properties: { hex: cls(f.properties?.cls).hex } }));
+    .map((f) => ({ ...f, properties: { hex: coreHexOf(f.properties?.cls) } }));
   setData('footprints', { type: 'FeatureCollection', features: feats });
 }
 

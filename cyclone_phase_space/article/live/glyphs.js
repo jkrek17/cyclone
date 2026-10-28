@@ -7,7 +7,11 @@
    class 6, which spans both sides of the wall, from B itself (bOf).
 
    Each glyph is a list of SVG paths, drawn to canvas images for the map
-   (Path2D) and inlined as SVG in the legend, so the two always match.
+   (Path2D), straight to a canvas in the phase space (glyphDraw) and
+   inlined as SVG in the legend and the panels, so they always match.
+   Everything else that marks a low by its class follows the same code:
+   tracks, footprints and the cells of the phase space take the lower
+   core's color (coreHexOf), a deep cell stronger than a shallow one.
    Uses the globals from app.js and storms.js. */
 'use strict';
 
@@ -18,19 +22,25 @@ const GLYPH_HALF = 12;        // the drawn box, half its side in CSS px
 // asymmetric (class 6 by its own B).
 const CORES = [[1, 1], [1, 0], [1, 1], [1, 0], [0, 0], [0, 0], [0, 1]];
 const ASYM = [false, false, true, true, true, false, null];
+const GLYPH_ALT = '#8b97a8';  // the thin ring where the field's class differs
 const GLYPH_HELP = 'Color is the lower core, red warm and blue cold. Triangle asymmetric, circle symmetric. Filled is deep (the upper core agrees); a hollow ring is shallow.';
 
 const coreHex = (w) => (w ? GLYPH.warm : GLYPH.cold);
+// The lower core's color of a class code, gray where it is missing.
+const coreHexOf = (k) => (k == null || blank(k) || !CORES[+k] ? '#8a8a86' : coreHex(CORES[+k][0]));
+// Whether a class code is deep (its upper core agrees with the lower).
+const deepCls = (k) => !!CORES[+k] && CORES[+k][0] === CORES[+k][1];
 
-// The three axes of a low, from the class shown: { lo, up, asym }, or null.
-function axesOf(c) {
-  const k = clsOf(c);
+// The three axes of class k with B b: { lo, up, asym }, or null.
+function axesOfCls(k, b) {
   if (k == null || blank(k) || !CORES[+k]) return null;
   const [lo, up] = CORES[+k];
-  const b = bOf(c);
   const asym = ASYM[+k] ?? (!blank(b) && +b > FIG1.onset);
   return { lo, up, asym };
 }
+
+// The three axes of a low, from the class shown, or null.
+const axesOf = (c) => axesOfCls(clsOf(c), bOf(c));
 
 /* ---------- geometry, centered on 0,0, in CSS px ---------- */
 
@@ -90,13 +100,41 @@ function glyphReach(c, z) {
   return Math.ceil(GLYPH.r * (a.asym ? 1.35 : 1) * k);  // the triangle reaches 1.3 r to its corners
 }
 
-/* ---------- legend ---------- */
+// A glyph on a 2-D canvas at x, y, scaled so its circle has radius r
+// (CSS px), at opacity alpha.
+function glyphDraw(ctx, a, x, y, r, alpha = 1) {
+  const k = r / GLYPH.r;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(k, k);
+  ctx.globalAlpha = alpha;
+  ctx.lineJoin = 'round';
+  for (const p of glyphPaths(a)) {
+    const path = new Path2D(p.d);
+    if (p.fill) { ctx.fillStyle = p.fill; ctx.fill(path); }
+    if (p.stroke) { ctx.strokeStyle = p.stroke; ctx.lineWidth = p.w; ctx.stroke(path); }
+  }
+  ctx.restore();
+}
+
+/* ---------- legend and panels ---------- */
 
 function glyphSVG(a, size = 20) {
   const h = GLYPH_HALF;
   const el = (p) => `<path d="${p.d}" fill="${p.fill || 'none'}"${p.stroke ? ` stroke="${p.stroke}" stroke-width="${p.w}" stroke-linejoin="round"` : ''}/>`;
   return `<svg class="glyph" viewBox="${-h} ${-h} ${2 * h} ${2 * h}" width="${size}" height="${size}" aria-hidden="true">${glyphPaths(a).map(el).join('')}</svg>`;
 }
+
+// A low's glyph inline in the panels and tooltips, with the thin gray ring
+// and its title where the field's class differs (classDiffers).
+function glyphDot(e, size = 18) {
+  const a = axesOf(e);
+  const svg = a ? glyphSVG(a, size) : `<svg class="glyph" viewBox="-12 -12 24 24" width="${size}" height="${size}" aria-hidden="true"><path d="${circ(GLYPH.r - 1)}" fill="#8a8a86"/></svg>`;
+  return classDiffers(e) ? `<span class="glyph-alt" title="${esc(diffTitle(e))}">${svg}</span>` : svg;
+}
+
+// The field's class (steering flow) as a glyph, where it differs.
+const fieldGlyph = (e, size = 14) => { const a = axesOfCls(e.cls, e.hb); return a ? glyphSVG(a, size) : ''; };
 
 // One glyph per class, for the legend; class 6 drawn symmetric.
 function glyphLegendRows() {
