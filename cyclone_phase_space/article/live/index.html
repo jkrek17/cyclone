@@ -16,6 +16,7 @@
 <script src="globe-kit/globe-kit.js" defer></script>
 <script src="card.js" defer></script>
 <script src="storms.js" defer></script>
+<script src="glyphs.js" defer></script>
 <script src="space3d.js" defer></script>
 <script src="app.js" defer></script>
 </head>
@@ -96,6 +97,16 @@
       <label class="switch-row"><span><i class="swatch swatch-z500"></i>500&nbsp;mb heights, 6&nbsp;dam</span><input type="checkbox" class="switch" data-layer="z500"><kbd>Z</kbd></label>
       <label class="switch-row"><span><i class="swatch swatch-thick"></i>1000&ndash;500&nbsp;mb thickness</span><input type="checkbox" class="switch" data-layer="thick"><kbd>N</kbd></label>
       <label class="switch-row"><span><i class="swatch swatch-jet"></i>250&nbsp;mb jet, 70+&nbsp;kt</span><input type="checkbox" class="switch" data-layer="jet"><kbd>J</kbd></label>
+    </section>
+
+    <section class="panel-section">
+      <h3>Low markers <span class="hint">trial</span></h3>
+      <div class="segmented markers" role="radiogroup" aria-label="Low markers">
+        <button type="button" role="radio" data-marker="class" aria-checked="true" title="One color per class, larger below 980 hPa">Class</button>
+        <button type="button" role="radio" data-marker="split" aria-checked="false" title="Split disc: lower core below, upper core above; a tail to the warm side when asymmetric">A</button>
+        <button type="button" role="radio" data-marker="shape" aria-checked="false" title="Lower core color; triangle when asymmetric; filled deep, hollow shallow">B</button>
+        <button type="button" role="radio" data-marker="combo" aria-checked="false" title="Triangle when asymmetric; lower core below, upper core above">C</button>
+      </div>
     </section>
 
     <section class="panel-section">
@@ -181,6 +192,7 @@
       <dt><kbd>F</kbd></dt><dd>Follow or release the selected low</dd>
       <dt><kbd>I</kbd> <kbd>K</kbd> <kbd>O</kbd> <kbd>P</kbd> <kbd>G</kbd> <kbd>X</kbd></dt><dd>Contours, tracks, circles, footprint, terrain minima, fade</dd>
       <dt><kbd>Z</kbd> <kbd>N</kbd> <kbd>J</kbd></dt><dd>500&nbsp;mb heights, 1000&ndash;500&nbsp;mb thickness, 250&nbsp;mb jet</dd>
+      <dt><kbd>M</kbd></dt><dd>Next low marker style</dd>
       <dt><kbd>L</kbd></dt><dd>Show / hide layers panel</dd>
       <dt><kbd>Esc</kbd></dt><dd>Close a sheet, then the phase space</dd>
     </dl>
