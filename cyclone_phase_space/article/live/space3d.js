@@ -1,6 +1,12 @@
-/* Cyclone Phase Space, live: the selected low in Hart's 3-D phase space.
+/* Cyclone Phase Space, live: the selected low in Hart's phase space.
    The cube on the phase space card (card.js), loaded with the track of the
-   low clicked or followed on the map. The axes and cells are
+   low clicked or followed on the map, and, at the 2-D switch, Hart's (2003)
+   own two diagrams, which are the faces of that three-dimensional space:
+   B against the lower thermal wind (his Fig. with the B = 10 m line and the
+   lower term's zero line) over the upper against the lower thermal wind
+   (both zero lines), with the same track, the same dots and labels and
+   the current hour's ring. The choice is kept in localStorage (VIEW_KEY).
+   The axes and cells of the cube are
    those of the article's 3-D figure (article/figures/phase_space_3d.py):
    x = -V_T^L, y = B, z = -V_T^U (vertical), box aspect 1 : 1 : 0.9, on the
    Figure 1 ranges of the 2-D diagrams (FIG1). The planes B = 10 m,
@@ -14,17 +20,21 @@
    panes' grid, the cell faces (translucent, sorted by depth), the box
    edges and the dividing planes, the class numbers, the axes, then the
    track on top, colored by class per segment as on the map, with a dot
-   every 6 h, the start and end marked, a label every 24 h and a ring at
-   the hour on screen (S.i). Points with a missing value are skipped, and
-   values beyond the box are drawn on its wall as hollow dots, as the 2-D
-   diagrams do. B and the class are Hart's, from the storm's own motion,
-   where the track has them (storms.js, bOf and clsOf), else the field's.
+   every 6 h sized by central pressure as Hart's diagrams size their
+   markers (deeper is bigger; SIZE, radius, a key of three sizes), the
+   start and end marked, a label every 12 h and a ring at the hour on
+   screen (S.i). Points with a missing value are skipped, and values
+   beyond the box are drawn on its wall as hollow dots, as the 2-D
+   diagrams do. B is Hart's, from the storm's own motion, where the track
+   has it (storms.js, bOf), else the field's; the class colouring the
+   track is the held one (clsOf: clsh, else clst or cls), and the readout
+   quotes the margin to the nearest wall.
 
-   Drag rotates, a pinch zooms, a double click or double tap resets; once
-   the view has focus the wheel zooms and the arrow keys rotate (app.js
-   leaves the arrows to it). A click on a dot shows that hour. The camera
-   is shared by every low for the session. Uses the globals of app.js and
-   storms.js. */
+   In 3-D, drag rotates, a pinch zooms, a double click or double tap
+   resets; once the view has focus the wheel zooms and the arrow keys
+   rotate (app.js leaves the arrows to it). In either view a click on a
+   dot shows that hour. The camera is shared by every low for the session.
+   Uses the globals of app.js and storms.js. */
 'use strict';
 
 const Space3D = (() => {
@@ -35,6 +45,28 @@ const Space3D = (() => {
   const ASPECT_Z = 0.9;           // the article's box aspect (1, 1, 0.9)
   const FACE_A = 0.085;           // cell face alpha
   const cam = { ...DEFAULT };     // shared by every view, for the session
+  // The 3-D cube or Hart's two 2-D diagrams, kept across lows and sessions.
+  const VIEW_KEY = 'cps-live.phaseView';
+  let view = '3d';
+  try { const v = localStorage.getItem(VIEW_KEY); if (v === '2d' || v === '3d') view = v; } catch { /* no storage */ }
+  // Dot radius (CSS px) by central pressure (hPa), as Hart's diagrams size
+  // their markers by intensity: deeper is bigger, linear between SIZE.p[0]
+  // and SIZE.p[2] and clamped beyond; the key shows the three.
+  const SIZE = { p: [1010, 990, 960], r: [1.9, 4.8] };
+  function radius(mslp) {
+    const t = blank(mslp) ? 0.5 : (SIZE.p[0] - Math.max(SIZE.p[2], Math.min(SIZE.p[0], +mslp))) / (SIZE.p[0] - SIZE.p[2]);
+    return SIZE.r[0] + t * (SIZE.r[1] - SIZE.r[0]);
+  }
+  // Hart's two diagrams, stacked: the panel geometry (CSS px).
+  const PAD = { l: 46, r: 14, t: 16, b: 36, gap: 14 };
+  const panelH = (w) => Math.round((w - PAD.l - PAD.r) * 0.62);
+  const height2D = (w) => PAD.t + 2 * panelH(w) + 2 * PAD.b + PAD.gap;
+  // The region names Hart writes on his diagrams, by panel and quadrant
+  // (left/right of the lower term's zero, below/above the other wall).
+  const REGIONS = {
+    y: { tl: 'Asymmetric cold core', tr: 'Asymmetric warm core', bl: 'Symmetric cold core', br: 'Symmetric warm core' },
+    z: { tl: 'Shallow cold core', tr: 'Deep warm core', bl: 'Cold core', br: 'Shallow warm core' },
+  };
   const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const rad = Math.PI / 180;
   const clampv = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
@@ -158,15 +190,20 @@ const Space3D = (() => {
     wrap.className = 's3d';
     const hintId = `s3d-hint-${String(s.key).replace(/[^\w-]/g, '_')}`;
     wrap.innerHTML = `<p class="s3d-read" aria-live="off"></p>
+      <div class="s3d-bar"><span class="hint"></span>
+        <div class="segmented s3d-switch" aria-label="Phase space view">
+          <button type="button" data-pv="3d" aria-pressed="false" title="Hart's three-dimensional phase space">3-D</button>
+          <button type="button" data-pv="2d" aria-pressed="false" title="Hart's two diagrams, the faces of the cube">2-D</button>
+        </div></div>
       <canvas class="s3d-canvas" tabindex="0" role="img"></canvas>
       <ul class="s3d-key"></ul>
-      <p class="s3d-note" id="${hintId}">Cells cut by B = 10&nbsp;m, ${TERM.hvtl.sym} = 0 and ${TERM.hvtu.sym} = 0; class 6 spans both sides of B = 10&nbsp;m. Values in m.
-        ${s.at.some(trackB) ? 'B from the storm\'s own motion; the field\'s B uses the steering flow.' : ''}
-        Drag to rotate, double click to reset; once it has focus, the wheel zooms and the arrow keys rotate. Click a dot for its hour.</p>`;
+      <ul class="s3d-size" title="Deeper lows get bigger dots, as in Hart's diagrams"></ul>
+      <p class="s3d-note" id="${hintId}"></p>`;
     host.append(wrap);
     const canvas = wrap.querySelector('canvas');
     const read = wrap.querySelector('.s3d-read');
-    canvas.setAttribute('aria-label', `${s.label}, track in the three-dimensional phase space: lower thermal wind across, thermal asymmetry in depth, upper thermal wind up`);
+    const note = wrap.querySelector('.s3d-note');
+    const hint = wrap.querySelector('.s3d-bar .hint');
     canvas.setAttribute('aria-describedby', hintId);
     const key = wrap.querySelector('.s3d-key');
     for (let c = 0; c < 7; c++) {
@@ -176,8 +213,35 @@ const Space3D = (() => {
       li.title = cls(c).name;
       key.append(li);
     }
+    wrap.querySelector('.s3d-size').innerHTML = '<li>Central pressure</li>' +
+      SIZE.p.map((p) => `<li><i style="width:${(2 * radius(p)).toFixed(1)}px;height:${(2 * radius(p)).toFixed(1)}px"></i>${p} hPa</li>`).join('');
+    const bNote = s.at.some(trackB) ? ' B from the storm\'s own motion; the field\'s B uses the steering flow.' : '';
+    // The note, the hint and the canvas label follow the view.
+    function describe() {
+      const flat = view === '2d';
+      note.innerHTML = flat
+        ? `Hart's (2003) two diagrams, the faces of his three-dimensional phase space: B against the lower thermal wind, with the B = 10&nbsp;m line and the lower term's zero line, over the upper against the lower thermal wind, with both zero lines. Values in m; dots sized by central pressure, labelled every 12 h.${bNote} Click a dot for its hour.`
+        : `Hart's (2003) three-dimensional phase space; his two diagrams are its faces. Cells cut by B = 10&nbsp;m, ${TERM.hvtl.sym} = 0 and ${TERM.hvtu.sym} = 0; class 6 spans both sides of B = 10&nbsp;m. Values in m; dots sized by central pressure, labelled every 12 h.${bNote} Drag to rotate, double click to reset; once it has focus, the wheel zooms and the arrow keys rotate. Click a dot for its hour.`;
+      hint.textContent = flat ? 'Hart\'s two diagrams' : 'Hart\'s three-dimensional space';
+      canvas.setAttribute('aria-label', flat
+        ? `${s.label}, track on Hart's two phase diagrams: thermal asymmetry against the lower thermal wind, and the upper against the lower thermal wind`
+        : `${s.label}, track in the three-dimensional phase space: lower thermal wind across, thermal asymmetry in depth, upper thermal wind up`);
+      canvas.classList.toggle('flat', flat);
+      wrap.querySelectorAll('[data-pv]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.pv === view)));
+    }
+    function setView(v) {
+      if (v !== '2d' && v !== '3d') return;
+      view = v;
+      try { localStorage.setItem(VIEW_KEY, v); } catch { /* no storage */ }
+      describe();
+      size();
+      schedule();
+    }
+    wrap.querySelectorAll('[data-pv]').forEach((b) => b.addEventListener('click', () => setView(b.dataset.pv)));
+    describe();
 
-    let W = 0;           // CSS px, square
+    let W = 0;           // CSS px wide; H px tall (W in 3-D, height2D in 2-D)
+    let H = 0;
     let dpr = 1;
     let pending = 0;
     let hover = -1;      // frame index of the dot under the pointer
@@ -190,12 +254,14 @@ const Space3D = (() => {
     function size() {
       const w = Math.round(wrap.clientWidth);
       const d = window.devicePixelRatio || 1;
-      if (!w || (w === W && d === dpr)) return;
+      const h = view === '2d' ? height2D(w) : w;
+      if (!w || (w === W && h === H && d === dpr)) return;
       W = w;
+      H = h;
       dpr = d;
-      canvas.style.height = `${W}px`;
+      canvas.style.height = `${H}px`;
       canvas.width = Math.round(W * dpr);
-      canvas.height = Math.round(W * dpr);
+      canvas.height = Math.round(H * dpr);
       draw();
     }
     const ro = new ResizeObserver(size);
@@ -234,22 +300,29 @@ const Space3D = (() => {
       return { P, eye };
     }
 
+    const line = (pts, color, w) => {
+      ctx.beginPath();
+      pts.forEach((p, j) => (j ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
+      ctx.strokeStyle = color;
+      ctx.lineWidth = w;
+      ctx.stroke();
+    };
+
     function draw() {
       if (!W || gone) return;
-      const { P, eye } = camera();
-      const N = (x, y, z) => P(norm(x, y, z));
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.clearRect(0, 0, W, W);
+      ctx.clearRect(0, 0, W, H);
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
+      if (view === '2d') draw2D();
+      else draw3D();
+      readout();
+    }
+
+    function draw3D() {
+      const { P, eye } = camera();
+      const N = (x, y, z) => P(norm(x, y, z));
       const L = lim();
-      const line = (pts, color, w) => {
-        ctx.beginPath();
-        pts.forEach((p, j) => (j ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y)));
-        ctx.strokeStyle = color;
-        ctx.lineWidth = w;
-        ctx.stroke();
-      };
 
       // Far panes: the walls opposite the eye, with a faint grid at the ticks.
       const far = { x: eye[0] >= 0 ? L.x[0] : L.x[1], y: eye[1] >= 0 ? L.y[0] : L.y[1], z: eye[2] >= 0 ? L.z[0] : L.z[1] };
@@ -322,8 +395,93 @@ const Space3D = (() => {
 
       drawAxes(N, far);
       drawAxes.placed.push(...nums.map((p) => [p.x - 5, p.y - 7, p.x + 5, p.y + 7]));
-      drawTrack(pts);
-      readout();
+      proj = drawTrack(pts, [0, 0, W, W], drawAxes.placed, true);
+    }
+
+    // Hart's two diagrams, one above the other: B against the lower thermal
+    // wind (the cube's y-x face) with the B = 10 m line and the lower term's
+    // zero line, then the upper against the lower thermal wind (its z-x
+    // face) with both zero lines; his region names in the quadrants, the
+    // same track on each, the dots sized by pressure and labelled every
+    // 12 h, the ring at the hour on screen on both.
+    function draw2D() {
+      const L = lim();
+      const w = W - PAD.l - PAD.r;
+      const h = panelH(W);
+      const grid = 'rgba(233,232,227,0.07)';
+      const wall = 'rgba(233,232,227,0.55)';
+      proj = [];
+      let msg = true;
+      [['y', PAD.t], ['z', PAD.t + h + PAD.b + PAD.gap]].forEach(([ay, y0]) => {
+        const x0 = PAD.l;
+        const X = L.x, Y = L[ay];
+        const px = (v) => x0 + ((v - X[0]) / (X[1] - X[0])) * w;
+        const py = (v) => y0 + h - ((v - Y[0]) / (Y[1] - Y[0])) * h;
+        // the panel, its grid and its walls
+        ctx.fillStyle = 'rgba(233,232,227,0.025)';
+        ctx.fillRect(x0, y0, w, h);
+        for (const v of TICKS.x.every) line([{ x: px(v), y: y0 }, { x: px(v), y: y0 + h }], grid, 1);
+        for (const v of TICKS[ay].every) line([{ x: x0, y: py(v) }, { x: x0 + w, y: py(v) }], grid, 1);
+        const yWall = ay === 'y' ? FIG1.onset : 0;
+        line([{ x: px(0), y: y0 }, { x: px(0), y: y0 + h }], wall, 1);
+        line([{ x: x0, y: py(yWall) }, { x: x0 + w, y: py(yWall) }], wall, 1);
+        ctx.strokeStyle = 'rgba(233,232,227,0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x0 + 0.5, y0 + 0.5, w - 1, h - 1);
+        // Hart's region names, in the quadrant corners
+        ctx.font = `500 9.5px ${FONT.sans}`;
+        ctx.fillStyle = C.faint;
+        ctx.textBaseline = 'top';
+        const R = REGIONS[ay];
+        const placed = [];
+        const put = (t, x, y, al, bl) => {
+          ctx.textAlign = al;
+          ctx.textBaseline = bl;
+          ctx.fillText(t, x, y);
+          placed.push(box(x, y, ctx.measureText(t).width, 11, al, bl));
+        };
+        put(R.tl, x0 + 5, y0 + 4, 'left', 'top');
+        put(R.tr, x0 + w - 5, y0 + 4, 'right', 'top');
+        put(R.bl, x0 + 5, y0 + h - 4, 'left', 'bottom');
+        put(R.br, x0 + w - 5, y0 + h - 4, 'right', 'bottom');
+        // ticks and labels: x below, y to the left; titles beyond them
+        ctx.font = `9.5px ${FONT.mono}`;
+        ctx.fillStyle = C.faint;
+        ctx.strokeStyle = 'rgba(233,232,227,0.45)';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        for (const v of TICKS.x.every) {
+          const x = px(v);
+          line([{ x, y: y0 + h }, { x, y: y0 + h + (TICKS.x.label.includes(v) ? 4 : 2.5) }], 'rgba(233,232,227,0.45)', 1);
+          if (TICKS.x.label.includes(v)) ctx.fillText(fmt(v), x, y0 + h + 6);
+        }
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'middle';
+        for (const v of TICKS[ay].every) {
+          const y = py(v);
+          const major = TICKS[ay].label.includes(v);
+          line([{ x: x0, y }, { x: x0 - (major ? 4 : 2.5), y }], ay === 'y' && v === FIG1.onset ? 'rgba(233,232,227,0.8)' : 'rgba(233,232,227,0.45)', 1);
+          if (major) ctx.fillText(fmt(v), x0 - 7, y);
+        }
+        ctx.textBaseline = 'middle';
+        drawRich(ctx, TITLE.x, x0 + w / 2, y0 + h + 24, 'center', 10, C.muted);
+        ctx.save();
+        ctx.translate(13, y0 + h / 2);
+        ctx.rotate(-Math.PI / 2);
+        drawRich(ctx, TITLE[ay], 0, 0, 'center', 10, C.muted);
+        ctx.restore();
+        // the track on this panel
+        const pts = s.at.map((e, k) => {
+          const b = e ? bOf(e) : null;
+          if (!e || blank(e.hvtl) || blank(e.hvtu) || blank(b)) return null;
+          const vy = ay === 'y' ? +b : +e.hvtu;
+          const x = clampv(+e.hvtl, ...X), y = clampv(vy, ...Y);
+          return { k, x: px(x), y: py(y), d: 0, f: 1, r: radius(e.mslp), hex: cls(clsOf(e)).hex,
+            clipped: x !== +e.hvtl || y !== vy || clampv(+e.hvtu, ...L.z) !== +e.hvtu || clampv(+b, ...L.y) !== +b };
+        });
+        proj.push(...drawTrack(pts, [x0, y0, x0 + w, y0 + h], placed, msg));
+        msg = false;
+      });
     }
 
     // Axes on the near bottom edges (x and B) and the right-hand vertical
@@ -427,21 +585,24 @@ const Space3D = (() => {
         if (!e || blank(e.hvtl) || blank(e.hvtu) || blank(b)) return null;
         const x = clampv(+e.hvtl, ...L.x), y = clampv(+b, ...L.y), z = clampv(+e.hvtu, ...L.z);
         const p = N(x, y, z);
-        return { k, ...p, hex: cls(clsOf(e)).hex, clipped: x !== +e.hvtl || y !== +b || z !== +e.hvtu };
+        return { k, ...p, r: radius(e.mslp), hex: cls(clsOf(e)).hex, clipped: x !== +e.hvtl || y !== +b || z !== +e.hvtu };
       });
     }
 
-    function drawTrack(pts) {
+    // The track within rect [x0, y0, x1, y1], its labels clear of the boxes
+    // in `placed`; the message about an empty track only when `msg`.
+    // Returns the drawn points, for picking.
+    function drawTrack(pts, rect, placed0, msg) {
       const hours = S.index.hours;
       const live = pts.filter(Boolean);
-      proj = live;
       if (!live.length) {
+        if (!msg) return live;
         ctx.font = `11px ${FONT.sans}`;
         ctx.fillStyle = C.muted;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(ST.built ? 'No point of this track has all three values.' : 'Loading the values of this track', W / 2, 14);
-        return;
+        return live;
       }
       // Segments between consecutive hours, a dark casing under each.
       const segs = [];
@@ -455,10 +616,10 @@ const Space3D = (() => {
         ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
         ctx.strokeStyle = a.hex; ctx.lineWidth = 1.75; ctx.stroke();
       }
-      const r0 = W < 330 ? 2.4 : 2.7;
+      // Dots by central pressure (radius), deeper bigger, far ones first.
       for (const p of [...live].sort((a, b) => a.d - b.d)) {
         ctx.beginPath();
-        ctx.arc(p.x, p.y, r0 * p.f, 0, 2 * Math.PI);
+        ctx.arc(p.x, p.y, p.r * p.f, 0, 2 * Math.PI);
         ctx.fillStyle = p.clipped ? rgba(C.bg, 1) : p.hex;
         ctx.fill();
         ctx.lineWidth = p.clipped ? 1.25 : 0.75;
@@ -490,15 +651,15 @@ const Space3D = (() => {
           ctx.beginPath(); ctx.arc(last.x, last.y, 6, 0, 2 * Math.PI); ctx.stroke();
         }
       }
-      // Hour labels: start and end first, then every 24 h where there is room.
-      const placed = [...(drawAxes.placed || [])];
-      const dots = live.map((p) => [p.x - 3, p.y - 3, p.x + 3, p.y + 3]);
+      // Hour labels: start and end first, then every 12 h where there is room.
+      const placed = [...(placed0 || [])];
+      const dots = live.map((p) => [p.x - p.r, p.y - p.r, p.x + p.r, p.y + p.r]);
       for (let k = 0; k + 1 < pts.length; k++) {
         const a = pts[k], b = pts[k + 1];
         if (!a || !b) continue;
         for (const t of [0.2, 0.4, 0.6, 0.8]) { const x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t; dots.push([x - 1, y - 1, x + 1, y + 1]); }
       }
-      const want = [first, last, ...live.filter((p) => p !== first && p !== last && hours[p.k] % 24 === 0)];
+      const want = [first, last, ...live.filter((p) => p !== first && p !== last && hours[p.k] % 12 === 0)];
       const seen = new Set();
       for (const p of want) {
         if (seen.has(p)) continue;
@@ -507,14 +668,15 @@ const Space3D = (() => {
         const t = `F${pad(hours[p.k], 3)}`;
         ctx.font = `${end ? 500 : 400} 9.5px ${FONT.mono}`;
         const w = ctx.measureText(t).width;
-        const spots = [[p.x + 7, p.y - 7, 'left', 'bottom'], [p.x - 7, p.y - 7, 'right', 'bottom'],
-          [p.x + 7, p.y + 7, 'left', 'top'], [p.x - 7, p.y + 7, 'right', 'top']];
+        const o = p.r * p.f + 4;
+        const spots = [[p.x + o, p.y - o, 'left', 'bottom'], [p.x - o, p.y - o, 'right', 'bottom'],
+          [p.x + o, p.y + o, 'left', 'top'], [p.x - o, p.y + o, 'right', 'top']];
         let spot = null;
         // The start and end are labelled even over the track, if not over another label.
         for (const loose of end ? [false, true] : [false]) {
           for (const sp of spots) {
             const r = box(sp[0], sp[1], w, 11, sp[2], sp[3]);
-            if (r[0] < 2 || r[2] > W - 2 || r[1] < 2 || r[3] > W - 2) continue;
+            if (r[0] < rect[0] + 2 || r[2] > rect[2] - 2 || r[1] < rect[1] + 2 || r[3] > rect[3] - 2) continue;
             if (placed.some((q) => overlap(q, r, 1)) || (!loose && dots.some((q) => overlap(q, r, 0)))) continue;
             spot = [sp, r];
             break;
@@ -536,7 +698,7 @@ const Space3D = (() => {
       const cur = pts[S.i];
       if (cur) {
         ctx.beginPath();
-        ctx.arc(cur.x, cur.y, 6.5 * cur.f, 0, 2 * Math.PI);
+        ctx.arc(cur.x, cur.y, (cur.r + 3.8) * cur.f, 0, 2 * Math.PI);
         ctx.lineWidth = 1.75;
         ctx.strokeStyle = C.text;
         ctx.stroke();
@@ -544,11 +706,12 @@ const Space3D = (() => {
       const hv = hover >= 0 ? pts[hover] : null;
       if (hv && hv !== cur) {
         ctx.beginPath();
-        ctx.arc(hv.x, hv.y, 5.5 * hv.f, 0, 2 * Math.PI);
+        ctx.arc(hv.x, hv.y, (hv.r + 2.8) * hv.f, 0, 2 * Math.PI);
         ctx.lineWidth = 1;
         ctx.strokeStyle = C.muted;
         ctx.stroke();
       }
+      return live;
     }
 
     // The line above the view: the hour on screen (or the hovered one), its class and values.
@@ -558,10 +721,15 @@ const Space3D = (() => {
       const h = `F${pad(S.index.hours[k], 3)}`;
       const term = (f, d, v = e[f]) => `<span class="s3d-t">${TERM[f].sym} <b>${fmt(v, d, '', true)}</b></span>`;
       const c = e ? clsOf(e) : null;
+      // the margin to the nearest wall, and this hour's raw class where the held one differs
+      const mg = e ? marginHTML(e) : '';
+      const held = e && heldDiffers(e)
+        ? `<span class="s3d-raw" title="${esc(heldTitle(e))}">this hour ${esc(SHORT[rawClsOf(e)] ?? cls(rawClsOf(e)).name)} (${rawClsOf(e)}), held</span>` : '';
       const html = e
         ? `<span class="s3d-h">${h}${hover >= 0 && hover !== S.i ? ' <span class="s3d-at">under the pointer</span>' : ''}</span>` +
           `<span class="s3d-c">${clsDot(e)}${esc(c == null ? 'no class' : SHORT[c] ?? cls(c).name)}</span>` +
-          `<span class="s3d-v">${term('hvtl', 0)}${term('hvtu', 0)}${term('hb', 1, bOf(e))}<span class="s3d-u">m${trackB(e) ? ', B from the motion' : ''}</span></span>`
+          `<span class="s3d-v">${term('hvtl', 0)}${term('hvtu', 0)}${term('hb', 1, bOf(e))}<span class="s3d-u">m${trackB(e) ? ', B from the motion' : ''}</span></span>` +
+          (mg || held ? `<span class="s3d-mg">${mg}${mg && held ? ' · ' : ''}${held}</span>` : '')
         : `<span class="s3d-h">${h}</span><span class="s3d-c muted">not tracked at this hour</span>`;
       if (read.innerHTML !== html) read.innerHTML = html;
     }
@@ -633,6 +801,7 @@ const Space3D = (() => {
         return;
       }
       ptrs.set(e.pointerId, p);
+      if (view !== '3d') return;  // the 2-D diagrams neither rotate nor zoom
       if (pinch && ptrs.size >= 2) {
         const [a, b] = [...ptrs.values()];
         setCam(cam.az, cam.el, pinch.zoom * (Math.hypot(a.x - b.x, a.y - b.y) / pinch.d));
@@ -650,7 +819,7 @@ const Space3D = (() => {
       if (e.type === 'pointerup' && drag && !drag.moved && !pinch) {
         const k = pick(p.x, p.y);
         const now = performance.now();
-        if (e.pointerType !== 'mouse' && lastTap && now - lastTap.t < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 24) {
+        if (view === '3d' && e.pointerType !== 'mouse' && lastTap && now - lastTap.t < 320 && Math.hypot(p.x - lastTap.x, p.y - lastTap.y) < 24) {
           lastTap = null;
           reset();
         } else {
@@ -667,17 +836,18 @@ const Space3D = (() => {
     canvas.addEventListener('pointerleave', (e) => {
       if (e.pointerType === 'mouse' && hover >= 0 && !ptrs.size) { hover = -1; canvas.classList.remove('on-dot'); schedule(); }
     });
-    canvas.addEventListener('dblclick', (e) => { e.preventDefault(); reset(); });
+    canvas.addEventListener('dblclick', (e) => { e.preventDefault(); if (view === '3d') reset(); });
     // The wheel zooms only once the view has focus (else it scrolls the
     // panel); a trackpad pinch (ctrlKey) always zooms.
     canvas.addEventListener('wheel', (e) => {
+      if (view !== '3d') return;
       if (!e.ctrlKey && document.activeElement !== canvas) return;
       e.preventDefault();
       const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
       setCam(cam.az, cam.el, cam.zoom * Math.exp(-dy * (e.ctrlKey ? 0.01 : 0.0015)));
     }, { passive: false });
     canvas.addEventListener('keydown', (e) => {
-      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      if (view !== '3d' || e.altKey || e.ctrlKey || e.metaKey) return;
       const st = e.shiftKey ? 15 : 5;
       const act = {
         ArrowLeft: () => setCam(cam.az + st, cam.el),

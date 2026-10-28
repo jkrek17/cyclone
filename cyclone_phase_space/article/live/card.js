@@ -128,6 +128,10 @@ function renderLegend() {
   if (ST.trackB) {
     keys.push('<span class="full"><i class="k-dot"></i>Low center, by class; a tracked low\'s B is from its own motion, the field\'s from the steering flow</span>',
       '<span class="full"><i class="k-ring"></i>The field\'s class where it differs, so a dot may not match the field under it</span>');
+    if (ST.hyst) {
+      const h = hyst();
+      keys.push(`<span class="full"><i class="k-held"></i>A tracked low keeps its class until B is ${fmt(h.b_hi - FIG1.onset)} m past its wall or a thermal wind term is ${fmt(h.vt_m)} m past zero, so the colour does not flicker; the margin quoted is the distance to the nearest wall</span>`);
+    }
   } else {
     keys.push('<span><i class="k-dot"></i>Low center, by class</span>');
   }
@@ -181,9 +185,13 @@ function lowTip(c) {
   }
   const alt = classDiffers(c)
     ? `<p class="tip-alt">Field, steering flow: ${esc(SHORT[c.cls] ?? cls(c.cls).name)} (${c.cls})</p>` : '';
+  // this hour's raw class where the held class differs, then the margin to the nearest wall
+  const held = heldDiffers(c)
+    ? `<p class="tip-alt" title="${esc(heldTitle(c))}">This hour's class: ${esc(SHORT[rawClsOf(c)] ?? cls(rawClsOf(c)).name)} (${rawClsOf(c)}), held</p>` : '';
+  const mg = marginHTML(c, 'p', 'tip-margin');
   const move = blank(c.spd) ? '' : `<tr><td>Motion</td><td>${esc(motionText(c))}</td></tr>`;
   return `<div class="h">${s ? esc(s.label) : 'Untracked low'}${s?.fsu != null ? `, FSU ${esc(s.fsu)}` : ''}</div>
-    <p class="tip-cls">${clsDot(c)}${esc(k.name)}</p>${alt}
+    <p class="tip-cls">${clsDot(c)}${esc(k.name)}</p>${held}${mg}${alt}
     <table><tr><td>Central pressure</td><td>${hpa(c.mslp)}</td></tr>
     <tr><td>Center</td><td>${pos(c.lat, c.lon)}</td></tr>${move}
     ${row('hvtl', 0, ' class="sep"')}${row('hvtu', 0)}${b}</table>` +
@@ -251,7 +259,8 @@ function phaseFrame() {
 function cardVals(c, s) {
   const e = s?.track ? s.at[S.i] : null;
   if (!e || (e.id != null && c.id != null && e.id !== c.id)) return c;
-  return { ...c, hbt: c.hbt ?? e.hbt, clst: c.clst ?? e.clst, spd: c.spd ?? e.spd, hdg: c.hdg ?? e.hdg };
+  return { ...c, hbt: c.hbt ?? e.hbt, clst: c.clst ?? e.clst, clsh: c.clsh ?? e.clsh, margin: c.margin ?? e.margin,
+    spd: c.spd ?? e.spd, hdg: c.hdg ?? e.hdg };
 }
 
 // B on the card: Hart's, from the storm's own motion, as the main line, and
@@ -263,7 +272,8 @@ function bLines(v, s) {
   const short = (k) => `${esc(SHORT[k] ?? cls(k).name)} (${k})`;
   const rows = [];
   if (trackB(v)) {
-    rows.push(`<dt>B, storm motion</dt><dd><b>${fmt(v.hbt, 1, 'm', true)}</b>${clsOf(v) == null ? '' : `, ${short(clsOf(v))}`}</dd>`);
+    const raw = rawClsOf(v);
+    rows.push(`<dt>B, storm motion</dt><dd><b>${fmt(v.hbt, 1, 'm', true)}</b>${raw == null ? '' : `, ${short(raw)}${heldDiffers(v) ? ' this hour' : ''}`}</dd>`);
     const diff = classDiffers(v);
     if (diff || fmt(v.hb, 1) !== fmt(v.hbt, 1)) {
       rows.push(`<dt class="alt">B, steering flow (field)</dt><dd class="alt"><b>${fmt(v.hb, 1, 'm', true)}</b>` +
@@ -276,6 +286,16 @@ function bLines(v, s) {
   const m = motionText(v);
   if (m) rows.push(`<dt>Motion</dt><dd>${esc(m)}</dd>`);
   return `<dl class="ph-b">${rows.join('')}</dl>`;
+}
+
+// Under the class on the card: the margin to the nearest wall, and this
+// hour's raw class where the class shown is held from an earlier hour.
+function marginLine(v) {
+  const mg = marginHTML(v);
+  const held = heldDiffers(v)
+    ? `<span class="ph-raw" title="${esc(heldTitle(v))}">this hour's class ${esc(SHORT[rawClsOf(v)] ?? cls(rawClsOf(v)).name)} (${rawClsOf(v)}), held</span>` : '';
+  if (!mg && !held) return '';
+  return `<p class="ph-margin">${mg}${mg && held ? ' · ' : ''}${held}</p>`;
 }
 
 function renderCard(c, s, absent = false) {
@@ -312,6 +332,7 @@ function renderCard(c, s, absent = false) {
   const now = c
     ? `<p class="ph-now"><span class="cls-chip">${clsDot(cv)}${esc(k.name)}</span>
         <span class="ph-mslp">${fmt(c.mslp, 1)}<small> hPa</small></span><span class="ph-where">${pos(c.lat, c.lon)} · ${when}</span></p>` +
+      marginLine(cv) +
       (s ? bLines(cv, s) : '') +
       (c.terrain ? `<p class="ph-warn">Terrain minimum: surface pressure ${blank(c.psfc) ? 'under 850 hPa' : fmt(c.psfc, 0, 'hPa')}; a false low over high ground.</p>` : '')
     : `<p class="ph-now muted">${absent ? `Not tracked at ${when}.` : `No closed low near the last position at ${when}.`}</p>`;

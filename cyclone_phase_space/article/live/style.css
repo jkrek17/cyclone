@@ -93,6 +93,12 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .ph-b-note { display: block; font-size: 11px; color: var(--text-3); }
 .alt-cls { white-space: nowrap; }
 .alt-cls i { display: inline-block; width: 8px; height: 8px; margin: 0 4px 0 1px; border: 1.5px solid var(--c2); border-radius: 50%; vertical-align: -0.5px; }
+/* the margin to the nearest class wall, and this hour's raw class where the shown one is held */
+.ph-margin { margin: -2px 0 6px; font-size: 11.5px; color: var(--text-2); }
+.ph-raw { color: var(--text-3); }
+.margin { white-space: nowrap; }
+.margin.near { color: #fde68a; }
+.margin.near::before { content: ''; display: inline-block; width: 6px; height: 6px; margin: 0 5px 0 0; border-radius: 1px; background: var(--warn); transform: rotate(45deg); vertical-align: 1px; }
 .ph-vals { font-size: 12px; color: var(--text-2); margin: 0 0 4px; }
 .ph-vals b { color: var(--text); font-family: var(--mono); font-weight: 600; margin-right: 8px; }
 .ph-links { font-size: 12px; margin: 6px 0 2px; }
@@ -110,7 +116,7 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 }
 .deep-list { margin: 6px 0 0; padding: 0; list-style: none; display: grid; gap: 1px; }
 .deep-row {
-  display: grid; grid-template-columns: 12px 76px 1fr auto; align-items: center; gap: 8px;
+  display: grid; grid-template-columns: 12px 76px 1fr auto; align-items: center; gap: 2px 8px;
   width: 100%; padding: 5px 8px; border: 1px solid transparent; border-radius: var(--radius-sm);
   background: transparent; text-align: left; cursor: pointer; font-size: 12px;
 }
@@ -124,6 +130,9 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .d-mslp { font-weight: 700; font-variant-numeric: tabular-nums; }
 .d-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text); }
 .d-where { font-size: 11px; color: var(--text-3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.d-margin { grid-column: 2 / -1; font-size: 11px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.d-margin .margin.near::before { width: 5px; height: 5px; margin-right: 4px; }
+.d-raw { color: var(--text-3); }
 .empty-row { color: var(--text-3); font-size: 12px; padding: 4px 8px; }
 
 /* ---------- Legend ---------- */
@@ -140,6 +149,7 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .legend-keys .full { grid-column: 1 / -1; padding-left: 23px; text-indent: -23px; }
 .legend-keys .k-ring { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #2680e6;
   box-shadow: 0 0 0 1.5px #0b1220, 0 0 0 2.7px #5938b8; }
+.legend-keys .k-held { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #2680e6; box-shadow: 0 0 0 1px #0b1220, 0 0 0 2.5px rgba(38, 128, 230, .35); }
 .legend-keys .k-dot { width: 8px; height: 8px; border: 0; border-radius: 50%; vertical-align: 0; margin: 0 11px 0 4px; background: #fad91a; box-shadow: 0 0 0 1px #0b1220; }
 .legend-keys .k-halo { width: 12px; height: 12px; border: 1px solid #fad91a; border-radius: 50%; vertical-align: -2px; margin: 0 8px 0 2px; }
 .legend-keys .k-terrain { width: 9px; height: 9px; border: 1.2px solid var(--text-2); border-radius: 50%; vertical-align: -1px; margin: 0 10px 0 3px; }
@@ -149,6 +159,7 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .readout .h { font-family: var(--font); }
 .tip-hint { margin-top: 6px; font-size: 11px; color: var(--text-3); }
 .tip-alt { margin: -3px 0 6px 17px; font-size: 11px; color: var(--text-3); }
+.tip-margin { margin: -3px 0 6px 17px; font-size: 11px; color: var(--text-2); }
 .readout tr.dim td { font-size: 11px; color: var(--text-3); }
 .readout tr.dim td:last-child { color: var(--text-2); font-weight: 500; }
 
@@ -174,14 +185,25 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 .s3d-t b { font: 11px/16px var(--mono); color: var(--text); font-weight: 600; }
 .s3d-t sub, .s3d-t sup { font-size: 8px; }
 .s3d-u { color: var(--text-3); }
+.s3d-mg { grid-column: 1 / -1; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.s3d-mg .s3d-raw { color: var(--text-3); }
+.s3d-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.s3d-bar .hint { font-size: 11px; color: var(--text-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.s3d-switch button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
 .s3d-canvas {
-  display: block; width: 100%; aspect-ratio: 1; border-radius: var(--radius-sm);
+  display: block; width: 100%; border-radius: var(--radius-sm);
   background: rgba(5, 10, 20, .35);
   touch-action: none; cursor: grab; -webkit-user-select: none; user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 .s3d-canvas.grabbing { cursor: grabbing; }
 .s3d-canvas.on-dot { cursor: pointer; }
+.s3d-canvas.flat { cursor: default; touch-action: pan-y; }
+.s3d-canvas.flat.on-dot { cursor: pointer; }
+/* dot size by central pressure, as Hart's diagrams: three sizes */
+.s3d-size { display: flex; align-items: center; gap: 10px; margin: 0; padding: 0; list-style: none; font-size: 11px; line-height: 16px; color: var(--text-3); }
+.s3d-size li { display: flex; align-items: center; gap: 5px; }
+.s3d-size i { display: inline-block; border-radius: 50%; background: var(--text-2); }
 .s3d-canvas:focus-visible { outline-offset: -2px; }
 .s3d-key {
   display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 12px;

@@ -23,6 +23,19 @@ load directly:
     DIR/frames/fHHH/class.png     the class raster, same geometry
     DIR/frames/fHHH/mask.png      alpha weight of the fields: 1 near the closed lows, MASK_DIM far away
 
+Every tracked low carries, beside the raw class of each hour (clst, from
+Hart's B with the storm's own motion), a hysteresis class clsh that only
+changes once the value that would change it is a margin past its wall (B
+above HYST_B_HI to become asymmetric, below HYST_B_LO to become symmetric;
+a thermal wind term more than HYST_VT_M beyond zero to change from cold to
+warm or back; class 6's rule unchanged), and a margin: the smallest
+distance in m to a wall that would change the raw class (|B - 10|, |VTL|,
+|VTU|; B does not enter class 6). Half of the archive's fixes sit within
+10 m of the B = 10 m wall and the raw class changes at 21% of six-hour
+steps, so the page shows clsh and quotes the margin (hysteresis_class,
+class_margin). Untracked centers get the margin only, from the field's
+values.
+
 Without --cycle the newest cycle whose f198 is posted (NOMADS, else the AWS
 bucket) is used, probing back two days in 6 h steps. Without --out the files
 go to out/web/<cycle>/ and out/web/history.json lists every cycle there.
@@ -80,6 +93,16 @@ TRACK_MATCH_KM = 300.0  # a collected storm and a track are the same low when th
 B_LAYER = (900, 600)  # the thickness layer of B, hPa (top, bottom): Hart's
 B_RADIUS_KM = 500.0
 B_THRESHOLD_M = 10.0
+# Hysteresis class of a tracked low (hysteresis_class): the class of the
+# previous hour is kept unless the value that would change it has crossed
+# its wall by a margin. B must exceed HYST_B_HI to become asymmetric and
+# fall below HYST_B_LO to become symmetric; a thermal wind term must pass
+# HYST_VT_M beyond zero to change its sign reading. Half of the archive's
+# fixes sit within 10 m of B = 10 m and 21% of 6 h steps change the raw
+# class (article, Section 6), so the raw class flickers; this one does not.
+HYST_B_HI = 15.0
+HYST_B_LO = 5.0
+HYST_VT_M = 10.0
 CLOSED_DEPTH_HPA = 5.0  # the product's closed-low ring test, as executeHartClass
 CLOSED_BLOB_KM = 200.0  # and its dilation around each closed low
 IDX_SCALE_M = 100.0  # HCPSidx: 2 tanh(VTL / scale) + tanh(VTU / scale)
@@ -787,6 +810,81 @@ def hart_class_point(b, vtl, vtu, threshold: float = B_THRESHOLD_M):
     return 4 if asym else 5
 
 
+def _finite(*vals) -> bool:
+    return all(v is not None and math.isfinite(float(v)) for v in vals)
+
+
+def class_margin(cls, b, vtl, vtu, threshold: float = B_THRESHOLD_M) -> float | None:
+    """The smallest distance (m, one decimal) from the point to a wall that
+    would change its raw class cls: |B - threshold|, |VTL| and |VTU|, except
+    that B does not enter class 6 (a cold lower under a warm upper layer is
+    class 6 whatever B). None when cls or a value it needs is missing."""
+    if cls is None or not _finite(vtl, vtu):
+        return None
+    walls = [abs(float(vtl)), abs(float(vtu))]
+    if int(cls) != 6:
+        if not _finite(b):
+            return None
+        walls.append(abs(float(b) - threshold))
+    return round(min(walls), 1)
+
+
+def _readings(cls: int, b) -> tuple[bool, bool, bool]:
+    """(asymmetric, lower warm, upper warm) read back from a class; class 6
+    does not record B, so its asymmetry is read from B itself."""
+    cls = int(cls)
+    asym = cls in (2, 3, 4) if cls != 6 else (_finite(b) and float(b) > B_THRESHOLD_M)
+    return asym, cls in (0, 1, 2, 3), cls in (0, 2, 6)
+
+
+def _class_of(asym: bool, lw: bool, uw: bool) -> int:
+    if lw and uw:
+        return 2 if asym else 0
+    if lw:
+        return 3 if asym else 1
+    if uw:
+        return 6
+    return 4 if asym else 5
+
+
+def hysteresis_class(pts: list[dict], b_key: str = "hbt", cls_key: str = "clst", out: str = "clsh",
+                     b_hi: float = HYST_B_HI, b_lo: float = HYST_B_LO, vt_m: float = HYST_VT_M) -> None:
+    """The hysteresis class along a track, in place as pts[k][out]: the
+    first classed point's raw class (cls_key) seeds the three readings
+    (asymmetric, lower warm, upper warm); at every later point a reading
+    changes only when its value is past the wall by the margin, B above
+    b_hi to read asymmetric and below b_lo to read symmetric, a thermal
+    wind term above +vt_m to read warm and below -vt_m to read cold, and
+    the class follows from the readings by the same table as
+    hart_class_point (class 6 whatever B). A point with no raw class gets
+    None and leaves the readings as they are, though a value it does have
+    may still move its own reading; a track that never has a raw class
+    gets None throughout."""
+    state = None
+    for p in pts:
+        raw = p.get(cls_key)
+        b, vtl, vtu = p.get(b_key), p.get("hvtl"), p.get("hvtu")
+        if state is None:
+            if raw is None:
+                p[out] = None
+                continue
+            state = list(_readings(raw, b))
+            p[out] = int(raw)
+            continue
+        if _finite(b):
+            if float(b) > b_hi:
+                state[0] = True
+            elif float(b) < b_lo:
+                state[0] = False
+        for k, v in ((1, vtl), (2, vtu)):
+            if _finite(v):
+                if float(v) > vt_m:
+                    state[k] = True
+                elif float(v) < -vt_m:
+                    state[k] = False
+        p[out] = _class_of(*state) if raw is not None else None
+
+
 def track_motion_b(pts: list[dict]) -> None:
     """Hart's B from the track's own motion, in place: for every point the
     motion by centered differences over the neighbouring fixes (one-sided at
@@ -864,9 +962,16 @@ def build_storms(out: Path, hours: list[int], valids: list[str], collection: lis
             n_unnamed += 1
             name, fsu, phase, comp = f"L{n_unnamed:02d}", None, None, None
         track_motion_b(pts)
+        hysteresis_class(pts)
+        for p in pts:
+            # the margin of the class the page shows as raw: the track's
+            # own where the point has one, else the field's
+            p["margin"] = (class_margin(p["clst"], p["hbt"], p["hvtl"], p["hvtu"]) if p["clst"] is not None
+                           else class_margin(p["cls"], p["hb"], p["hvtl"], p["hvtu"]))
         storms.append({"id": tid, "name": name, "source": "track", "fsu": fsu,
                        "min_mslp": min(p["mslp"] for p in pts), "points": pts,
                        "cls_seq": [p["cls"] for p in pts], "clst_seq": [p["clst"] for p in pts],
+                       "clsh_seq": [p["clsh"] for p in pts],
                        "phase_png": phase, "compare_png": comp})
         for p in pts:
             p.pop("bq", None)
@@ -875,13 +980,18 @@ def build_storms(out: Path, hours: list[int], valids: list[str], collection: lis
                     ft["properties"]["track"] = tid
                     ft["properties"]["hbt"] = p["hbt"]
                     ft["properties"]["clst"] = p["clst"]
+                    ft["properties"]["clsh"] = p["clsh"]
+                    ft["properties"]["margin"] = p["margin"]
                     ft["properties"]["spd"] = p["spd"]
     for k, s in enumerate((s for s in collection if s["name"] not in taken), start=1):
         storms.append({"id": f"C{k:02d}", "source": "collection", "min_mslp": min(p["mslp"] for p in s["points"]),
                        **s})
     for path, fc in feats.values():
         for ft in fc["features"]:
-            ft["properties"].pop("bq", None)  # the means served their purpose
+            pr = ft["properties"]
+            pr.pop("bq", None)  # the means served their purpose
+            if pr["kind"] == "center" and "margin" not in pr:  # untracked: the field's margin
+                pr["margin"] = class_margin(pr.get("cls"), pr.get("hb"), pr.get("hvtl"), pr.get("hvtu"))
         write_json(path, fc)
     return storms
 
@@ -972,6 +1082,7 @@ def main(argv=None) -> int:
     index["bands"] = {"lower_hpa": list(g.HART_LOWER), "upper_hpa": list(g.HART_UPPER), "b_layer_hpa": list(B_LAYER),
                       "note": "Hart's own layers; the D2D fields in CAVE use 925-700 and 500-300 hPa"}
     index["track_b"] = "track motion (hbt, clst); hb and cls are the gridded field's steering-flow values"
+    index["hysteresis"] = hysteresis_note()
     write_json(out / "index.json", index)
     update_history(out / "history.json", cycle, generated, "index.json")
     if a.out is None:
@@ -982,6 +1093,14 @@ def main(argv=None) -> int:
     return 0
 
 
+def hysteresis_note() -> dict:
+    """index.json's "hysteresis": the walls of clsh and what margin means."""
+    return {"b_hi": HYST_B_HI, "b_lo": HYST_B_LO, "vt_m": HYST_VT_M, "class": "clsh", "margin": "margin",
+            "note": "clsh keeps the previous hour's class until B is above b_hi (asymmetric) or below b_lo "
+                    "(symmetric), or a thermal wind term is more than vt_m beyond zero; margin is the distance in m "
+                    "to the nearest wall that would change the raw class (B does not enter class 6)"}
+
+
 def relink(out: Path) -> int:
     """Rebuild index.json's storms from the frames already in out (no GRIB)."""
     ip = out / "index.json"
@@ -990,6 +1109,7 @@ def relink(out: Path) -> int:
     storms = build_storms(out, index["hours"], index["valid"], collection)
     index["storms_cycle"], index["storms"] = storms_cycle, storms
     index["tracks"] = sum(1 for s_ in storms if s_["source"] == "track")
+    index["hysteresis"] = hysteresis_note()
     write_json(ip, index)
     log(f"relinked {out}: {index['tracks']} tracks, {len(storms) - index['tracks']} more collected storms")
     return 0

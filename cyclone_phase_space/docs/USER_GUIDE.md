@@ -197,9 +197,9 @@ building it as a gridded product at all.
 | Product | Menu name | What it shows | Read as |
 | :--- | :--- | :--- | :--- |
 | HCPSclass | Hart CPS Class (0 sym deep warm, 1 sym shallow warm, 2 asym deep warm, 3 asym shallow warm, 4 asym cold, 5 sym cold, 6 shallow cold) | one of seven classes (0-6), the intersection of the quadrants of Hart's two diagrams, at each detected low, blank elsewhere | see "Reading the class" in section 5 |
-| HVTL | Hart CPS -VTL 925-700 (m) | lower thermal wind, meters | positive warm core, negative cold core |
-| HVTU | Hart CPS -VTU 500-300 (m) | upper thermal wind, meters | positive warm core, negative cold core |
-| HB | Hart CPS B 900-600 equiv (m) | thermal asymmetry, meters (900-600 hPa equivalent) | at or below 10 symmetric, above 10 asymmetric |
+| HVTL | Hart CPS -VTL lower band (m) | lower thermal wind, meters (Hart's 900 to 600 hPa band on the GFS; the mean of the 925/850/700 and 850/700/500 hPa slopes on other models) | positive warm core, negative cold core |
+| HVTU | Hart CPS -VTU upper band (m) | upper thermal wind, meters (Hart's 600 to 300 hPa band on the GFS; 500/400/300 hPa on other models) | positive warm core, negative cold core |
+| HB | Hart CPS B 900-600 equiv (m) | thermal asymmetry, meters (Hart's 900-600 hPa thickness on the GFS; the 925-700 hPa thickness rescaled to a 900-600 equivalent on other models) | at or below 10 symmetric, above 10 asymmetric |
 | HCPSidx | Hart CPS Index -3 to +3 | one number from -3 to +3 at each detected low | -3 deep cold, 0 neutral, +3 deep warm |
 
 All products sit at a single Surface plane in the Product Browser and
@@ -212,12 +212,16 @@ overlay on anything.
 **Product Browser.** Grid, then the model, then the product name, then
 Surface. The five Hart products appear together because their names
 start with Hart CPS. If a product is missing for a model, check which
-inputs that model lacks: HVTL and HVTU need their three height levels
-(925/850/700 or 500/400/300) plus surface pressure; HCPSclass and
-HCPSidx also need mean sea level pressure (for the closed-low test);
-HCPSclass and HB also need wind at 850, 700, 500, and 300 hPa and the
-coriolis field. That is six height levels in all; 1000 hPa height is
-not used.
+inputs that model lacks: HVTL and HVTU need their height levels plus
+surface pressure (on the GFS every 50 hPa level from 900 to 300 hPa,
+Hart's own bands; on other models 925, 850, 700, 500, 400 and 300 hPa,
+with 925/850/700 alone as a last resort); HCPSclass and HCPSidx also
+need mean sea level pressure (for the closed-low test); HCPSclass and
+HB also need wind at 850, 700, 500, and 300 hPa and the coriolis
+field. The products pick the levels themselves from what the model
+carries, so the same product name means Hart's levels on the GFS and
+the standard-level estimate elsewhere; 1000 hPa height is used only
+as the last-resort stand-in for mean sea level pressure.
 
 **Volume Browser.** Only if your site has added the entries to the
 Fields menu; then they are under a Hart CPS heading.
@@ -366,13 +370,18 @@ These are Hart's own quantities in his units. Typical values:
 | weak or marginal system | within about 25 of zero | | |
 
 Zero is the warm versus cold boundary, exactly as on the FSU diagram.
-Values are close to but not identical to the FSU page for the same
-storm, because the FSU page uses 50 hPa levels and these use standard
-levels only. In practice the lower term reads higher than the FSU
-page for a shallow warm core (a seclusion or a storm in transition),
-because the 925 to 700 hPa band sits lower than Hart's 900 to 600 hPa
-layer; a synthetic test put the overstatement at 60 to 80 m for those
-profiles and showed that a deeper band would lose the signal instead.
+On the GFS the terms are computed on the same 50 hPa levels the FSU
+page uses (900 to 600 and 600 to 300 hPa) and B on the same 900 to
+600 hPa thickness, so values are close to the FSU page for the same
+storm and run, differing only by the pointwise window and the
+steering-flow motion proxy. On other models the lower term is an
+estimate from the standard levels (the mean of the 925/850/700 and
+850/700/500 hPa slopes, within about 25 m of Hart's band on synthetic
+profiles, reading a shallow warm core about 20 m too cold) and the
+upper term is 500/400/300 hPa (within about 20 m); do not compare
+HVTL magnitudes between the GFS and another model as if the band were
+the same. The earlier 925/850/700 band read a shallow warm core 60 to
+80 m too warm and is kept only as a last resort.
 With about 5 m of height noise the terms at a center scatter by about
 16 m (HVTL) and 9 m (HVTU) and B by under 1 m, so expect the class to
 flicker when a term is within about 15 m of zero or B within a meter

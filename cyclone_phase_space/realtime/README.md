@@ -829,6 +829,35 @@ from the collector's Hart columns (`hvtl_hart`, `hvtu_hart`, `hb_hart`)
 with the class recomputed from those three inside a closed low, and
 fall back to the standard columns for an older archive.
 
+**Hysteresis class and margin.** Half of the archive's fixes sit within
+10 m of the B = 10 m wall and the raw class changes at 21% of six-hour
+steps (the article's Section 6), so `clst` flickers between neighbouring
+classes along a track. Each tracked storm therefore also carries a
+hysteresis class, `clsh` (`hysteresis_class`): the first classed point's
+`clst` seeds three readings (asymmetric, lower layer warm, upper layer
+warm), and at every later point a reading changes only once its value is
+past the wall by a margin. B must exceed `HYST_B_HI` (15 m) to read
+asymmetric and fall below `HYST_B_LO` (5 m) to read symmetric; a thermal
+wind term must pass `HYST_VT_M` (10 m) beyond zero to change its sign
+reading, so the lower term reads warm only once above +10 m from cold and
+cold only once below -10 m from warm. The class follows from the three
+readings by the same table as `clst` (`hart_class_point`), class 6's rule
+unchanged: a cold lower layer under a warm upper one is class 6 whatever
+B, and since class 6 does not record B its asymmetry reading comes from
+B itself. A point without a raw class (no motion) has `clsh` null and
+leaves the readings as they are. Every point also gets `margin`
+(`class_margin`): the smallest distance in m, one decimal, to a wall that
+would change its raw class, the least of |B - 10|, |VTL| and |VTU|, B
+left out for class 6; for a tracked point the B is `hbt` and the class
+`clst` (the field's `hb` and `cls` where the point has no `hbt`), for an
+untracked center the field's `hb` and `cls`. Null when a value it needs
+is missing. `clsh` and `margin` sit on the track points, `clsh_seq` on
+the entry beside `clst_seq`, and `clsh` and `margin` on the matching
+centers of `lows.geojson` like `clst`; untracked centers carry `margin`
+only. `index.json` gives the walls under `hysteresis` (`b_hi`, `b_lo`,
+`vt_m`). The live map colours a tracked low by `clsh`, quotes `clst` as
+this hour's class where it differs, and names the margin and its wall.
+
 **Files.** In the output directory:
 
 - `index.json`:
@@ -839,7 +868,8 @@ fall back to the standard columns for an older archive.
        "raster": {"bounds": [[-85, -180], [85, 180]], "crs": "EPSG:3857", "width": 2048, "height": 2041,
                   "format": "webp", "mask": "mask.png", "mask_dim": 0.35, "fade": 0.1},
        "ranges": {"hb": [-40, 40], "hvtl": [-300, 300], "hvtu": [-300, 300]},
-       "frames": "frames/f{hhh}/", "storms_cycle": "2026092418", "storms": [...]}
+       "frames": "frames/f{hhh}/", "storms_cycle": "2026092418", "storms": [...],
+       "hysteresis": {"b_hi": 15.0, "b_lo": 5.0, "vt_m": 10.0, ...}}
 
   `hours` and `valid` list the frames actually written, in step;
   `frames` is a template (`{hhh}` is the hour in three digits).
@@ -847,9 +877,11 @@ fall back to the standard columns for an older archive.
   from the frames themselves (see **Tracks** above) come first, each
   `{"id": "T01", "name", "source": "track", "fsu": FSU number or null,
   "min_mslp", "points": [{"fhr", "valid", "id", "lat", "lon", "mslp",
-  "cls", "hvtl", "hvtu", "hb", "idx"}, ...], "cls_seq", "phase_png",
+  "cls", "hvtl", "hvtu", "hb", "idx", "hbt", "clst", "clsh", "margin",
+  "spd", "hdg"}, ...], "cls_seq", "clst_seq", "clsh_seq", "phase_png",
   "compare_png"}` (a point's `id` is the matching center's `id` in that
-  frame's `lows.geojson`); then whichever storms of the day's
+  frame's `lows.geojson`; see **Hart's B from the track** and
+  **Hysteresis class and margin** above); then whichever storms of the day's
   collection no track matched, `{"id": "C01", "source": "collection",
   "min_mslp", "name", "cycle", "fsu", "points": [{"fhr", "valid",
   "lat", "lon", "mslp", "cls", "hvtl", "hvtu", "hb"}, ...], "cls_seq",
@@ -902,9 +934,11 @@ fall back to the standard columns for an older archive.
   is cut at 180 into two features with the same `id`. Rings follow
   RFC 7946 (exterior counterclockwise). Once tracks are linked, a
   center that ends up on one also gets `"track"`, that track's `id`
-  in `storms` (see **Tracks** above), with `"hbt"`, `"clst"` and
-  `"spd"` (see **Hart's B from the track**); a center whose low was
-  dropped (too short-lived, or over terrain) has none of these.
+  in `storms` (see **Tracks** above), with `"hbt"`, `"clst"`, `"clsh"`,
+  `"margin"` and `"spd"` (see **Hart's B from the track** and
+  **Hysteresis class and margin**); a center whose low was dropped (too
+  short-lived, or over terrain) has none of these but `"margin"`, from
+  the field's values.
 - `frames/fHHH/mslp.geojson`: isobars every 4 hPa as LineString
   features with `{"level": hPa}`, from contourpy on the global field
   smoothed for display by a Gaussian of 2 grid cells (sigma, about
