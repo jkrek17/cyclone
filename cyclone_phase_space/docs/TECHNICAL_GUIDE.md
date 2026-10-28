@@ -19,7 +19,7 @@ The package implements the Hart family:
 
 | Family | Function file | Products | Inputs | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| Hart | `derivedParameters/functions/cps_HartCPS.py` | HVTL, HVTU, HCPSclass, HCPSidx, HB | geopotential height at 925, 850, 700, 500, 400, 300 hPa (six levels); u/v wind at 850, 700, 500, 300 hPa; surface pressure; mean sea level pressure (HCPSclass and HCPSidx only, for the closed-low mask); coriolis (HB and HCPSclass only) | experimental |
+| Hart | `derivedParameters/functions/cps_HartCPS.py` | HVTL, HVTU, HCPSclass, HCPSidx, HB | geopotential height at every 50 hPa level from 900 to 300 hPa on the GFS (Hart's own bands), or at 925, 850, 700, 500, 400, 300 hPa on every other model (section 2.3); u/v wind at 850, 700, 500, 300 hPa; surface pressure; mean sea level pressure (HCPSclass and HCPSidx only, for the closed-low mask); coriolis (HB and HCPSclass only) | experimental |
 
 The function file is self-contained numpy with no imports from the
 rest of the repository, because the CAVE interpreter only sees the
@@ -139,40 +139,63 @@ about 1000 km across (a 1000 km square with the former square window).
 This is cosmetic. The class and index products are masked to a
 blob around the center and do not show it.
 
-### 2.3 Level bands
+### 2.3 Level bands: three methods, chosen per model
 
-Hart uses 900 to 600 hPa and 600 to 300 hPa at 50 hPa spacing, which
-only the GFS carries in D2D. The package uses standard levels so the
-products exist for every model:
+Hart uses 900 to 600 hPa and 600 to 300 hPa at 50 hPa spacing (seven
+levels each) and takes B on the 900 to 600 hPa thickness. In this
+inventory only the GFS carries those levels, so every definition lists
+up to three `<Method>` blocks and AWIPS runs the first whose inputs the
+model carries:
 
-| Band | Levels | Constant |
-| :--- | :--- | :--- |
-| lower | 925, 850, 700 | `LOWER_BAND` |
-| upper | 500, 400, 300 | `UPPER_BAND` |
+| Method | Lower term | Upper term | B layer | Entry points | Runs on |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 1, Hart's bands | 900, 850, 800, 750, 700, 650, 600 (`HART_LOWER_BAND`) | 600, 550, 500, 450, 400, 350, 300 (`HART_UPPER_BAND`) | 900-600, `layerScale` 1.0 | `executeBand7`, `executeBLayer`, `executeHartClass7`, `executeIndex7` | a model with every 50 hPa level from 900 to 300 hPa (the GFS) |
+| 2, two-slope mean | mean of the 925/850/700 and 850/700/500 slopes (`MEAN2_LOWER_BANDS`) | 500, 400, 300 (`UPPER_BAND`) | 925-700, `layerScale` 1.4548 | `executeBandMean2`, `executeB`, `executeHartClassMean2`, `executeIndexMean2` | every other model with the six standard levels |
+| 3, fallback | 925, 850, 700 (`LOWER_BAND`) | 500, 400, 300 | 925-700, `layerScale` 1.4548 | `executeBand3`, `executeB`, `executeHartClass`, `executeIndexStd` | a model without 500 hPa height, or a site that removes methods 1 and 2 to reproduce earlier numbers |
 
-The 700 to 500 layer is deliberately in neither band. The lower band
-lies entirely below Hart's 900 to 600 hPa layer, so magnitudes can
-differ from the FSU page's values for the same storm by tens of
-percent depending on the vertical profile of the core anomaly; the
-size of the difference on real storms has not been measured. Signs,
-the zero threshold and transition timing carry over, and the Dujuan
-case confirmed the timing matches within one 6 h frame. A GFS-only definition on
-Hart's exact levels can be added with `executeBand7` (section 4.4).
+Method 3 is the package as shipped before revision 4, unchanged. The
+700 to 500 layer is deliberately in neither of its bands, and its lower
+band lies entirely below Hart's 900 to 600 hPa layer. Against the
+Florida State diagrams Hart's layers agree far better (class agreement
+75 percent against 55 percent for the standard bands; the 925 to 700
+band read about 17 m too warm on the GFS cases), which is why the GFS
+now gets them.
 
-A synthetic test (`cyclone_phase_space/article/figures/band_comparison.py`, README
-"Band experiment") fitted Hart's band and two alternatives to five
-prescribed profiles. For a shallow warm core with cold air above, the
-seclusion and transition profiles, 925/850/700 overstates Hart's value
-by 60 to 80 m while a 925/850/700/500 band dilutes the same signal to
-near zero (+11 m against Hart's +79 m for the seclusion profile), so
-the deeper band was rejected. The mean of the 925/850/700 and
-850/700/500 slopes tracked Hart's band best of the simple estimators
-(rms 25 m against 44 m for the band in use) and is a candidate for a
-later revision once tested on real data. A morphing-profile test puts
-completion about 3 h late on a 48 h transition for the band in use,
-against about 6 h early for the deeper band; the upper crossing is
-within a frame of Hart's (`cyclone_phase_space/article/figures/experiments.py`, README
-"Band experiment").
+The two-slope mean comes from the synthetic test
+(`cyclone_phase_space/article/figures/band_comparison.py`, README "Band
+experiment"), which fitted Hart's band and several standard-level
+estimators to five prescribed profiles (deep warm core, warm core
+linear in ln p, warm seclusion, transitioning storm, deep cold core).
+Against Hart's 900 to 600 band, 925/850/700 alone has an rms error of
+44 m and a bias of +38 m (a shallow warm core reads 60 m too warm, the
+deep cold profile 39 m too warm); a 925/850/700/500 band has rms 66 m
+and dilutes the seclusion signal to near zero (+11 m against +79 m);
+the mean of the 925/850/700 and 850/700/500 slopes has rms 25 m and a
+bias of -16 m, is exact for a profile linear in ln p and for the deep
+cold profile, and keeps the seclusion signal (+60 m against +79 m). It
+is the estimator closest to Hart's band among those tried, and it is
+what every model other than the GFS now gets.
+
+The upper term has no two-slope counterpart. On the same five
+profiles 500/400/300 tracks Hart's 600 to 300 band with rms 20 m and
+bias -5 m; every alternative that pulls 700 hPa into the upper band is
+worse (700/500/400/300 rms 33 m, the mean of 700/500/400 and
+500/400/300 rms 25 m, 700/500/400 rms 65 m), and 500/400/300/250
+reaches past Hart's top (rms 58 m). So methods 2 and 3 share the upper
+band and the B layer, and HVTU and HB carry two `<Method>` blocks
+rather than three.
+
+Signs, the zero threshold and transition timing carry over between the
+methods; the Dujuan case confirmed the timing matches within one 6 h
+frame. A morphing-profile test puts completion about 3 h late on a
+48 h transition for the 925/850/700 band and within a frame for the
+two-slope mean; the upper crossing is within a frame of Hart's
+(`cyclone_phase_space/article/figures/experiments.py`, README "Band
+experiment"). Nothing in the display changes between methods: the
+product names, units, sign convention, masking and colormaps are the
+same, only the levels under the number. Do not compare HVTL magnitudes
+between a GFS panel and another model's panel without allowing for the
+band as well as the model.
 
 ### 2.4 Below-ground masking
 
@@ -611,9 +634,18 @@ Hart family (`cps_HartCPS.py`):
 | `executeBand3` | z1, z2, z3, psfc, dx, dy, radiusKm, p1, p2, p3, capHpa |
 | `executeBand4` | z1..z4, psfc, dx, dy, radiusKm, p1..p4, capHpa |
 | `executeBand7` | z1..z7, psfc, dx, dy, radiusKm, p1..p7, capHpa |
-| `executeIndexStd` | pmsl, z925, z850, z700, z500, z400, z300, psfc, dx, dy, radiusKm, scaleM, depthHpa, blobKm, capHpa |
+| `executeBandMean2` | z925, z850, z700, z500, psfc, dx, dy, radiusKm, capHpa (the two bands are fixed: 925/850/700 and 850/700/500) |
+| `executeIndexStd` | pmsl, z925, z850, z700, z500, z400, z300, psfc, dx, dy, radiusKm, scaleM, depthHpa, blobKm, capHpa, pmslKind |
+| `executeIndexMean2` | same as `executeIndexStd` (the lower term is the two-slope mean) |
+| `executeIndex7` | pmsl, z900, z850, z800, z750, z700, z650, z600, z550, z500, z450, z400, z350, z300, psfc, dx, dy, radiusKm, scaleM, depthHpa, blobKm, capHpa, pmslKind |
 | `executeB` | z925, z700, u850, v850, u700, v700, u500, v500, u300, v300, psfc, coriolis, dx, dy, radiusKm, layerScale, capHpa |
-| `executeHartClass` | pmsl, z925, z850, z700, z500, z400, z300, u850, v850, u700, v700, u500, v500, u300, v300, psfc, coriolis, dx, dy, radiusKm, bThresholdM, layerScale, depthHpa, blobKm, capHpa |
+| `executeBLayer` | zTop, zBot, u850, v850, u700, v700, u500, v500, u300, v300, psfc, coriolis, dx, dy, radiusKm, pTop, pBot, layerScale, capHpa (shipped with zTop = GH 600MB, zBot = GH 900MB, pTop 600, pBot 900, layerScale 1.0) |
+| `executeHartClass` | pmsl, z925, z850, z700, z500, z400, z300, u850, v850, u700, v700, u500, v500, u300, v300, psfc, coriolis, dx, dy, radiusKm, bThresholdM, layerScale, depthHpa, blobKm, capHpa, pmslKind |
+| `executeHartClassMean2` | same as `executeHartClass` (the lower term is the two-slope mean; B stays on 925-700 rescaled) |
+| `executeHartClass7` | pmsl, z900, z850, z800, z750, z700, z650, z600, z550, z500, z450, z400, z350, z300, u850, v850, u700, v700, u500, v500, u300, v300, psfc, coriolis, dx, dy, radiusKm, bThresholdM, layerScale, depthHpa, blobKm, capHpa, pmslKind (B on z600 minus z900; layerScale 1.0) |
+
+The seven-level entry points pass 600 hPa once: it closes the lower
+band and opens the upper. `executeBand4` is unused by any definition.
 
 ### 4.3 Tunables by definition
 
@@ -622,11 +654,20 @@ CAVE; no Python change is needed.
 
 | Definition | ConstantFields in order | Defaults |
 | :--- | :--- | :--- |
-| HVTL | radiusKm, p1, p2, p3, capHpa | 500, 925, 850, 700, 900 |
-| HVTU | radiusKm, p1, p2, p3, capHpa | 500, 500, 400, 300, 900 |
-| HCPSclass | radiusKm, bThresholdM, layerScale, depthHpa, blobKm, capHpa | 500, 10, 1.4548, 5, 200, 900 |
-| HCPSidx | radiusKm, scaleM, depthHpa, blobKm, capHpa | 500, 100, 5, 200, 900 |
-| HB | radiusKm, layerScale, capHpa | 500, 1.4548, 900 |
+| HVTL, method 1 | radiusKm, p1..p7, capHpa | 500, 900, 850, 800, 750, 700, 650, 600, 900 |
+| HVTL, method 2 | radiusKm, capHpa | 500, 900 |
+| HVTL, method 3 | radiusKm, p1, p2, p3, capHpa | 500, 925, 850, 700, 900 |
+| HVTU, method 1 | radiusKm, p1..p7, capHpa | 500, 600, 550, 500, 450, 400, 350, 300, 900 |
+| HVTU, method 2 | radiusKm, p1, p2, p3, capHpa | 500, 500, 400, 300, 900 |
+| HCPSclass, methods 1-4 | radiusKm, bThresholdM, layerScale, depthHpa, blobKm, capHpa, pmslKind | 500, 10, 1.0, 5, 200, 900, 0 (1 in the 1000 hPa block) |
+| HCPSclass, methods 5-12 | radiusKm, bThresholdM, layerScale, depthHpa, blobKm, capHpa, pmslKind | 500, 10, 1.4548, 5, 200, 900, 0 (1 in the 1000 hPa blocks) |
+| HCPSidx, all methods | radiusKm, scaleM, depthHpa, blobKm, capHpa, pmslKind | 500, 100, 5, 200, 900, 0 (1 in the 1000 hPa blocks) |
+| HB, method 1 | radiusKm, pTop, pBot, layerScale, capHpa | 500, 600, 900, 1.0, 900 |
+| HB, method 2 | radiusKm, layerScale, capHpa | 500, 1.4548, 900 |
+
+A tunable that is meant to change for every model must be changed in
+every `<Method>` block of the file: AWIPS runs one block per model and
+the blocks do not share constants.
 
 What each does:
 
@@ -641,9 +682,15 @@ What each does:
 - `capHpa`: below-ground cap. Lower it only if deep ocean lows are
   being blanked, which has not been seen.
 - `scaleM`: tanh scale for the index.
-- `layerScale`: rescales B from the 925-700 hPa layer this package
-  computes it on to a 900-600 hPa equivalent, so Hart's 10 m threshold
-  applies. 1.0 gives the raw, unscaled value.
+- `layerScale`: multiplies B. 1.0 in the seven-level blocks, where B is
+  on Hart's own 900-600 hPa thickness; 1.4548 (`ln(900/600)/ln(925/700)`)
+  in the standard-level blocks, which rescale the 925-700 hPa thickness
+  to a 900-600 hPa equivalent so Hart's 10 m threshold applies. 1.0 in
+  a standard-level block gives the raw, unscaled 925-700 value.
+- `pTop`, `pBot` (HB method 1 only): the pressures of `executeBLayer`'s
+  two height Fields, matched by position; change the Fields and these
+  together, and set `layerScale` to `ln(900/600)/ln(pBot/pTop)` for a
+  layer other than 900-600.
 - `bThresholdM`: Hart's asymmetry threshold for B, used by `HCPSclass`.
   Hart's own is 10 m.
 - `MIN_STEERING_MS` (module constant in `cps_HartCPS.py`, not a
@@ -651,17 +698,33 @@ What each does:
   to have a well defined right/left of motion. 2 m/s by default;
   below it, `HB` and (through it) `HCPSclass` are blanked.
 
-### 4.4 Adding definitions
+### 4.4 Adding or removing methods
 
-To change the levels of a band, edit the GH Field levels and the
-matching pressure ConstantFields together. To add a GFS-only,
-seven-level definition on Hart's exact 900 to 600 band, copy
-cps_HVTL.xml, list GH at 900, 850,
-800, 750, 700, 650, 600, then P, dx, dy, then ConstantFields radiusKm,
-the seven pressures, capHpa, and name the method
-`cps_HartCPS.executeBand7`. A classification product on those levels would
-need a new entry point; `executeHartClass` is fixed to the standard
-levels.
+Each definition's `<Method>` blocks are tried in file order and the
+first whose inputs the model carries runs, so the order is the policy:
+Hart's bands first, the two-slope mean second, the 925/850/700 band
+last. To change the levels of a band inside a block, edit the GH Field
+levels and the matching pressure ConstantFields together (the test
+`tests/d2d_cps/test_hart_bands.py` checks they agree). To pin a site to
+one method, delete the blocks above it; to reproduce numbers from
+before revision 4, keep only the `executeBand3`/`executeB`/
+`executeHartClass`/`executeIndexStd` blocks. Note that the two-slope
+mean and the fallback have identical inputs, so the fallback blocks are
+never reached while the two-slope blocks are present; they are there to
+be kept when the others are removed.
+
+HCPSclass and HCPSidx multiply two independent choices (three band
+sets, four MSLP spellings) into twelve blocks, band-major, because the
+framework cannot express "any of these MSLP inputs" separately from
+"whichever band set the model carries". To add a fifth MSLP spelling,
+add one block to each of the three groups (copy a block of the group
+and change only the first Field), so the band preference still wins
+over the MSLP spelling.
+
+A model that carries some but not all of the thirteen 50 hPa levels
+gets the two-slope mean, not a partial seven-level band; there is no
+intermediate method and none is planned, since a band missing one of
+its seven levels is no longer Hart's.
 
 ---
 
@@ -715,7 +778,22 @@ They appear under Grid in the legend's Change Colormap menu.
    `1000MB` with the trailing `pmslKind` constant 1 (height converted
    to MSLP at 8 m per hPa). Find what the model's "MSL Press" resolves
    to (README, Install) and add it as another `<Method>` block in both
-   files.
+   files, once per band group (section 4.4).
+6. Check which band method each model gets (section 2.3). The method
+   is not shown in D2D, so read it off the inventory: in the Product
+   Browser, Grid, model, the GFS lists GH at 800, 750, 650, 550, 450
+   and 350 MB as well as the standard levels, and gets Hart's bands;
+   a model without those levels gets the two-slope mean. Then sample
+   HVTL at the same low center on the GFS and on a second model. The
+   two will differ by the band as well as by the model, by tens of
+   meters on a shallow warm core and little on a deep one; a GFS
+   value that matches a hand computation on 900 to 600 hPa, or the
+   Florida State value for the same storm and run to within the
+   window's own differences, confirms the seven-level method ran. A
+   definitive check is to copy cps_HVTL.xml to a test abbreviation
+   keeping only its first `<Method>` block: that product appears for
+   exactly the models that get Hart's bands. Remove the copy
+   afterwards.
 
 **Installation risk: `ORIENTATION_MODE`.** This is the one setting in
 the whole package that can be silently wrong on a new site or a new
@@ -764,7 +842,10 @@ bundle file extracted from the saved procedure:
 | HB/HCPSclass mirrored or lobed at a low | wrong `ORIENTATION_MODE` in `cps_HartCPS.py` | check against mode 1 (section 2.7); see 5.2 step 4 |
 | whole field green on load | style rule not applied | pick the colormap from the legend or load the procedure |
 | Hart products vanish after adding P | P field level spelling | check how base definitions reference Surface |
-| HCPSclass/HCPSidx missing or empty for one model while HVTL, HVTU, HB load | none of the four MSLP `<Method>` blocks resolves for that model | add a `<Method>` with the model's own MSLP name (5.2 step 5) |
+| HCPSclass/HCPSidx missing or empty for one model while HVTL, HVTU, HB load | none of the four MSLP `<Method>` blocks in any band group resolves for that model | add a `<Method>` with the model's own MSLP name to each band group (5.2 step 5, 4.4) |
+| GFS gets the two-slope mean instead of Hart's bands (HVTL on the GFS matches a 925/850/700/500 hand computation, not a 900 to 600 one; or the test copy of 5.2 step 6 does not appear for the GFS) | a 50 hPa level is missing from the GFS inventory as ingested at the site, or its level is spelled differently from `800MB` | check the Product Browser for GH at 800, 750, 650, 550, 450, 350 MB; fix the spelling in the first `<Method>` of every file, or accept the standard-level method |
+| the five products vanish for every model after revision 4 | a build limit on `<Method>` arguments (the seven-level class block passes 33) or on the number of `<Method>` blocks (twelve) | CAVE log names the file; remove the seven-level blocks from cps_HCPSclass.xml and cps_HCPSidx.xml first, then from cps_HVTL.xml/cps_HVTU.xml/cps_HB.xml, and report which one failed |
+| HVTL differs between the GFS and another model on the same storm by tens of meters | the band: Hart's 900 to 600 on the GFS, the two-slope mean elsewhere (2.3) | expected; compare crossings and trends between models, not magnitudes |
 | CAVE reports "unexpected element menuTemplate" | `cpsFields.xml` placed in a derivedParameters or styleRules folder | remove it; it belongs under cave_static `menus/volumebrowser/` if used at all |
 | blank over land | below-ground mask | expected |
 | HVTL/HVTU/HCPSclass blank over open water near Greenland or Iceland | window valid-fraction mask (2.4): a level's 500 km window is mostly over masked terrain | expected; the value belongs to the mask, not the model |
@@ -779,8 +860,10 @@ bundle file extracted from the saved procedure:
 python3 -m pytest cyclone_phase_space/tests/d2d_cps cyclone_phase_space/tests/cps -q
 ```
 
-73 tests: the storm-centered reference in `cyclone_phase_space/tests/cps` and the Hart
-family in `cyclone_phase_space/tests/d2d_cps/test_hart_cps.py`. Every expected value is
+106 tests (88 in `cyclone_phase_space/tests/d2d_cps`, 18 in
+`cyclone_phase_space/tests/cps`): the storm-centered reference in
+`tests/cps` and the Hart family in `tests/d2d_cps/test_hart_cps.py`,
+`test_hart_cps_circle.py` and `test_hart_bands.py`. Every expected value is
 analytic or from a brute-force comparison, never copied from the
 implementation. Coverage includes sliding extrema against brute force,
 band slopes on exact linear profiles, agreement between the gridded and
@@ -792,7 +875,18 @@ uniform gradient (the `8R/(3 pi)` value), on a 400 km dipole (against a
 brute-force semicircle difference, with the first-order form alongside),
 against `cps.hart.parameter_b` in both hemispheres, across the dateline
 and at 60 N, orientation modes on transposed inputs, and a performance
-budget on a full 0.25 degree grid.
+budget on a full 0.25 degree grid. `test_hart_bands.py` covers the
+revision 4 entry points: the seven-level slope reproduces a prescribed
+slope on a synthetic warm core, the two-slope mean equals the mean of
+the two three-level slopes, `executeBLayer` on the 900-600 thickness
+with scale 1 equals `executeB`'s semicircle difference on the same
+thickness and masks at its own levels, the seven-level and two-slope
+class and index match the standard ones on a profile linear in ln p
+and differ in the expected direction on a shallow warm core (Hart's
+band cold, the standard band warm, the mean between), and every XML
+definition parses with the expected method order, every referenced
+function existing with the right arity, and level Fields matching
+their pressure constants.
 `cyclone_phase_space/tests/d2d_cps/conftest.py` puts the functions directory on the path
 so the files import exactly as CAVE imports them.
 
@@ -841,8 +935,13 @@ negative on a GFS forecast (section 2.2) and is kept only as an option
 (`WINDOW_SHAPE = "square"`). The real-case values sampled in CAVE so
 far were read with the square and are to be re-sampled.
 
-- Standard-level bands differ from Hart's. A GFS-only seven-level
-  definition is a small addition (4.4).
+- Hart's own bands run only where the model carries the 50 hPa levels
+  (the GFS); every other model gets the two-slope mean, which tracks
+  Hart's lower band to an rms of 25 m with a bias of -16 m on five
+  synthetic profiles, and the 500/400/300 upper band (rms 20 m, bias
+  -5 m). The two-slope mean has been tested on synthetic profiles and
+  against the FSU comparison that motivated it, not yet on a season of
+  real cases on a non-GFS model (2.3).
 - Parameter B (`HB`, and `HCPSclass`, which depends on it for its
   asymmetric/symmetric split) uses the deep-layer steering wind
   (850/700/500/300 hPa mean, area-averaged over the 500 km window

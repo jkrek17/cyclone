@@ -70,7 +70,8 @@
     <div class="card">
       <h3>Lower thermal wind, &minus;V<sub>T</sub><sup>L</sup> (HVTL)</h3>
       <p>Is the core warmer or colder than its surroundings in the lower
-      troposphere, 900 to 600 hPa on the live map (925 to 700 hPa in D2D)?
+      troposphere, 900 to 600 hPa on the live map and on the GFS in D2D
+      (standard levels on other models)?
       Positive is warm, negative is cold. A hurricane reads a few
       hundred metres warm; a mature extratropical low a hundred or more cold.</p>
     </div>
@@ -97,9 +98,9 @@
       the dip shrinks with height (the warm column is thick, so the upper
       surfaces are nearly flat); in a cold core the dip grows with height. The
       lower term measures that change over the lower troposphere (900 to
-      600 hPa on the live map, 925 to 700 hPa in D2D), the upper term over
-      the upper troposphere (600 to 300 hPa on the map, 500 to 300 hPa in
-      D2D). Warm is positive.</figcaption>
+      600 hPa on the live map and on the GFS in D2D, 925 to 700 hPa on
+      other models), the upper term over the upper troposphere (600 to
+      300 hPa, or 500 to 300 hPa on other models). Warm is positive.</figcaption>
   </figure>
 
   <figure>
@@ -167,8 +168,18 @@
     the B field, and D2D, take the motion from the steering flow instead,
     because one frame has no track. The two usually agree. Where they do
     not, the dot carries a thin ring in the field's colour and the card gives
-    both values. In D2D, load HCPSclass as an image with MSLP
-    contours. Three things to know about what you see, on either display:
+    both values. Every low's card also gives the margin: how many metres the
+    low sits from the nearest class boundary. A margin under 5 m means the
+    colour could go either way; under 10 m, treat the class as provisional
+    and read the trend. For a tracked low the colour holds until the low has
+    crossed a boundary by that margin (5 m in B, 10 m in a thermal wind), so
+    the dot does not flip back and forth while a storm sits on a line; the
+    card shows the strict class as well whenever the two differ; a margin
+    under 5 m is marked in amber. In D2D,
+    load HCPSclass as an image with MSLP contours; D2D shows the strict
+    class, one frame at a time, so there the margin is your own read of how
+    far HB is from 10 m and HVTL from zero. Three things to know about what
+    you see, on either display:
   </p>
   <ul>
     <li><strong>A coloured blob appears only at a closed low.</strong> The
@@ -262,17 +273,23 @@
       asymmetric, enough to change its class. When a low is nearly
       stationary, trust the two thermal winds and your own thickness
       overlay over B.</li>
-    <li><strong>The map and D2D use different layers.</strong> The live map
-      uses Hart's own layers, every 50 hPa from 900 to 600 and 600 to 300 hPa,
-      the same as the FSU page, and its class agrees with FSU's about 70
-      percent of the time. D2D uses the standard levels every model carries
-      (925, 850, 700 and 500, 400, 300 hPa), which read a lower warm core
-      about 35 m higher than the map and agree with FSU's class about 55
-      percent of the time. The signs and the sequence of classes carry over;
-      the numbers are not interchangeable between the two displays.</li>
-    <li><strong>A class is a state, not an event.</strong> Two adjacent frames
-      can straddle a line by a metre. Look at the trend over several hours and
-      at the numbers, not the colour alone.</li>
+    <li><strong>Not every model gets Hart's layers.</strong> The live map,
+      and the GFS in D2D, use Hart's own layers, every 50 hPa from 900 to 600
+      and 600 to 300 hPa, the same as the FSU page; a tracked low on the map,
+      read from its own motion, agrees with FSU's class about 75 percent of
+      the time. On other models the same product names are estimates from
+      the standard levels (925, 850, 700 and 500 hPa below, 500, 400 and
+      300 hPa above), within a few tens of metres of the GFS method on a
+      shallow warm core and close on a deep one; the plain 925 to 700 hPa
+      band of the first install, with the steering-flow B, agreed with
+      FSU's class about 55 percent of the time. Compare crossings and
+      trends between models; compare magnitudes only within one model,
+      and only on the GFS against the FSU page.</li>
+    <li><strong>A class is a state, not an event.</strong> Half of all hours
+      on record sit within 10 m of a boundary, most of them the B = 10 m
+      line. Look at the margin and the trend over several hours, not the
+      colour alone; on the map a tracked low's colour already waits for the
+      crossing to be clear.</li>
     <li><strong>Terrain.</strong> Near the Rockies, Greenland or the Andes the
       lower term is blank or thin and the class may be missing. Nothing is
       wrong; there is no 900 hPa air there.</li>
@@ -287,9 +304,10 @@
   <h2>7. The five-second checklist</h2>
   <ol class="checklist">
     <li>Is there a blob? If not, the low is not closed by 5 hPa.</li>
-    <li>What colour, and is it changing frame to frame? Red or magenta: no
+    <li>What colour, and how big is the margin? Red or magenta: no
       front through the centre. Yellow or green: warm core with a front,
-      transition under way. Blue or indigo: cold core.</li>
+      transition under way. Blue or indigo: cold core. Under 5 m from a
+      line: either colour is possible.</li>
     <li>Where does HB change sign around the low? That is where the warm
       sector is, and the triple point.</li>
     <li>Is the low moving with its steering flow? If not, discount B.</li>

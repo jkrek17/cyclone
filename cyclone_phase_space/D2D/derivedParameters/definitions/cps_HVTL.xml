@@ -1,25 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <!--
   EXPERIMENTAL. Hart CPS lower thermal wind, actual method: at every grid
-  point, dZ = window max minus window min of geopotential height over a
-  square window of half-width 500 km (Hart's own analysis radius, but a
-  square instead of his circle - see cps_HartCPS.py's module docstring), then
-  -V_T^L is the least-squares slope of dZ against ln(pressure) across
-  925/850/700 hPa (cps_HartCPS.LOWER_BAND - the nearest universal
-  standard-level stand-in for Hart's 900-600 hPa band; see cps_HartCPS.py for
-  why). Units are meters (of dZ) per unit of ln(p), i.e. plain meters.
-  Positive = warm core, negative = cold core - same sign convention as
-  cps.hart.thermal_wind. This field needs NO unit rescaling: its physical
-  magnitude (order 1e2 m) already samples readably at CAVE's two-decimal
-  rounding.
+  point, dZ = window max minus window min of geopotential height over
+  the 500 km circle centered on the point (Hart's own analysis radius;
+  see cps_HartCPS.py's module docstring, "The circular window"), then
+  -V_T^L is the least-squares slope of dZ against ln(pressure) across a
+  band of levels. Units are meters (of dZ) per unit of ln(p), i.e. plain
+  meters. Positive = warm core, negative = cold core - same sign
+  convention as cps.hart.thermal_wind. This field needs NO unit
+  rescaling: its physical magnitude (order 1e2 m) already samples
+  readably at CAVE's two-decimal rounding.
 
-  Below-ground masking: each of the three height levels above is
-  blanked (NaN) before dZ wherever it is below the local ground surface
-  for its own pressure, using the surface pressure field (P, Surface)
-  and capHpa below - see cps_HartCPS.mask_below_ground and the module
-  docstring's "Below-ground masking" section. This keeps a level that
-  is fictitious over high terrain (extrapolated below ground) out of
-  the window max/min without needing a separate terrain field.
+  THREE METHODS, tried in order; AWIPS runs the first whose inputs the
+  model carries (see cps_HartCPS.py's module docstring, "Level bands and
+  the three methods", and D2D/README.md, "Which method runs on which
+  model"):
+    1. cps_HartCPS.executeBand7 on Hart's own 900-600 hPa band at 50 hPa
+       spacing (900, 850, 800, 750, 700, 650, 600 hPa). Runs on a model
+       whose inventory carries every one of the seven levels (the GFS).
+    2. cps_HartCPS.executeBandMean2: the mean of the 925/850/700 and
+       850/700/500 hPa slopes, the standard-level estimator closest to
+       Hart's band (rms 25 m and bias -16 m against it across five
+       synthetic profiles, where 925/850/700 alone gives rms 44 m and
+       bias +38 m). Runs on every other model that carries 925, 850,
+       700 and 500 hPa.
+    3. cps_HartCPS.executeBand3 on 925/850/700 hPa (cps_HartCPS.LOWER_BAND),
+       the band this package shipped with, kept unchanged as the
+       documented fallback: a model without 500 hPa height, or a site
+       that deletes methods 1 and 2 to reproduce earlier numbers. It
+       reads a shallow warm core about 60 m warmer than Hart's band.
+  The product name, units, sign, masking and colormap are the same for
+  all three; only the levels under the number differ. A site can check
+  which method a model gets from the model's own inventory: method 1
+  needs GH at 800, 750 and 650 MB (and the rest of the seven), method 2
+  needs GH at 500 MB as well as 925/850/700.
+
+  Below-ground masking: each height level is blanked (NaN) before dZ
+  wherever it is below the local ground surface for its own pressure,
+  using the surface pressure field (P, Surface) and capHpa - see
+  cps_HartCPS.mask_below_ground and the module docstring's
+  "Below-ground masking" section. This keeps a level that is fictitious
+  over high terrain (extrapolated below ground) out of the window
+  max/min without needing a separate terrain field.
 
   VERIFY against an existing definition in
   /awips2/edex/data/utility/common_static/base/derivedParameters/definitions/
@@ -28,29 +50,75 @@
       (some builds spell it "GeoH" or something else - check a base
       height-based definition and change the abbreviation here if needed),
     - fixed-level Field references use the "925MB"/"850MB"/"700MB"
-      spelling,
+      spelling, and the 50 hPa levels "800MB"/"750MB"/"650MB" exist in
+      the GFS inventory (if the GFS is thinned to the standard levels at
+      your site, method 1 is simply never selected and method 2 runs),
     - the surface pressure field's abbreviation is "P" at level="Surface"
       as used below (confirmed on this site; some builds spell the
-      surface plane "0.0SFC" instead of "Surface" - if the four Hart
-      fields disappear from the Product Browser after adding this Field,
-      its level spelling is the first thing to check, since the other
-      Field level spellings here are already confirmed on this site),
+      surface plane "0.0SFC" instead of "Surface" - if the Hart fields
+      disappear from the Product Browser after adding this Field, its
+      level spelling is the first thing to check),
     - the "dx"/"dy" pseudo-fields and <ConstantField> are accepted,
     - "Surface" is the right levels= value to make this show under a
       surface plane in the Volume Browser (alternatively use levels="MSL"),
     - unit="" (empty) is accepted - confirmed to load on a real AWIPS
       site for derived parameters using the same convention.
 -->
-<DerivedParameter abbreviation="HVTL" name="Hart CPS -VTL 925-700 (m)" unit="">
+<DerivedParameter abbreviation="HVTL" name="Hart CPS -VTL lower band (m)" unit="">
+    <Method name="cps_HartCPS.executeBand7" levels="Surface">
+        <!-- Method 1: Hart's own 900-600 hPa band, seven levels at 50 hPa spacing (GFS) -->
+        <Field abbreviation="GH" level="900MB"/>
+        <Field abbreviation="GH" level="850MB"/>
+        <Field abbreviation="GH" level="800MB"/>
+        <Field abbreviation="GH" level="750MB"/>
+        <Field abbreviation="GH" level="700MB"/>
+        <Field abbreviation="GH" level="650MB"/>
+        <Field abbreviation="GH" level="600MB"/>
+        <Field abbreviation="P" level="Surface"/>
+        <Field abbreviation="dx"/>
+        <Field abbreviation="dy"/>
+        <!-- radiusKm (km): Hart's own 500 km analysis-circle radius -->
+        <ConstantField value="500.0"/>
+        <!-- p1: pressure (hPa) matching z1 (900MB) above -->
+        <ConstantField value="900"/>
+        <!-- p2: pressure (hPa) matching z2 (850MB) above -->
+        <ConstantField value="850"/>
+        <!-- p3: pressure (hPa) matching z3 (800MB) above -->
+        <ConstantField value="800"/>
+        <!-- p4: pressure (hPa) matching z4 (750MB) above -->
+        <ConstantField value="750"/>
+        <!-- p5: pressure (hPa) matching z5 (700MB) above -->
+        <ConstantField value="700"/>
+        <!-- p6: pressure (hPa) matching z6 (650MB) above -->
+        <ConstantField value="650"/>
+        <!-- p7: pressure (hPa) matching z7 (600MB) above -->
+        <ConstantField value="600"/>
+        <!-- capHpa: below-ground cap, see cps_HartCPS.py -->
+        <ConstantField value="900.0"/>
+    </Method>
+    <Method name="cps_HartCPS.executeBandMean2" levels="Surface">
+        <!-- Method 2: the mean of the 925/850/700 and 850/700/500 hPa slopes (standard levels; the pressures are fixed inside executeBandMean2) -->
+        <Field abbreviation="GH" level="925MB"/>
+        <Field abbreviation="GH" level="850MB"/>
+        <Field abbreviation="GH" level="700MB"/>
+        <Field abbreviation="GH" level="500MB"/>
+        <Field abbreviation="P" level="Surface"/>
+        <Field abbreviation="dx"/>
+        <Field abbreviation="dy"/>
+        <!-- radiusKm (km): Hart's own 500 km analysis-circle radius -->
+        <ConstantField value="500.0"/>
+        <!-- capHpa: below-ground cap, see cps_HartCPS.py -->
+        <ConstantField value="900.0"/>
+    </Method>
     <Method name="cps_HartCPS.executeBand3" levels="Surface">
+        <!-- Method 3, fallback: the 925/850/700 hPa band this package shipped with (cps_HartCPS.LOWER_BAND) -->
         <Field abbreviation="GH" level="925MB"/>
         <Field abbreviation="GH" level="850MB"/>
         <Field abbreviation="GH" level="700MB"/>
         <Field abbreviation="P" level="Surface"/>
         <Field abbreviation="dx"/>
         <Field abbreviation="dy"/>
-        <!-- radiusKm: half-width (km) of the max-minus-min analysis
-             window - Hart's own 500 km analysis-circle radius -->
+        <!-- radiusKm (km): Hart's own 500 km analysis-circle radius -->
         <ConstantField value="500.0"/>
         <!-- p1: pressure (hPa) matching z1 (925MB) above -->
         <ConstantField value="925"/>

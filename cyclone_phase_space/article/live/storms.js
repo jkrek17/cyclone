@@ -25,15 +25,34 @@
    motion, the collection's storms and older exports. Where the two
    classes differ the page marks it quietly (classDiffers): a thin ring in
    the field's class color round the map dot and the list dot, a line on
-   the card. Uses the globals from app.js. */
+   the card.
+
+   The class held, and the margin. Half of the archive's fixes sit within
+   10 m of the B = 10 m wall and the raw class changes at 21% of 6 h
+   steps, so clst flickers. The exporter also gives every tracked point a
+   hysteresis class, clsh, that keeps the previous hour's class until B is
+   5 m past its wall (above 15 m to become asymmetric, below 5 m to become
+   symmetric) or a thermal wind term is 10 m past zero, and a margin: the
+   distance in m to the nearest wall that would change this hour's raw
+   class (|B - 10|, |VTL|, |VTU|; B does not enter class 6). Wherever the
+   page colours or names a tracked low's class it uses clsh (clsOf), with
+   clst as this hour's raw class where it differs (rawClsOf, heldDiffers),
+   and quotes the margin with the wall named (marginOf, marginText), a
+   cue where it is under NEAR_M. The field's-class ring (classDiffers)
+   compares the shown class with the field's as before. An export without
+   clsh or margin (before this) shows clst or cls and no margin. Uses the
+   globals from app.js. */
 'use strict';
 
 // Figure 1's axis limits (article/figures/diagram_style.py), in m.
 const FIG1 = { vtl: [-300, 300], vtu: [-300, 300], b: [-20, 80], onset: 10 };
 const SHORT = ['sym deep warm', 'sym shallow warm', 'asym deep warm', 'asym shallow warm', 'asym cold', 'sym cold', 'shallow cold'];
 const TAIL_STEPS = 4;            // map tail: the last 24 h, at 6 h steps
+const NEAR_M = 5;                // a margin under this gets the near-the-wall cue
+// The hysteresis walls (export_web HYST_*), when index.json does not say.
+const HYST_DEFAULT = { b_hi: 15, b_lo: 5, vt_m: 10 };
 
-const ST = { list: [], byKey: new Map(), built: false, hover: null, selected: null, trackB: false };
+const ST = { list: [], byKey: new Map(), built: false, hover: null, selected: null, trackB: false, hyst: false };
 
 function stormLabel(name) {
   const m = /^AUTO_\d{6}_(\d+)$/.exec(name);
@@ -73,7 +92,43 @@ const hasTerms = (e) => !blank(e.hvtl) && !blank(e.hvtu) && !blank(e.hb);
 // motion, where the export has it; else the field's steering-flow values.
 const trackB = (e) => !!e && !blank(e.hbt);
 const bOf = (e) => (trackB(e) ? e.hbt : e?.hb);
-const clsOf = (e) => (e && e.clst != null && !blank(e.clst) ? +e.clst : e?.cls);
+// This hour's raw class: from the storm's motion where the export has it, else the field's.
+const rawClsOf = (e) => (e && e.clst != null && !blank(e.clst) ? +e.clst : e?.cls);
+// The class shown: the hysteresis class where the export has it, else the raw one.
+const hasHyst = (e) => !!e && e.clsh != null && !blank(e.clsh);
+const clsOf = (e) => (hasHyst(e) ? +e.clsh : rawClsOf(e));
+// The held class is not this hour's raw class (both known).
+const heldDiffers = (e) => hasHyst(e) && rawClsOf(e) != null && !blank(rawClsOf(e)) && +e.clsh !== +rawClsOf(e);
+// The hysteresis walls of this export.
+const hyst = () => ({ ...HYST_DEFAULT, ...(S.index?.hysteresis || {}) });
+// Why the held class stays, in a title.
+const heldTitle = (e) => `This hour's values give ${SHORT[rawClsOf(e)] ?? cls(rawClsOf(e)).name} (${rawClsOf(e)}); the class shown is held until ` +
+  `B is past ${fmt(hyst().b_hi)} m or under ${fmt(hyst().b_lo)} m, or a thermal wind term is ${fmt(hyst().vt_m)} m beyond zero, so it does not flicker`;
+
+// The margin of a low or point: {m, wall, near}, the distance in m to the
+// nearest wall that would change this hour's raw class, and which wall it
+// is (named from the same values the exporter used); null without one.
+const WALL = { b: 'B wall', vtl: 'lower-term wall', vtu: 'upper-term wall' };
+function marginOf(e) {
+  if (!e || blank(e.margin)) return null;
+  const m = +e.margin;
+  const d = { vtl: Math.abs(+e.hvtl), vtu: Math.abs(+e.hvtu) };
+  const b = bOf(e);
+  if (rawClsOf(e) !== 6 && !blank(b)) d.b = Math.abs(+b - FIG1.onset);
+  let wall = null;
+  let bd = Infinity;
+  for (const [k, v] of Object.entries(d)) if (Number.isFinite(v) && v < bd) { bd = v; wall = k; }
+  return { m, wall, near: m < NEAR_M };
+}
+// "3 m from the B wall"
+const marginText = (mg) => `${fmt(mg.m, mg.m < 10 ? 1 : 0, 'm')} from the ${WALL[mg.wall] || 'nearest wall'}`;
+const MARGIN_TITLE = 'How far this hour\'s values are from the nearest wall that would change the class; under 5 m the class is fragile';
+// The margin as a chip, with the near cue; empty without a margin.
+function marginHTML(e, tag = 'span', extra = '') {
+  const mg = marginOf(e);
+  if (!mg) return '';
+  return `<${tag} class="margin${mg.near ? ' near' : ''}${extra ? ` ${extra}` : ''}" title="${MARGIN_TITLE}">${esc(marginText(mg))}</${tag}>`;
+}
 // The two classes disagree at this point (both known).
 const classDiffers = (e) => trackB(e) && e.clst != null && e.cls != null && !blank(e.clst) && !blank(e.cls) && +e.clst !== +e.cls;
 
@@ -99,6 +154,7 @@ function initStorms() {
     const at = new Array(n).fill(null);
     const seq = Array.isArray(s.cls_seq) && s.cls_seq.length === pts.length ? s.cls_seq : null;
     const seqt = Array.isArray(s.clst_seq) && s.clst_seq.length === pts.length ? s.clst_seq : null;
+    const seqh = Array.isArray(s.clsh_seq) && s.clsh_seq.length === pts.length ? s.clsh_seq : null;
     pts.forEach((pt, j) => {
       const k = frameIndex(pt);
       if (k < 0) return;
@@ -106,6 +162,7 @@ function initStorms() {
         lat: +pt.lat, lon: +pt.lon, mslp: pt.mslp, cls: seq ? seq[j] : pt.cls, id: pt.id,
         hvtl: pt.hvtl, hvtu: pt.hvtu, hb: pt.hb, idx: pt.idx, c: null,
         hbt: pt.hbt ?? null, clst: seqt ? seqt[j] : pt.clst ?? null, spd: pt.spd ?? null, hdg: pt.hdg ?? null,
+        clsh: seqh ? seqh[j] : pt.clsh ?? null, margin: pt.margin ?? null,
       };
     });
     const live = [];
@@ -136,6 +193,8 @@ function initStorms() {
   ST.built = !ST.list.some((s) => s.at.some((e) => e && !hasTerms(e)));
   // Does this export carry Hart's B from the track motion at all?
   ST.trackB = !!S.index.track_b || ST.list.some((s) => s.at.some(trackB));
+  // ... and the hysteresis class and margin?
+  ST.hyst = !!S.index.hysteresis || ST.list.some((s) => s.at.some(hasHyst));
   $('runInfo').textContent = `${S.index.model || 'GFS'} · ${ST.list.length} tracked low${ST.list.length === 1 ? '' : 's'}`;
 }
 
@@ -190,10 +249,10 @@ async function loadAllLows() {
       s.at.forEach((e, k) => {
         if (!e || hasTerms(e)) return;
         e.c = s.track && e.id != null ? centers[k].find((c) => c.id === e.id) : nearest(centers[k], e.lat, e.lon, MATCH_KM);
-        for (const f of ['hvtl', 'hvtu', 'hb', 'idx']) if (blank(e[f]) && e.c) e[f] = e.c[f];
-        // the track's own B, only from a center of this same track
+        for (const f of ['hvtl', 'hvtu', 'hb', 'idx', 'margin']) if (blank(e[f]) && e.c) e[f] = e.c[f];
+        // the track's own B and held class, only from a center of this same track
         if (s.track && e.c && e.c.track != null && String(e.c.track) === s.id) {
-          for (const f of ['hbt', 'clst', 'spd']) if (e[f] == null && e.c[f] != null) e[f] = e.c[f];
+          for (const f of ['hbt', 'clst', 'clsh', 'spd']) if (e[f] == null && e.c[f] != null) e[f] = e.c[f];
         }
       });
     }
@@ -223,8 +282,11 @@ function renderDeepest() {
     const li = document.createElement('li');
     const on = S.sel?.c === c;
     const alt = classDiffers(c);
+    // the class, its margin to the nearest wall, and this hour's raw class where the held one differs
+    const held = heldDiffers(c) ? `<span class="d-raw" title="${esc(heldTitle(c))}">this hour ${esc(SHORT[rawClsOf(c)] ?? cls(rawClsOf(c)).name)}</span>` : '';
+    const mg = marginHTML(c);
     li.innerHTML = `<button type="button" class="deep-row"${on ? ' aria-current="true"' : ''}><i${alt ? ` class="alt" style="--c:${cls(clsOf(c)).hex};--c2:${cls(c.cls).hex}" title="${esc(diffTitle(c))}"` : ` style="--c:${cls(clsOf(c)).hex}"`}></i>
-      <span class="d-mslp">${hpa(c.mslp)}</span><span class="d-name"></span><span class="d-where">${pos(c.lat, c.lon)}</span></button>`;
+      <span class="d-mslp">${hpa(c.mslp)}</span><span class="d-name"></span><span class="d-where">${pos(c.lat, c.lon)}</span>${mg || held ? `<span class="d-margin">${esc(SHORT[clsOf(c)] ?? '')}${mg ? `, ${mg}` : ''}${held ? ` · ${held}` : ''}</span>` : ''}</button>`;
     li.querySelector('.d-name').textContent = s ? s.label : SHORT[clsOf(c)] ?? 'untracked';
     li.querySelector('button').addEventListener('click', () => {
       if (S.follow) unfollow();

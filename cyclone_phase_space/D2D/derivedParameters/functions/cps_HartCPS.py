@@ -7,7 +7,8 @@ wind parameters, computed pointwise on the grid.
 This is the operational cyclone phase space module. It computes Hart's
 own quantity -- the actual -V_T^L / -V_T^U thermal wind parameters from
 `cps/hart.py`'s `thermal_wind` -- at every point of the grid, from
-geopotential height, plus parameter B (from 925-700 hPa thickness and
+geopotential height, plus parameter B (from the 900-600 hPa thickness on
+the GFS, the rescaled 925-700 hPa thickness on every other model, and
 the steering wind) and the joint class (which also needs mean sea level
 pressure, for its closed-low mask).
 
@@ -43,32 +44,68 @@ unit of `ln(pressure in hPa)` -- i.e. plain meters, since `ln(p)` is
 dimensionless. A mature hurricane typically samples in the +100 to
 +300 m range; a cold-core low typically samples -100 to -300 m.
 
-Standard level bands
----------------------
+Level bands and the three methods
+----------------------------------
 
 Hart's own bands are 900-600 hPa (lower) and 600-300 hPa (upper), each
 sampled every 50 hPa (900, 850, 800, 750, 700, 650, 600 / 600, 550,
-500, 450, 400, 350, 300). Most AWIPS D2D grids do not carry 50 hPa
-resolution in the mid-troposphere -- GFS's own native grid does, but
-many downstream/thinned grids only carry the "standard" set (1000,
-925, 850, 700, 500, 400, 300, 250, 200, ...). Rather than depend on
-levels that are only reliably present on one model, this module's
-`executeHartClass`/`executeIndexStd`/`HVTL`/`HVTU` use exactly:
+500, 450, 400, 350, 300), and his B is taken on the 900-600 hPa
+thickness. Not every AWIPS D2D grid carries that 50 hPa resolution in
+the mid-troposphere: the GFS does, but most other models in a typical
+inventory only carry the standard set (1000, 925, 850, 700, 500, 400,
+300, 250, 200, ...). Every XML definition in this package therefore
+lists up to three `<Method>` blocks, and AWIPS runs the first one whose
+inputs the model carries:
+
+1. **Hart's own bands** (`executeBand7`, `executeBLayer`,
+   `executeHartClass7`, `executeIndex7`): the seven-level 900-600 and
+   600-300 hPa slopes (`HART_LOWER_BAND`, `HART_UPPER_BAND`) and B on
+   the 900-600 hPa thickness with `layerScale = 1.0`. Runs where the
+   model carries every one of the thirteen 50 hPa levels from 900 to
+   300 hPa (the GFS in this inventory). Against the Florida State
+   diagrams these layers agree far better than the standard-level
+   stand-ins (class agreement 75% against 55%).
+2. **The two-slope mean** (`executeBandMean2`, `executeHartClassMean2`,
+   `executeIndexMean2`, `thermal_wind_mean2_grid`): the lower term is
+   the MEAN of the 925/850/700 and 850/700/500 hPa least-squares slopes
+   (`MEAN2_LOWER_BANDS`), the upper term stays 500/400/300 hPa, and B
+   is taken on the 925-700 hPa thickness rescaled by
+   `HART_B_LAYER_SCALE`. On five synthetic profiles (deep warm core,
+   warm core linear in ln p, warm seclusion, transitioning storm, deep
+   cold core; `article/figures/band_comparison.py`) the two-slope mean
+   tracks Hart's 900-600 hPa band with an rms of 25 m and a bias of
+   -16 m, against 44 m rms and +38 m bias for 925/850/700 alone; it is
+   exact for a profile linear in ln p and for the deep cold profile.
+   The upper band gets no two-slope counterpart: 500/400/300 hPa
+   already sits inside Hart's 600-300 hPa layer and is the closest
+   standard-level estimator of it (rms 20 m, bias -5 m on the same
+   five profiles), and every alternative that pulls 700 hPa into the
+   upper band is worse (rms 25 to 65 m). Runs on every model that
+   carries 925, 850, 700, 500, 400 and 300 hPa.
+3. **The 925/850/700 fallback** (`executeBand3` on `LOWER_BAND`,
+   `executeB`, `executeHartClass`, `executeIndexStd`): the bands this
+   package shipped with, kept unchanged as the documented fallback for
+   a model without 500 hPa height and for a site that wants to
+   reproduce earlier numbers (delete or reorder the `<Method>` blocks).
+   They use exactly
 
     LOWER_BAND = (925, 850, 700)   hPa
     UPPER_BAND = (500, 400, 300)   hPa
 
-both of which are on the universal standard-level list. This leaves
-the 700-500 hPa layer **unassigned** -- neither band claims it -- on
-purpose: forcing it into either band would mean averaging a layer that
-straddles the actual 600 hPa boundary Hart uses into a band it does
-not belong to, which would bias that band's slope toward whichever
-side 700-500 got glued onto. Leaving a small gap between the two bands
-is a smaller, more honest error than that. A future GFS-only,
-Hart-exact definition, using the true 7-level bands at 50 hPa spacing,
-is supported by `executeBand7` below and needs only a new XML
-definition (no Python change) once a site confirms its grid actually
-carries every 50 hPa level from 900 to 300.
+   both on the universal standard-level list, leaving the 700-500 hPa
+   layer unassigned on purpose: forcing it into either band would mean
+   averaging a layer that straddles the 600 hPa boundary Hart uses into
+   a band it does not belong to. The lower band lies entirely below
+   Hart's 900-600 hPa layer and reads a shallow warm core about 60 m
+   (about 17 m on the GFS cases compared with Florida State) too warm.
+
+The entry points of methods 1 and 2 take the same constants as their
+method-3 counterparts (`radiusKm`, `capHpa`, and for the class and
+index `bThresholdM`, `layerScale`, `depthHpa`, `blobKm`, `pmslKind`),
+so the XML `<ConstantField>` blocks carry over unchanged except for
+`layerScale`, which is 1.0 for the 900-600 hPa thickness. Nothing in
+the display changes between methods: the same product name, units,
+sign convention, masking and colormap apply, only the levels under it.
 
 The circular window
 -------------------
@@ -250,9 +287,14 @@ given an optional `psfc_hpa` (paired with `cap_hpa`); `psfc_hpa=None`
 (the default) skips this entirely, so callers with no terrain to
 mask -- including this module's own reference tests -- are
 unaffected. `executeHartClass`/`executeIndexStd`/`executeBand3`/
-`executeBand4`/`executeBand7` all take a `psfc` argument and a
-`capHpa` constant (default `BELOW_GROUND_CAP_HPA`) and apply the mask
-to every height argument (`executeB` does the same for its two). The
+`executeBand4`/`executeBand7`, and the seven-level and two-slope-mean
+entry points `executeHartClass7`/`executeIndex7`/`executeBandMean2`/
+`executeHartClassMean2`/`executeIndexMean2`, all take a `psfc`
+argument and a `capHpa` constant (default `BELOW_GROUND_CAP_HPA`) and
+apply the mask to every height argument (`executeB` does the same for
+its two, `executeBLayer` for its two at the layer's own `pTop`/`pBot`;
+with the default 900 hPa cap the 900 hPa level is masked exactly where
+925 hPa is). The
 MSLP argument of `executeHartClass`/`executeIndexStd` is not masked (see
 "Closed-low mask" above). Because the disk extrema
 (`window_extreme_2d`), disk sums (`window_sum_2d`) and half-disk means
@@ -372,7 +414,12 @@ with the log-pressure depth of the layer, `B` is multiplied by
 `HART_B_LAYER_SCALE = ln(900/600)/ln(925/700)` (~1.4548) by default,
 so the result reads as a "900-600 equivalent" against Hart's own 10 m
 threshold; a caller wanting the raw, unscaled 925-700 hPa value passes
-`layerScale=1.0`.
+`layerScale=1.0`. On a model that carries 900 and 600 hPa height (the
+GFS) the first `<Method>` of cps_HB.xml and cps_HCPSclass.xml instead
+takes B on Hart's own 900-600 hPa thickness (`executeBLayer`,
+`executeHartClass7`) with `layerScale = 1.0` and the below-ground mask
+at 900 and 600 hPa, so no rescaling is involved there at all -- see
+"Level bands and the three methods" above.
 
 This entire scheme -- the semicircle means, the steering-flow motion
 proxy, and the layer scaling -- is orientation- and sign-free by
@@ -483,6 +530,16 @@ __all__ = [
     "executeIndexStd",
     "executeB",
     "executeHartClass",
+    "HART_LOWER_BAND",
+    "HART_UPPER_BAND",
+    "MEAN2_LOWER_BANDS",
+    "thermal_wind_mean2_grid",
+    "executeBandMean2",
+    "executeBLayer",
+    "executeHartClass7",
+    "executeHartClassMean2",
+    "executeIndex7",
+    "executeIndexMean2",
 ]
 
 # ---------------------------------------------------------------------------
@@ -557,12 +614,34 @@ DEFAULT_BLOB_RADIUS_KM = 200.0
 DEFAULT_CENTER_TOL_HPA = 0.6
 
 #: Pressure levels (hPa) for the lower-tropospheric standard-level band --
-#: see the module docstring's "Standard level bands" section for why these
+#: see the module docstring's "Level bands and the three methods" section for why these
 #: three (not Hart's 900-600 hPa/50 hPa-spaced set) were chosen.
 LOWER_BAND = (925.0, 850.0, 700.0)
 
 #: Pressure levels (hPa) for the upper-tropospheric standard-level band.
 UPPER_BAND = (500.0, 400.0, 300.0)
+
+#: Hart's (2003) own lower band, 900 to 600 hPa at 50 hPa spacing (seven
+#: levels) -- the first `<Method>` of cps_HVTL.xml (via `executeBand7`),
+#: cps_HCPSclass.xml (`executeHartClass7`) and cps_HCPSidx.xml
+#: (`executeIndex7`), which AWIPS runs on a model whose inventory carries
+#: every one of these levels (the GFS). See the module docstring's "Level
+#: bands and the three methods" section.
+HART_LOWER_BAND = (900.0, 850.0, 800.0, 750.0, 700.0, 650.0, 600.0)
+
+#: Hart's own upper band, 600 to 300 hPa at 50 hPa spacing (seven levels).
+HART_UPPER_BAND = (600.0, 550.0, 500.0, 450.0, 400.0, 350.0, 300.0)
+
+#: The two standard-level bands whose least-squares slopes
+#: `thermal_wind_mean2_grid` (and so `executeBandMean2`,
+#: `executeHartClassMean2`, `executeIndexMean2`) averages for the lower
+#: thermal wind on a model without the 50 hPa levels: 925/850/700 hPa and
+#: 850/700/500 hPa. Their mean tracks Hart's 900-600 hPa band more closely
+#: than either alone (rms 25 m against 44 m for `LOWER_BAND` across five
+#: synthetic profiles). The upper band has no such pair: `UPPER_BAND`
+#: (500/400/300 hPa) is already the closest standard-level estimator of
+#: Hart's 600-300 hPa band.
+MEAN2_LOWER_BANDS = ((925.0, 850.0, 700.0), (850.0, 700.0, 500.0))
 
 #: hPa; cap on the below-ground threshold `mask_below_ground` applies (a
 #: point at level `level_hpa` is below ground when its own surface
@@ -1838,6 +1917,50 @@ def thermal_wind_grid(
     return band_slope(dz_list, pressures).astype(np.float64)
 
 
+def thermal_wind_mean2_grid(
+    z925,
+    z850,
+    z700,
+    z500,
+    dx,
+    dy,
+    radius_km: float = RADIUS_KM,
+    psfc_hpa: np.ndarray = None,
+    cap_hpa: float = BELOW_GROUND_CAP_HPA,
+    shape: str = None,
+) -> np.ndarray:
+    """The two-slope-mean lower thermal wind: the mean of `band_slope` over
+    925/850/700 hPa and over 850/700/500 hPa (`MEAN2_LOWER_BANDS`), each
+    from the same `delta_z` of the four heights -- the standard-level
+    estimator of Hart's 900-600 hPa lower band used on a model without
+    the 50 hPa levels (see the module docstring's "Level bands and the
+    three methods" section). `z925`...`z500` are 2D geopotential height
+    arrays (meters) at those four pressures; `dx`, `dy` the grid spacing
+    pseudo-fields (meters). Returns a float64 grid, same shape as the
+    heights, in meters (of `dZ` per unit `ln p`), positive = warm core.
+
+    If `psfc_hpa` (surface pressure, hPa -- see `surface_pressure_hpa`)
+    is given, each height is first run through `mask_below_ground`
+    against its own pressure and `cap_hpa`, exactly as `thermal_wind_grid`
+    does; `psfc_hpa=None` skips the mask. `delta_z` is computed once per
+    level (850 and 700 hPa are shared by the two bands), so this costs
+    four window passes, not six. The result is NaN wherever either
+    band's slope is NaN (a level missing or below ground, or a window
+    with too few valid cells): a mean of one slope would silently shift
+    toward whichever band survived.
+
+    `shape` is passed to `delta_z` (`None` means `WINDOW_SHAPE`).
+    """
+    pressures = (925.0, 850.0, 700.0, 500.0)
+    z_levels = [z925, z850, z700, z500]
+    if psfc_hpa is not None:
+        z_levels = [mask_below_ground(z, psfc_hpa, p, cap_hpa) for z, p in zip(z_levels, pressures)]
+    dz_list = [delta_z(z, dx, dy, radius_km, shape=shape) for z in z_levels]
+    slope_a = band_slope(dz_list[0:3], pressures[0:3])
+    slope_b = band_slope(dz_list[1:4], pressures[1:4])
+    return (0.5 * (slope_a + slope_b)).astype(np.float64)
+
+
 # ---------------------------------------------------------------------------
 # Closed-low mask
 # ---------------------------------------------------------------------------
@@ -2724,13 +2847,16 @@ def executeBand4(z1, z2, z3, z4, psfc, dx, dy, radiusKm, p1, p2, p3, p4, capHpa=
 def executeBand7(z1, z2, z3, z4, z5, z6, z7, psfc, dx, dy, radiusKm, p1, p2, p3, p4, p5, p6, p7, capHpa=BELOW_GROUND_CAP_HPA):
     """AWIPS derived-parameter entry point: thermal wind over 7 levels.
 
-    For a future GFS-only definition using Hart's exact 50 hPa-spaced
-    bands (900, 850, 800, 750, 700, 650, 600 hPa or 600, 550, 500, 450,
-    400, 350, 300 hPa) rather than the 3-level `LOWER_BAND`/`UPPER_BAND`
-    standard-level approximation `executeBand3` is meant for -- see the
-    module docstring's "Standard level bands" section. Same conventions
-    as `executeBand3` (including `psfc`/`capHpa` below-ground masking),
-    just with 7 height/pressure pairs instead of 3.
+    The first `<Method>` of cps_HVTL.xml and cps_HVTU.xml: Hart's exact
+    50 hPa-spaced bands (`HART_LOWER_BAND`, 900, 850, 800, 750, 700, 650,
+    600 hPa, or `HART_UPPER_BAND`, 600, 550, 500, 450, 400, 350, 300
+    hPa), which AWIPS runs on a model whose inventory carries all seven
+    levels (the GFS) and skips otherwise in favor of the standard-level
+    methods -- see the module docstring's "Level bands and the three
+    methods" section. Same conventions as `executeBand3` (including
+    `psfc`/`capHpa` below-ground masking, `_coerce_scalar` on every
+    constant, float32 meters out, positive = warm core), just with 7
+    height/pressure pairs instead of 3.
     """
     radius_km = _coerce_scalar(radiusKm)
     cap_hpa = _coerce_scalar(capHpa)
@@ -2938,6 +3064,359 @@ def executeB(
 
 
 # ---------------------------------------------------------------------------
+# AWIPS entry points: Hart's seven-level bands (GFS) and the two-slope mean
+# ---------------------------------------------------------------------------
+
+
+def _parameter_b_layer(
+    z_top, z_bot, p_top, p_bot, u_levels, v_levels, psfc_hpa, coriolis, dx, dy, radius_km, layer_scale, cap_hpa,
+):
+    """Parameter B on the thickness `z_top - z_bot` of the layer between
+    pressures `p_bot` (lower, e.g. 900 hPa) and `p_top` (upper, e.g.
+    600 hPa), with each height blanked below ground for its own pressure
+    and `cap_hpa` (`mask_below_ground`), the steering flow from
+    `steering` then `steering_window_mean` over `radius_km`, and
+    `parameter_b_grid`'s semicircle difference scaled by `layer_scale`.
+    The shared body of `executeBLayer`, `executeHartClass7` and
+    `executeHartClassMean2` (`executeB`/`executeHartClass` keep their own
+    unchanged copy of the same steps).
+    """
+    z_top_masked = mask_below_ground(z_top, psfc_hpa, p_top, cap_hpa)
+    z_bot_masked = mask_below_ground(z_bot, psfc_hpa, p_bot, cap_hpa)
+    thickness = np.asarray(z_top_masked, dtype=float) - np.asarray(z_bot_masked, dtype=float)
+    u_s, v_s = steering(u_levels, v_levels)
+    u_s, v_s = steering_window_mean(u_s, v_s, dx, dy, radius_km)
+    return parameter_b_grid(thickness, u_s, v_s, dx, dy, coriolis, radius_km, layer_scale)
+
+
+def _index_from_terms(vtl, vtu, mask, scale_m):
+    """`2*tanh(vtl/scale_m) + tanh(vtu/scale_m)` blanked outside `mask`
+    or wherever either term is NaN -- `executeIndexStd`'s combination,
+    shared by `executeIndex7` and `executeIndexMean2`. Returns float32.
+    """
+    index = 2.0 * np.tanh(vtl / scale_m) + np.tanh(vtu / scale_m)
+    masked = ~mask | ~np.isfinite(vtl) | ~np.isfinite(vtu)
+    return np.where(masked, np.nan, index).astype(np.float32)
+
+
+def executeBandMean2(z925, z850, z700, z500, psfc, dx, dy, radiusKm, capHpa=BELOW_GROUND_CAP_HPA):
+    """AWIPS derived-parameter entry point: the two-slope-mean lower
+    thermal wind, the second `<Method>` of cps_HVTL.xml, for a model
+    that carries the standard levels but not Hart's 50 hPa set.
+
+    `z925`/`z850`/`z700`/`z500` are geopotential height (meters) at
+    exactly those pressures (the pressures are fixed, not passed, since
+    the two bands are a specific pair: `MEAN2_LOWER_BANDS`). The result
+    is the mean of the 925/850/700 hPa and 850/700/500 hPa least-squares
+    slopes of the pointwise `dZ` against `ln p` (`thermal_wind_mean2_grid`),
+    the standard-level estimator closest to Hart's 900-600 hPa band
+    (see the module docstring's "Level bands and the three methods"
+    section). `psfc` is AWIPS surface pressure (Pa or hPa --
+    `surface_pressure_hpa` auto-detects which); each height is blanked
+    (NaN) wherever it is below ground for its own pressure and `capHpa`
+    (`mask_below_ground`) before `dZ` is taken, so the result is NaN
+    wherever either band's slope is. `dx`, `dy` are the grid spacing
+    pseudo-fields (meters). `radiusKm`/`capHpa` may arrive as a float, a
+    0-d numpy array, or a 1-element numpy array (an AWIPS
+    `<ConstantField>` value). Returns a float32 array, units meters (see
+    the module docstring); positive = warm core.
+    """
+    radius_km = _coerce_scalar(radiusKm)
+    cap_hpa = _coerce_scalar(capHpa)
+    psfc_hpa = surface_pressure_hpa(psfc)
+    slope = thermal_wind_mean2_grid(z925, z850, z700, z500, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    return slope.astype(np.float32)
+
+
+def executeBLayer(
+    zTop, zBot,
+    u850, v850, u700, v700, u500, v500, u300, v300,
+    psfc, coriolis, dx, dy,
+    radiusKm=RADIUS_KM,
+    pTop=600.0,
+    pBot=900.0,
+    layerScale=1.0,
+    capHpa=BELOW_GROUND_CAP_HPA,
+):
+    """AWIPS derived-parameter entry point for HB (cps_HB.xml, first
+    `<Method>`): Hart's parameter B on a thickness layer whose two
+    levels are parameters -- as shipped, Hart's own 900-600 hPa layer
+    with no rescaling, for a model that carries 900 and 600 hPa height
+    (the GFS). The method is otherwise `executeB`'s exactly: the
+    right-minus-left semicircle difference of thickness across the
+    window-averaged steering flow (`parameter_b_grid`; see the module
+    docstring's "Parameter B and the joint class" section).
+
+    `zTop`/`zBot` are geopotential height (meters) at the layer's upper
+    and lower pressure, `pTop`/`pBot` (hPa; 600 and 900 as shipped,
+    matched to `zTop`/`zBot` by position); the thickness is `zTop -
+    zBot`. Each height is blanked (NaN) below ground for its own
+    pressure and `capHpa` before the difference is taken
+    (`mask_below_ground`; with the default 900 hPa cap the 900 hPa level
+    is masked wherever the surface pressure is under 900 hPa, the same
+    places 925 hPa is masked in `executeB`), so `B` comes back NaN
+    wherever either height was masked. `u850`/`v850` ... `u300`/`v300`
+    are the four steering wind level pairs, `psfc` AWIPS surface
+    pressure (Pa or hPa), `coriolis` the coriolis pseudo-field whose sign
+    is the hemisphere factor, `dx`/`dy` the grid spacing pseudo-fields
+    (meters) -- all exactly as in `executeB`. `layerScale` multiplies the
+    semicircle difference: 1.0 for the 900-600 hPa layer, which reads
+    directly against Hart's 10 m threshold; for a different layer pass
+    `ln(900/600)/ln(pBot/pTop)` to rescale to a 900-600 hPa equivalent
+    (`HART_B_LAYER_SCALE` is that factor for 925-700). `radiusKm`,
+    `pTop`, `pBot`, `layerScale`, `capHpa` may each arrive as a float, a
+    0-d numpy array, or a 1-element numpy array (AWIPS `<ConstantField>`
+    values) and are coerced with `_coerce_scalar`.
+
+    Returns a float32 array, units meters; positive = warm/thick air on
+    the right of motion in the Northern Hemisphere (left in the
+    Southern); NaN below `MIN_STEERING_MS` or below ground.
+    """
+    radius_km = _coerce_scalar(radiusKm)
+    p_top = _coerce_scalar(pTop)
+    p_bot = _coerce_scalar(pBot)
+    layer_scale = _coerce_scalar(layerScale)
+    cap_hpa = _coerce_scalar(capHpa)
+    psfc_hpa = surface_pressure_hpa(psfc)
+    b = _parameter_b_layer(
+        zTop, zBot, p_top, p_bot, [u850, u700, u500, u300], [v850, v700, v500, v300],
+        psfc_hpa, coriolis, dx, dy, radius_km, layer_scale, cap_hpa,
+    )
+    return b.astype(np.float32)
+
+
+def executeHartClass7(
+    pmsl, z900, z850, z800, z750, z700, z650, z600, z550, z500, z450, z400, z350, z300,
+    u850, v850, u700, v700, u500, v500, u300, v300,
+    psfc, coriolis, dx, dy,
+    radiusKm=RADIUS_KM,
+    bThresholdM=B_THRESHOLD_M,
+    layerScale=1.0,
+    depthHpa=DEFAULT_DEPTH_HPA,
+    blobKm=DEFAULT_BLOB_RADIUS_KM,
+    capHpa=BELOW_GROUND_CAP_HPA,
+    pmslKind=PMSL_KIND_PRESSURE,
+):
+    """AWIPS derived-parameter entry point for HCPSclass (cps_HCPSclass.xml,
+    the seven-level `<Method>` blocks): the joint Hart CPS class on
+    Hart's own levels, for a model that carries every 50 hPa level from
+    900 to 300 hPa (the GFS). Same rule, same closed-low mask and same
+    7-code table as `executeHartClass` (see `hart_class`); only the
+    layers under the three parameters differ.
+
+    Computes the lower thermal wind over `HART_LOWER_BAND` (900, 850,
+    800, 750, 700, 650, 600 hPa) and the upper over `HART_UPPER_BAND`
+    (600, 550, 500, 450, 400, 350, 300 hPa), both via
+    `thermal_wind_grid`; parameter B on the 900-600 hPa thickness
+    (`z600 - z900`, the same two arrays the bands use, so the 900 and
+    600 hPa heights are passed once) across the window-averaged
+    steering flow (`steering`, `steering_window_mean`,
+    `parameter_b_grid`, as `executeB`/`executeBLayer`), with
+    `layerScale` defaulting to 1.0 because this IS Hart's layer; and
+    `closed_low_mask` on `pmsl`; then combines them with `hart_class`.
+
+    `pmsl` is mean sea level pressure (Pa or hPa, normalized by
+    `mslp_hpa`), or 1000 hPa height when `pmslKind` is 1 (see
+    `pmsl_input_hpa`); `z900`...`z300` are geopotential height (meters)
+    at the thirteen levels, 50 hPa apart, in that order (600 hPa once:
+    it closes the lower band and opens the upper); `u850`/`v850` ...
+    `u300`/`v300` the four steering wind level pairs; `psfc` AWIPS
+    surface pressure (Pa or hPa); `coriolis` the coriolis pseudo-field
+    (its sign is B's hemisphere factor); `dx`, `dy` the grid spacing
+    pseudo-fields (meters).
+
+    Every one of the thirteen heights is run through `mask_below_ground`
+    against its own pressure and `capHpa` (with the default 900 hPa cap,
+    900 hPa is masked where the surface pressure is under 900 hPa, 850
+    hPa likewise, and the levels from 800 hPa up only where the surface
+    itself is at or below their own pressure); `pmsl` is not masked
+    (MSLP is defined everywhere; the class is blanked over terrain
+    because the lower thermal wind is). `radiusKm`, `bThresholdM`,
+    `layerScale`, `depthHpa`, `blobKm`, `capHpa`, `pmslKind` may each
+    arrive as a float, a 0-d numpy array, or a 1-element numpy array
+    (AWIPS `<ConstantField>` values) and are coerced with
+    `_coerce_scalar`; `closed_low_mask`'s `min_radius_km`/
+    `center_tol_hpa` stay at their module defaults as in
+    `executeHartClass`.
+
+    Returns a float32 array: NaN outside the closed-low mask, below
+    ground, or wherever B is NaN (steering speed below
+    `MIN_STEERING_MS`); otherwise one of 0.0 through 6.0 (dimensionless)
+    per `hart_class`'s table.
+    """
+    radius_km = _coerce_scalar(radiusKm)
+    b_threshold_m = _coerce_scalar(bThresholdM)
+    layer_scale = _coerce_scalar(layerScale)
+    depth_hpa = _coerce_scalar(depthHpa)
+    blob_radius_km = _coerce_scalar(blobKm)
+    cap_hpa = _coerce_scalar(capHpa)
+
+    psfc_hpa = surface_pressure_hpa(psfc)
+
+    z_lower = [z900, z850, z800, z750, z700, z650, z600]
+    z_upper = [z600, z550, z500, z450, z400, z350, z300]
+    vtl = thermal_wind_grid(z_lower, HART_LOWER_BAND, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    vtu = thermal_wind_grid(z_upper, HART_UPPER_BAND, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+
+    b = _parameter_b_layer(
+        z600, z900, 600.0, 900.0, [u850, u700, u500, u300], [v850, v700, v500, v300],
+        psfc_hpa, coriolis, dx, dy, radius_km, layer_scale, cap_hpa,
+    )
+
+    mask = closed_low_mask(pmsl_input_hpa(pmsl, pmslKind), dx, dy, MIN_RADIUS_KM, radius_km, depth_hpa, blob_radius_km)
+
+    return hart_class(b, vtl, vtu, mask, b_threshold_m)
+
+
+def executeHartClassMean2(
+    pmsl, z925, z850, z700, z500, z400, z300,
+    u850, v850, u700, v700, u500, v500, u300, v300,
+    psfc, coriolis, dx, dy,
+    radiusKm=RADIUS_KM,
+    bThresholdM=B_THRESHOLD_M,
+    layerScale=HART_B_LAYER_SCALE,
+    depthHpa=DEFAULT_DEPTH_HPA,
+    blobKm=DEFAULT_BLOB_RADIUS_KM,
+    capHpa=BELOW_GROUND_CAP_HPA,
+    pmslKind=PMSL_KIND_PRESSURE,
+):
+    """AWIPS derived-parameter entry point for HCPSclass (cps_HCPSclass.xml,
+    the two-slope-mean `<Method>` blocks): the joint Hart CPS class on
+    the standard levels, for a model without Hart's 50 hPa set. Same
+    arguments, in the same order, as `executeHartClass` (so the XML
+    blocks differ only in the method name), same rule, same closed-low
+    mask and same 7-code table (`hart_class`); the one difference is the
+    lower thermal wind, which is the two-slope mean
+    (`thermal_wind_mean2_grid`: the mean of the 925/850/700 and
+    850/700/500 hPa slopes, the standard-level estimator closest to
+    Hart's 900-600 hPa band) instead of the 925/850/700 slope alone.
+    The upper thermal wind stays `UPPER_BAND` (500/400/300 hPa, already
+    the closest standard-level estimator of Hart's 600-300 hPa band),
+    and parameter B stays on the 925-700 hPa thickness (`z700 - z925`)
+    rescaled by `layerScale` (`HART_B_LAYER_SCALE` by default) to a
+    900-600 hPa equivalent, exactly as in `executeHartClass`/`executeB`.
+
+    `pmsl` is mean sea level pressure (Pa or hPa), or 1000 hPa height
+    when `pmslKind` is 1; `z925`...`z300` geopotential height (meters)
+    at the six standard levels; `u850`/`v850` ... `u300`/`v300` the four
+    steering wind level pairs; `psfc` AWIPS surface pressure (Pa or
+    hPa); `coriolis` the coriolis pseudo-field; `dx`, `dy` the grid
+    spacing pseudo-fields (meters). Every height is blanked below ground
+    for its own pressure and `capHpa` (`mask_below_ground`); `pmsl` is
+    not. The constants are coerced with `_coerce_scalar` as in
+    `executeHartClass`.
+
+    Returns a float32 array: NaN outside the closed-low mask, below
+    ground (a NaN lower term, which here needs 500 hPa as well), or
+    wherever B is NaN; otherwise one of 0.0 through 6.0 per
+    `hart_class`'s table.
+    """
+    radius_km = _coerce_scalar(radiusKm)
+    b_threshold_m = _coerce_scalar(bThresholdM)
+    layer_scale = _coerce_scalar(layerScale)
+    depth_hpa = _coerce_scalar(depthHpa)
+    blob_radius_km = _coerce_scalar(blobKm)
+    cap_hpa = _coerce_scalar(capHpa)
+
+    psfc_hpa = surface_pressure_hpa(psfc)
+
+    vtl = thermal_wind_mean2_grid(z925, z850, z700, z500, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    vtu = thermal_wind_grid([z500, z400, z300], UPPER_BAND, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+
+    b = _parameter_b_layer(
+        z700, z925, 700.0, 925.0, [u850, u700, u500, u300], [v850, v700, v500, v300],
+        psfc_hpa, coriolis, dx, dy, radius_km, layer_scale, cap_hpa,
+    )
+
+    mask = closed_low_mask(pmsl_input_hpa(pmsl, pmslKind), dx, dy, MIN_RADIUS_KM, radius_km, depth_hpa, blob_radius_km)
+
+    return hart_class(b, vtl, vtu, mask, b_threshold_m)
+
+
+def executeIndex7(
+    pmsl, z900, z850, z800, z750, z700, z650, z600, z550, z500, z450, z400, z350, z300,
+    psfc, dx, dy,
+    radiusKm=RADIUS_KM,
+    scaleM=100.0,
+    depthHpa=DEFAULT_DEPTH_HPA,
+    blobKm=DEFAULT_BLOB_RADIUS_KM,
+    capHpa=BELOW_GROUND_CAP_HPA,
+    pmslKind=PMSL_KIND_PRESSURE,
+):
+    """AWIPS derived-parameter entry point for HCPSidx (cps_HCPSidx.xml,
+    the seven-level `<Method>` blocks): `executeIndexStd`'s index,
+    `2*tanh(VTL/scaleM) + tanh(VTU/scaleM)` in [-3, 3], with the two
+    thermal winds taken over Hart's own `HART_LOWER_BAND` (900 to 600
+    hPa) and `HART_UPPER_BAND` (600 to 300 hPa) as in `executeHartClass7`,
+    for a model that carries every 50 hPa level from 900 to 300 hPa (the
+    GFS). Blanked (NaN) outside the same `closed_low_mask` on `pmsl`
+    (mean sea level pressure, Pa or hPa, or 1000 hPa height when
+    `pmslKind` is 1), and wherever either term is NaN (a height below
+    ground for its own pressure and `capHpa`, via `mask_below_ground` on
+    each of the thirteen heights). `z900`...`z300` are geopotential
+    height (meters) at the thirteen levels, 50 hPa apart, in that order;
+    `psfc` AWIPS surface pressure (Pa or hPa); `dx`, `dy` the grid
+    spacing pseudo-fields (meters). `radiusKm`, `scaleM` (meters),
+    `depthHpa`, `blobKm`, `capHpa`, `pmslKind` are coerced with
+    `_coerce_scalar` as in `executeIndexStd`. Returns a float32 array,
+    NaN outside the mask or below ground, otherwise in [-3, 3].
+    """
+    radius_km = _coerce_scalar(radiusKm)
+    scale_m = _coerce_scalar(scaleM)
+    depth_hpa = _coerce_scalar(depthHpa)
+    blob_radius_km = _coerce_scalar(blobKm)
+    cap_hpa = _coerce_scalar(capHpa)
+
+    psfc_hpa = surface_pressure_hpa(psfc)
+
+    z_lower = [z900, z850, z800, z750, z700, z650, z600]
+    z_upper = [z600, z550, z500, z450, z400, z350, z300]
+    vtl = thermal_wind_grid(z_lower, HART_LOWER_BAND, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    vtu = thermal_wind_grid(z_upper, HART_UPPER_BAND, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    mask = closed_low_mask(pmsl_input_hpa(pmsl, pmslKind), dx, dy, MIN_RADIUS_KM, radius_km, depth_hpa, blob_radius_km)
+    return _index_from_terms(vtl, vtu, mask, scale_m)
+
+
+def executeIndexMean2(
+    pmsl, z925, z850, z700, z500, z400, z300, psfc, dx, dy,
+    radiusKm=RADIUS_KM,
+    scaleM=100.0,
+    depthHpa=DEFAULT_DEPTH_HPA,
+    blobKm=DEFAULT_BLOB_RADIUS_KM,
+    capHpa=BELOW_GROUND_CAP_HPA,
+    pmslKind=PMSL_KIND_PRESSURE,
+):
+    """AWIPS derived-parameter entry point for HCPSidx (cps_HCPSidx.xml,
+    the two-slope-mean `<Method>` blocks): `executeIndexStd`'s index on
+    the standard levels, for a model without Hart's 50 hPa set, with the
+    same arguments in the same order as `executeIndexStd`. The lower
+    term is the two-slope mean (`thermal_wind_mean2_grid`, the mean of
+    the 925/850/700 and 850/700/500 hPa slopes) instead of the
+    925/850/700 slope alone; the upper term stays `UPPER_BAND`
+    (500/400/300 hPa); the index `2*tanh(VTL/scaleM) + tanh(VTU/scaleM)`
+    and the `closed_low_mask` on `pmsl` (mean sea level pressure, Pa or
+    hPa, or 1000 hPa height when `pmslKind` is 1) are unchanged. Every
+    height (meters) is blanked below ground for its own pressure and
+    `capHpa` (`mask_below_ground`); `psfc` is AWIPS surface pressure (Pa
+    or hPa); `dx`, `dy` the grid spacing pseudo-fields (meters). The
+    constants are coerced with `_coerce_scalar`. Returns a float32
+    array, NaN outside the mask or below ground, otherwise in [-3, 3].
+    """
+    radius_km = _coerce_scalar(radiusKm)
+    scale_m = _coerce_scalar(scaleM)
+    depth_hpa = _coerce_scalar(depthHpa)
+    blob_radius_km = _coerce_scalar(blobKm)
+    cap_hpa = _coerce_scalar(capHpa)
+
+    psfc_hpa = surface_pressure_hpa(psfc)
+
+    vtl = thermal_wind_mean2_grid(z925, z850, z700, z500, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    vtu = thermal_wind_grid([z500, z400, z300], UPPER_BAND, dx, dy, radius_km, psfc_hpa=psfc_hpa, cap_hpa=cap_hpa)
+    mask = closed_low_mask(pmsl_input_hpa(pmsl, pmslKind), dx, dy, MIN_RADIUS_KM, radius_km, depth_hpa, blob_radius_km)
+    return _index_from_terms(vtl, vtu, mask, scale_m)
+
+
+# ---------------------------------------------------------------------------
 # Standalone sanity check
 # ---------------------------------------------------------------------------
 
@@ -2993,6 +3472,24 @@ if __name__ == "__main__":
     cj = lon_vals.size // 2
     print("VTL (lower, 925-700) at center, m (expect roughly +100 to +300):", vtl[ci, cj])
     print("VTU (upper, 500-300) at center, m (expect roughly +100 to +300):", vtu[ci, cj])
+
+    # The other two lower-band methods on the same vortex (see the module
+    # docstring's "Level bands and the three methods"): the two-slope
+    # mean needs only the standard levels above; Hart's seven-level band
+    # needs the 50 hPa levels, built here by interpolating the amplitude
+    # profile in ln p.
+    vtl_mean2 = thermal_wind_mean2_grid(
+        z_by_level[925.0], z_by_level[850.0], z_by_level[700.0], z_by_level[500.0], dx2d, dy_m, RADIUS_KM,
+    )
+    anchor_p = np.array(sorted(amp_by_level), dtype=float)
+    anchor_amp = np.array([amp_by_level[p] for p in anchor_p])
+    for p in HART_LOWER_BAND:
+        if p not in z_by_level:
+            amp = float(np.interp(np.log(p), np.log(anchor_p), anchor_amp))
+            z_by_level[p] = 100.0 + 7000.0 * np.log(1000.0 / p) - amp * decay
+    vtl_hart = thermal_wind_grid([z_by_level[p] for p in HART_LOWER_BAND], HART_LOWER_BAND, dx2d, dy_m, RADIUS_KM)
+    print("VTL, two-slope mean (925/850/700 and 850/700/500) at center, m:", vtl_mean2[ci, cj])
+    print("VTL, Hart's seven-level 900-600 band at center, m:", vtl_hart[ci, cj])
 
     # No terrain: ordinary open-ocean surface pressure everywhere.
     psfc_ocean = np.full(lat2d.shape, 1013.0)
