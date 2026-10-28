@@ -28,7 +28,7 @@ const SPEEDS = { slow: 1200, normal: 700, fast: 350 };  // ms per frame
 const MAX_RASTER_FRAMES = 12;    // decoded raster frames kept in memory
 const MATCH_KM = 300;            // center to storm matching radius, for entries without run ids
 const HALO_KM = 200;             // radius of the circle drawn at each low
-const DEEP_HPA = 980;            // lows below this get a larger dot
+const DEEP_HPA = 980;            // lows below this get a bolder circle
 const TERRAIN_HPA = 850;         // surface pressure below this: a false low over high ground
 const STALE_H = 12;              // hours before the data is called stale
 const RASTERS = ['hb', 'hvtl', 'hvtu'];
@@ -78,7 +78,7 @@ const ENDS = {
 // Reading notes per field, from the user guide; the clear band at zero is
 // added from the export (card.js, clearText), else CLEAR_OLD.
 const HELP = {
-  class: 'Read the class at the center dot, never the footprint edge. A transition runs red, yellow, green, blue (codes 0, 2, 3, 4).',
+  class: `${GLYPH_HELP} Read the class at the center marker, never the footprint edge. A transition runs from a filled red circle to a filled red triangle, a hollow red triangle, then a filled blue triangle (codes 0, 2, 3, 4).`,
   hb: 'Magenta: warm air to the right of the deep-layer flow, the frontal geometry; teal: warm air on the left. More than 10 m at a low center is asymmetric (Hart\'s onset line, marked).',
   hvtl: 'Red is a warm lower core, blue a cold one. A hurricane reads +100 to +300 m; a center falling below 0 marks transition complete.',
   hvtu: 'Red is a warm upper core, blue is cold aloft. The upper core usually turns blue first as a transition gets under way.',
@@ -99,7 +99,7 @@ const narrow = () => K.isMobile();
 
 const S = {
   base: null, index: null, legend: null, classes: new Map(),
-  i: 0, field: 'class', marker: 'class', playing: false, timer: 0, token: 0,
+  i: 0, field: 'class', playing: false, timer: 0, token: 0,
   speed: 'normal', bust: '',
   opacity: { hb: 0.7, hvtl: 0.7, hvtu: 0.7 },  // the ramps are opaque from 10% of the half range
   layers: { contours: true, circles: true, footprint: false, tracks: true, terrain: false, fade: true,
@@ -420,26 +420,23 @@ function buildMap(start) {
     // just outside the dot, a dark band between the two.
     map.addLayer({ id: 'lows-alt', type: 'circle', source: 'lows', filter: ['has', 'alt'], paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'],
-        0, ['case', ['has', 'glyph'], 10.5, ['get', 'deep'], 6.8, 5.2], LABEL_ZOOM, ['case', ['has', 'glyph'], 13.5, ['get', 'deep'], 8.8, 7]],
+        0, ['case', ['has', 'glyph'], 10.5, 5.2], LABEL_ZOOM, ['case', ['has', 'glyph'], 13.5, 7]],
       'circle-color': 'rgba(11,18,32,0.85)',
       'circle-stroke-color': ['get', 'alt'],
       'circle-stroke-width': 1.4,
     } });
-    // The dot, and the hit target for every marker style; clear under a glyph.
+    // The hit target of every low, and the ring of a terrain minimum; clear under a glyph.
     map.addLayer({ id: 'lows', type: 'circle', source: 'lows', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, ['case', ['get', 'deep'], 4.8, 3.2], LABEL_ZOOM, ['case', ['get', 'deep'], 6.5, 4.8]],
       'circle-color': ['case', ['any', ['get', 'terrain'], ['has', 'glyph']], 'rgba(0,0,0,0)', ['get', 'hex']],
       'circle-stroke-color': ['case', ['get', 'terrain'], '#a3b3c9', ['has', 'glyph'], 'rgba(0,0,0,0)', '#0b1220'],
       'circle-stroke-width': ['case', ['get', 'terrain'], 1.2, 1],
     } });
-    // The phase space glyphs (glyphs.js): A's tail under the disc, then the glyph.
+    // The phase space glyphs (glyphs.js).
     addGlyphImages(map);
     const glyphSize = ['interpolate', ['linear'], ['zoom'], 0, GLYPH_SIZE[0], LABEL_ZOOM, GLYPH_SIZE[1]];
-    const free = { 'icon-allow-overlap': true, 'icon-ignore-placement': true };
-    map.addLayer({ id: 'lows-tail', type: 'symbol', source: 'lows', filter: ['has', 'tail'], layout: {
-      'icon-image': 'g-tail', 'icon-size': glyphSize, 'icon-rotate': ['get', 'tail'], 'icon-rotation-alignment': 'map', ...free } });
     map.addLayer({ id: 'lows-glyph', type: 'symbol', source: 'lows', filter: ['has', 'glyph'], layout: {
-      'icon-image': ['get', 'glyph'], 'icon-size': glyphSize, ...free } });
+      'icon-image': ['get', 'glyph'], 'icon-size': glyphSize, 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
     map.addLayer({ id: 'sel', type: 'circle', source: 'sel',
       paint: { 'circle-radius': 12, 'circle-color': 'rgba(0,0,0,0)', 'circle-stroke-color': '#e7eef8', 'circle-stroke-width': 1.6 } });
     S.mapReady = true;
@@ -877,7 +874,7 @@ function goView(key) {
   setView(key);
 }
 
-// #t=hour&f=field&v=lat,lon,zoom&l=layers[&m=marker][&s=storm]. Links from the older
+// #t=hour&f=field&v=lat,lon,zoom&l=layers[&s=storm]. Links from the older
 // flat map also carry b= (its basemap) and a zoom one step deeper, since
 // its tiles were half the size.
 function readHash() {
@@ -889,7 +886,6 @@ function readHash() {
   if (v.length === 3 && v.every(Number.isFinite)) out.view = [v[0], v[1], q.has('b') ? Math.max(0, v[2] - 1) : v[2]];
   if (q.get('s')) out.storm = q.get('s');
   if (q.has('l')) out.layers = q.get('l');
-  if (MARKERS.includes(q.get('m'))) out.marker = q.get('m');
   return out;
 }
 
@@ -904,7 +900,7 @@ function viewHash() {
   const c = map.getCenter();
   const l = Object.entries(LAYER_KEYS).filter(([k]) => (INVERTED_KEYS.has(k) ? !S.layers[k] : S.layers[k])).map(([, v]) => v).join('');
   return `#t=${S.index.hours[S.i]}&f=${S.field}&v=${c.lat.toFixed(2)},${K.wrapLon(c.lng).toFixed(2)},${map.getZoom().toFixed(2)}` +
-    `&l=${l || '-'}${S.marker === 'class' ? '' : `&m=${S.marker}`}${S.follow ? `&s=${encodeURIComponent(followShare())}` : ''}`;
+    `&l=${l || '-'}${S.follow ? `&s=${encodeURIComponent(followShare())}` : ''}`;
 }
 
 async function share() {
@@ -987,7 +983,6 @@ function buildControls() {
   $('next').addEventListener('click', () => step(1));
   $('play').addEventListener('click', () => play(!S.playing));
   document.querySelectorAll('[data-speed]').forEach((b) => b.addEventListener('click', () => setSpeed(b.dataset.speed)));
-  document.querySelectorAll('[data-marker]').forEach((b) => b.addEventListener('click', () => setMarker(b.dataset.marker)));
   $('opacity').addEventListener('input', (e) => setOpacity(+e.target.value));
   document.querySelectorAll('[data-layer]').forEach((c) => c.addEventListener('change', () => setLayer(c.dataset.layer, c.checked)));
   document.querySelectorAll('[data-view]').forEach((a) => a.addEventListener('click', () => goView(a.dataset.view)));
@@ -1018,7 +1013,6 @@ function buildControls() {
     else if (/^[1-4]$/.test(e.key)) setField(FIELDS[+e.key - 1]);
     else if (k === 'f') toggleFollow();
     else if (k === 'l') K.setPanelOpen(!K.panelOpen());
-    else if (k === 'm') setMarker(MARKERS[(MARKERS.indexOf(S.marker) + 1) % MARKERS.length]);
     else if (e.key === '?') $('helpDialog').showModal();
     else if (HOTKEYS[k]) setLayer(HOTKEYS[k], !S.layers[HOTKEYS[k]]);
     else hit = false;
@@ -1095,7 +1089,6 @@ async function boot() {
   const hi = ix.hours.indexOf(want.hour);
   S.i = hi >= 0 ? hi : 0;
   setField(want.field || S.field, false);
-  setMarker(want.marker || S.marker);
   paintRamps();
   initStorms();
   $('foot-b').hidden = !ST.trackB;

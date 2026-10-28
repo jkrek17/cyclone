@@ -106,10 +106,8 @@ function renderLegend() {
   const f = S.field;
   const el = $('legend');
   let h;
-  const glyph = S.marker !== 'class';
   if (f === 'class') {
-    h = `<div class="legend-head"><span>${TITLES.class}</span></div><ul class="legend-classes${glyph ? ' glyphs' : ''}">${glyph ? glyphLegendRows(S.marker) : [...S.classes.values()].map((c) =>
-      `<li title="${esc(c.name)}"><i style="--c:${c.hex}"></i><b>${c.code}</b>${esc(SHORT[c.code] ?? c.name)}</li>`).join('')}</ul>`;
+    h = `<div class="legend-head"><span>${TITLES.class}</span></div><ul class="legend-classes glyphs">${glyphLegendRows()}</ul>`;
   } else {
     const { range: [lo, hi] } = stopsOf(f);
     const units = S.legend?.units?.[f] || 'm';
@@ -121,21 +119,21 @@ function renderLegend() {
       `<div class="legend-labels">${RAMP_LABELS[f].map((v) => `<span style="left:${pct(v)}%">${fmt(v)}</span>`).join('')}</div>` +
       `<p class="legend-ends"><span>${MINUS} ${ENDS[f][0]}</span><span>${ENDS[f][1]} +</span></p>`;
   }
-  const help = f === 'class' ? (glyph ? MARKER_HELP[S.marker] : HELP[f]) : `${HELP[f]} ${clearText(f)}`;
+  const help = f === 'class' ? HELP[f] : `${HELP[f]} ${clearText(f)}`;
   const dim = +S.index?.raster?.mask_dim;
   const fade = f !== 'class' && fadeOn() ? ` Faded to ${Math.round((dim > 0 ? dim : 0.35) * 100)}% beyond about 300 km from the lows.` : '';
   h += `<p class="legend-note">${esc(help)}${fade}</p>`;
   const keys = [];
-  if (glyph && f !== 'class') keys.push(`<span class="full">${glyphSVG(S.marker, { lo: 1, up: 0, asym: false }, { size: 20 })}${esc(MARKER_HELP[S.marker])}</span>`);
+  const dotKey = glyphSVG({ lo: 1, up: 1, asym: true }, 16);
   if (ST.trackB) {
-    keys.push('<span class="full"><i class="k-dot"></i>Low center, by class; a tracked low\'s B is from its own motion, the field\'s from the steering flow</span>',
+    keys.push(`<span class="full">${dotKey}Low center, by class${f === 'class' ? '' : ` (${GLYPH_HELP.charAt(0).toLowerCase()}${GLYPH_HELP.slice(1, -1)})`}; a tracked low's B is from its own motion, the field's from the steering flow</span>`,
       '<span class="full"><i class="k-ring"></i>The field\'s class where it differs, so a dot may not match the field under it</span>');
     if (ST.hyst) {
       const h = hyst();
       keys.push(`<span class="full"><i class="k-held"></i>A tracked low keeps its class until B is ${fmt(h.b_hi - FIG1.onset)} m past its wall or a thermal wind term is ${fmt(h.vt_m)} m past zero, so the colour does not flicker; the margin quoted is the distance to the nearest wall</span>`);
     }
   } else {
-    keys.push('<span><i class="k-dot"></i>Low center, by class</span>');
+    keys.push(`<span class="full">${dotKey}Low center, by class${f === 'class' ? '' : ` (${GLYPH_HELP.charAt(0).toLowerCase()}${GLYPH_HELP.slice(1, -1)})`}</span>`);
   }
   if (S.layers.contours) keys.push(`<span><i style="height:6px;vertical-align:1px;border:0;border-radius:2px;background:linear-gradient(#cfdbe8 2px,#0b1220 2px,#0b1220 4px,#cfdbe8 4px)"></i>MSLP, ${WIDE_CINT} hPa, bold 16</span>`);
   if (S.layers.z500 && hasUpper('z500')) keys.push('<span><i style="border-top:2px solid #6b8cff"></i>500 mb height, 6 dam</span>');
