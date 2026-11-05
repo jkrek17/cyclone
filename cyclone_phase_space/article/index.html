@@ -15,7 +15,7 @@
   Same Three Parameters at Every Closed Low on Every Forecast Frame, as
   a Live Global Map and as AWIPS Derived Parameters</h1>
 
-  <p class="byline">Jason Krekeler, NOAA/NWS Ocean Prediction Center &middot; 2026-10-28 (first version 2026-09-18)</p>
+  <p class="byline">Jason Krekeler, NOAA/NWS Ocean Prediction Center &middot; 2026-11-05 (first version 2026-09-18)</p>
   <p class="meta">Code:
     <a href="https://github.com/jkrek17/cyclone">github.com/jkrek17/cyclone</a>.
     Live map: <a href="../">the products on the current GFS run</a>,
@@ -60,8 +60,8 @@
       39&nbsp;m, the joint class 75% of the time (Cohen's kappa 0.68)
       and completion within 6&nbsp;h in 10 of 11 storms. Separating the
       two substitutions the single-frame fields make, the standard-level
-      bands cost 6 to 9 points of class agreement at any choice of
-      <i>B</i> and the steering flow 8 points at either band choice.
+      bands cost 6 to 8 points of class agreement at any choice of
+      <i>B</i> and the steering flow about 9 points at either band choice.
       Both sides read the GFS, so the comparison is of implementations,
       not of either against observed structure; on synthetic fields the
       gridded code matches the storm-centered reference to 1%, by
@@ -278,8 +278,9 @@
     Southern, so that warm air to the right of the track in the
     Northern Hemisphere reads positive; the same storm in the same
     thickness field reads positive moving one way and negative moving
-    the other (Figure B5). Evans and Hart (2003) took 10&nbsp;m as the
-    threshold between a symmetric and an asymmetric thickness field.
+    the other (Figure B1). Hart (2003) took 10&nbsp;m as the
+    threshold between a symmetric and an asymmetric thickness field, and
+    Evans and Hart (2003) took its crossing as the onset of transition.
     A grid point has no track, so the package evaluates the same
     semicircle difference about every point with a motion proxy in
     place of the track. At each point the mean thickness is taken over
@@ -418,8 +419,9 @@
     center and draws a trajectory; this package evaluates every grid
     point and draws a map per hour, recovering the trajectory by linking
     the lows. Both use a 500&nbsp;km circle and, where the model allows,
-    the same layers; the standard-level fallback reads a shallow warm
-    core two to three times Hart's value (Figure 8). Both take <i>B</i>
+    the same layers; on standard levels the plain 925/850/700&nbsp;hPa
+    band reads a shallow warm core two to three times Hart's value, and
+    the two-slope mean used in its place comes closer (Figure 8). Both take <i>B</i>
     from semicircle means, his split by the tracker's motion, this
     package's by the steering flow or, once a low is linked, by the
     track's motion. The page smooths with a 24&nbsp;h running mean; the
@@ -443,9 +445,7 @@
     (Section 5; Appendix A). Phase-space magnitudes depend on the
     resolution and dataset they are computed from (Manning and Hart
     2007), so the two sides are compared in sign and timing more than in
-    magnitude. The first checks on the CAVE display, made on five
-    September 2026 GFS cycles before the archive existed, are kept as
-    Appendix C. The synthetic material behind Figures 1, 2, 7, 8, 9 and
+    magnitude. The synthetic material behind Figures 1, 2, 7, 8, 9 and
     Appendix B is defined in the figure scripts and summarized figure by
     figure in Appendix A.
   </p>
@@ -614,9 +614,10 @@
     with the gridded fields' choices and at 75% with the live map's,
     Cohen's kappa 0.43 and 0.68 against a majority-class baseline of
     35%, the diagrams' most common class being the symmetric shallow
-    warm core. Taking the motion from the track is worth 8 points at
+    warm core. Taking the motion from the track is worth about 9 points at
     either band choice, the 900 to 600&nbsp;hPa thickness for <i>B</i> 3
-    to 5 more, and Hart's bands 6 to 9 points at any <i>B</i> choice;
+    to 5 more, and Hart's bands 6 to 8 points at any <i>B</i> choice
+    (differences of the unrounded rates);
     neither substitution accounts for the difference alone. The three
     signs that make the class agree separately at 82, 91 and 97% in the
     best cell, and of its 131 disagreements 69 are the <i>B</i> side
@@ -654,7 +655,7 @@
     and the tracker chose the storms, every closed low below
     980&nbsp;hPa at the analysis and the lows seeded by hand, which
     leans the sample toward deep extratropical lows and away from weak
-    tropical systems (Appendix D). Within those limits, the gridded
+    tropical systems (Appendix C). Within those limits, the gridded
     engine with Hart's bands and a track reproduces the diagrams to
     within the differences one expects of two resolutions and two
     trackers, and the two substitutions the gridded fields make are each
@@ -778,7 +779,7 @@
       tried, but it has not been measured against the Florida State
       diagrams, since the archive carries the plain band and Hart's; the
       plain band reads 17&nbsp;m above Hart's on the archive and costs
-      6 to 9 points of class agreement at any choice of <i>B</i>
+      6 to 8 points of class agreement at any choice of <i>B</i>
       (Section 5), and puts completion about 3&nbsp;h late on a
       48&nbsp;h synthetic transition (Appendix B).</li>
     <li><strong>Window and resolution.</strong> The window is Hart's
@@ -815,7 +816,7 @@
       between 980 and 1000&nbsp;hPa and 3% above, and 1% of minima within
       25&deg; of the equator, so the classified population is the deep
       and midlatitude lows, and weak tropical systems are
-      under-represented in every statistic here (Appendix D).</li>
+      under-represented in every statistic here (Appendix C).</li>
     <li><strong>Flicker at the thresholds.</strong> HCPSclass has no
       neutral band and no temporal smoothing, so a storm sitting on a
       threshold alternates between adjacent codes. On the archive the
@@ -826,7 +827,7 @@
       the symmetric cold core (median margin 2.5&nbsp;m) and asymmetric
       deep warm core (4.2&nbsp;m) are the most fragile classes.
       Displacing the center by one grid cell changes the class for 21%
-      of classed minima and by 100&nbsp;km for 44% (Appendix D), so a
+      of classed minima and by 100&nbsp;km for 44% (Appendix C), so a
       tracker that places the center a cell or two from the diagram's
       accounts for part of the scatter of Section 5. The live map's
       hysteresis and margin (Section 4) are sized by these figures; the
@@ -895,7 +896,7 @@
   <p>
     Four extensions were tested on synthetic fields with the operational
     code, as parallel products that would leave Hart's parameters as the
-    reference (Figure B8 and Appendix B). A storm-only core, the terms
+    reference (Figure B2 and Appendix B). A storm-only core, the terms
     after the domain background plane is subtracted from each level,
     returns the isolated-vortex values exactly where the unmodified terms
     fall to zero in a moderate baroclinic zone; it answers a different
@@ -937,8 +938,8 @@
       within 6&nbsp;h of completion in 10 of 11 storms. Both sides read
       the GFS; the comparison is of implementations.</li>
     <li>The two substitutions a single frame forces are measured apart:
-      the standard-level bands cost 6 to 9 points of class agreement at
-      any choice of <i>B</i>, the steering flow 8 points at either band
+      the standard-level bands cost 6 to 8 points of class agreement at
+      any choice of <i>B</i>, the steering flow about 9 points at either band
       choice with a +5.4&nbsp;m bias largest for slow storms. The
       products therefore use Hart's layers wherever the model carries
       them and read a tracked low from its own motion.</li>
@@ -990,25 +991,7 @@
     the entries below summarize them.
   </p>
   <p>
-    Figures B3, B4 and B6 share the two-vortex domain defined in the header
-    of <code>make_figures.py</code>: a regular 0.5&deg;
-    latitude-longitude grid from 160&deg;W to 100&deg;W and 15&deg;N to
-    65&deg;N, its rows increasing northward, on the seven standard
-    levels; a background height of 100&nbsp;m + 7000&nbsp;m
-    ln(1000&nbsp;hPa/<i>p</i>) that decreases northward at 40&nbsp;m per
-    1000&nbsp;km at 1000&nbsp;hPa, rising linearly in ln&nbsp;<i>p</i> to
-    60&nbsp;m per 1000&nbsp;km at 300&nbsp;hPa; vortex A, a Gaussian
-    depression of 150&nbsp;km e-folding radius at 28&deg;N 130&deg;W with
-    amplitude linear in ln&nbsp;<i>p</i> from 250&nbsp;m at 1000&nbsp;hPa
-    to 20&nbsp;m at 300&nbsp;hPa; vortex B, a Gaussian depression of
-    350&nbsp;km scale at 50&deg;N 140&deg;W with amplitude from 120&nbsp;m
-    at 1000&nbsp;hPa to 450&nbsp;m at 300&nbsp;hPa and its center
-    displaced westward with height, linearly in ln&nbsp;<i>p</i>, by a
-    specified 400&nbsp;km at 300&nbsp;hPa (<code>DEFAULT_TILT_KM</code>;
-    the 300&nbsp;hPa height minimum lands 393&nbsp;km from the surface
-    center, Figure B6); and a terrain block of 750&nbsp;hPa surface
-    pressure over 118&deg;W to 108&deg;W, 35&deg;N to 48&deg;N, with
-    1013&nbsp;hPa elsewhere. The synthetic cases carry no separate
+    The synthetic cases carry no separate
     pressure field, so every script that calls the closed-low detector
     (Figures 2 and 7 and the synthetic figures of Appendix B that show the mask) builds its MSLP input from the
     1000&nbsp;hPa height as 1000&nbsp;hPa + <i>Z</i><sub>1000</sub>/(8&nbsp;m
@@ -1233,58 +1216,7 @@
       (5&nbsp;m Gaussian noise on every level, 60
       realizations), all in Appendix B.</dd>
 
-    <dt id="src-fig2">Figure B1</dt>
-    <dd><code>make_figures.py</code> (<code>make_fig8</code>,
-      <code>fig8_thermal_wind_concept.png</code>). Implementation: the
-      storm-centered reference <code>cps.hart</code>, not the operational
-      <code>cps_HartCPS.py</code> that the other synthetic figures use. In panels (a)
-      and (b) each level's perturbation curve is converted to a vertical
-      offset at 9620&nbsp;m per natural-log-pressure axis unit, chosen so
-      that 250&nbsp;m, panel (a)'s largest amplitude, draws as about one
-      third of the 1000&ndash;925&nbsp;hPa tick spacing. Panel (c) runs
-      <code>cps.hart.thermal_wind</code> on a 2D grid built by
-      <code>make_grid</code> and <code>warm_core_heights</code> from
-      <code>cyclone_phase_space/tests/cps/synthetic.py</code> (centered
-      30&deg;N 0&deg;E, 0.5&deg; spacing, 150&nbsp;km scale) on Hart's
-      50&nbsp;hPa levels from 900 to 300&nbsp;hPa
-      (<code>hart.LOWER_LEVELS</code> and <code>hart.UPPER_LEVELS</code>);
-      the shaded bands are <code>cps.hart</code>'s own bands.</dd>
-
-    <dt id="src-fig3">Figure B2</dt>
-    <dd><code>make_figures.py</code> (<code>make_fig9</code>,
-      <code>fig9_b_concept.png</code>). Implementation: the storm-centered
-      reference, <code>cps.hart.parameter_b</code>, with local offsets and
-      distances from <code>cps.hart.local_offsets_km</code> and
-      <code>cps.hart.great_circle_km</code>, on a grid from
-      <code>make_grid</code> in
-      <code>cyclone_phase_space/tests/cps/synthetic.py</code>. The two
-      halves are <code>parameter_b</code>'s own heading convention: for
-      motion (<i>m<sub>x</sub></i>, <i>m<sub>y</sub></i>) a point at offset
-      (<i>x</i>, <i>y</i>) is on the right where
-      <i>m<sub>x</sub></i><i>y</i> &minus; <i>m<sub>y</sub></i><i>x</i> &lt; 0,
-      which for northeast motion is the south/east half.</dd>
-
-    <dt id="src-fig4">Figure B3</dt>
-    <dd><code>make_figures.py</code> (<code>make_fig2</code>,
-      <code>fig2_method.png</code>). Implementation: operational. &Delta;Z in
-      panel (a) is <code>cps_HartCPS.delta_z</code> at
-      <code>cps_HartCPS.RADIUS_KM</code>, and the fit lines are what
-      <code>cps_HartCPS.band_slope</code> returns over
-      <code>LOWER_BAND</code> and <code>UPPER_BAND</code>. In panel (b)
-      the max and min are taken over the grid points inside the circle as
-      the module lays it (planar offsets, each row's own spacing), and
-      they reproduce <code>delta_z</code> at the center. Fields: the
-      two-vortex domain above, defined in the script's header.</dd>
-
-    <dt id="src-fig5">Figure B4</dt>
-    <dd><code>make_figures.py</code> (<code>make_fig3</code>,
-      <code>fig3_gridded.png</code>). Implementation: operational. HVTL and
-      HVTU are <code>cps_HartCPS.executeBand3</code> and HCPSclass is
-      <code>cps_HartCPS.executeHartClass</code> on the MSLP built above,
-      with <code>ORIENTATION_MODE</code> set to 0 because the synthetic
-      grid's rows increase northward.</dd>
-
-    <dt id="src-fig6">Figure B5</dt>
+    <dt id="src-fig6">Figure B1</dt>
     <dd><code>make_figures.py</code> (<code>make_fig7</code>,
       <code>fig7_parameter_b.png</code>). Implementation: operational. HB
       is <code>cps_HartCPS.executeB</code> (the semicircle means,
@@ -1310,30 +1242,7 @@
       footprint, the points within its 150&nbsp;km e-folding radius, that
       reads class 2 rather than 0: none.</dd>
 
-    <dt id="src-fig8">Figure B6</dt>
-    <dd><code>make_figures.py</code> (<code>make_fig4</code>,
-      <code>fig4_tilt.png</code>). Implementation: operational. HVTL and
-      HVTU are <code>cps_HartCPS.executeBand3</code>, the class
-      <code>cps_HartCPS.executeHartClass</code> on the MSLP built above
-      with the shipped 5&nbsp;hPa detector depth
-      (<code>DEFAULT_DEPTH_HPA</code>), and
-      <code>ORIENTATION_MODE</code> is 0. Vortex B of the two-vortex domain
-      without the terrain block.</dd>
-
-    <dt id="src-fig14">Figure B7</dt>
-    <dd><code>lifecycle_storyboard.py</code>
-      (<code>figE_lifecycle_storyboard.png</code>). Every number comes from
-      the functions of <code>lifecycle_comparison.py</code>
-      (<code>compute_frame</code>, <code>build_heights</code>,
-      <code>build_track_and_motion</code>, <code>build_grid</code>,
-      <code>env_fields</code>, <code>make_hours</code>), so the
-      implementations are those of Figure 7; the script adds only the maps
-      and diagrams. It also writes the animated version,
-      <a href="figures/lifecycle_storyboard.gif"><code>figures/lifecycle_storyboard.gif</code></a>:
-      the same five panels in one row, one frame per 6&nbsp;h, 29 frames
-      at 500&nbsp;ms each.</dd>
-
-    <dt id="src-fig17">Figure B8</dt>
+    <dt id="src-fig17">Figure B2</dt>
     <dd><code>experiments_extensions.py</code>
       (<code>figC_extensions.png</code>). Panels (a) and (b), the
       background-removal and storm-scaled-radius tests, use the operational
@@ -1354,36 +1263,15 @@
       1000, 1250 and 1500&nbsp;km. The warm-core-top test is printed as a
       table and not plotted.</dd>
 
-    <dt id="src-fig10">Figure C1</dt>
-    <dd><code>make_cave_figures.py</code>
-      (<code>fig9_cave_lifecycle.jpg</code>). Implementation: operational,
-      <code>cps_HartCPS.py</code> as installed in CAVE. The full-screen
-      captures (2000 by 1125 pixels, taken on the OPC workstation) are not
-      kept in the repository; the script reads them from the directory
-      named by the <code>CPS_CAVE_CAPTURES</code> environment variable and
-      alters nothing beyond cropping, resizing and the panel labels.</dd>
-
-    <dt id="src-fig11">Figure C2</dt>
-    <dd><code>make_cave_figures.py</code>
-      (<code>fig10_cave_4panel.jpg</code>), as for Figure C1. The shipped
-      colormaps are <code>CPS_HartClass</code> on HCPSclass,
-      <code>CPS_Asymmetry</code> on HB and <code>CPS_CoreDiverging</code>
-      (the core map) on HVTL and HVTU.</dd>
-
-    <dt id="src-fig12">Figure C3</dt>
-    <dd><code>make_cave_figures.py</code>
-      (<code>fig11_cave_atlantic.jpg</code>), as for Figures C1 and C2.</dd>
-  </dl>
+    </dl>
 
   <h2 id="appendix-b">Appendix B. Synthetic demonstrations</h2>
   <p>
     The figures and tests collected here were built on prescribed height
     fields to show how the gridded evaluation behaves where every input is
-    known: the two thermal wind terms and the asymmetry parameter in
-    pictures, the window on a synthetic domain, the asymmetry parameter on
-    two identical vortices in opposite steering, the response to a tilted
-    cold core, the storyboard of the synthetic life cycle of Section 5, the
-    former square window, and the tests of the candidate extensions of
+    known: numeric checks of the window, the asymmetry parameter and the
+    detector, the former square window, the asymmetry parameter on two
+    identical vortices in opposite steering, and the tests of the candidate extensions of
     Section 7. None of it is evidence about real storms; on these fields
     the gridded code and the storm-centered reference implementation see
     the same prescribed ingredients, so their agreement is a check of the
@@ -1401,7 +1289,7 @@
     1000&nbsp;hPa, growing to 14&nbsp;m per degree at 300&nbsp;hPa, lowers
     the upper term to +79&nbsp;m when the gradient runs along a grid axis
     and to +67&nbsp;m at 45&deg; to it; at twice that gradient the upper
-    term reads &minus;68 and &minus;90&nbsp;m (Figure B8a). The reference
+    term reads &minus;68 and &minus;90&nbsp;m (Figure B2a). The reference
     implementation gives +69 and &minus;87&nbsp;m at 45&deg; on the same
     fields, so the remaining difference between the two directions
     belongs to the test field, whose tilted plane is defined in degrees
@@ -1427,7 +1315,7 @@
     value for a dipole of 400&nbsp;km scale and 59% of his peak in the
     synthetic life cycle, where it delayed onset by two 6&nbsp;h frames;
     with the disk window mean, 72% and 75%, and one frame (Figures 7 and
-    B8d). It is retained for comparison only. The motion proxy, on a
+    B2d). It is retained for comparison only. The motion proxy, on a
     synthetic vortex with 40% wavenumber-one asymmetry in an 8&nbsp;m/s
     westerly, returns 8.0&nbsp;m/s from 270&deg; at the center.
   </p>
@@ -1447,128 +1335,7 @@
     925 to 700&nbsp;hPa band and 0.59 on the 925 to 500&nbsp;hPa band;
     the upper crossing is within a frame of Hart's on every band.
   </p>
-  <figure id="fig2">
-    <img src="figures/fig8_thermal_wind_concept.png"
-         alt="Three-panel figure illustrating the thermal wind concept. Left and center: vertical cross-sections with pressure on a logarithmic axis from 1000 to 300 hectopascals, showing seven flat reference lines each with a height-perturbation curve dipping toward the bottom of the panel over the storm center, shaded light red for a warm core whose dip shrinks with height and light blue for a cold core whose dip grows with height, with the 500 kilometer circle marked by dashed vertical lines and the height range at 925 and 500 hectopascals marked and labeled. Right: height range plotted against pressure on the same logarithmic axis for both cores, with least-squares fit lines and slope values for a shaded lower band and a shaded upper band.">
-    <figcaption><strong>Figure B1.</strong> The thermal wind concept, on
-      <em>synthetic</em> single-point cross-sections built for this figure
-      alone (not the two-vortex domain of Figures B3, B4 and B6) and computed
-      with the storm-centered reference implementation, over
-      Hart's circle and levels, rather than the operational gridded code
-      that the other synthetic figures use. At each pressure <i>p</i> the
-      height perturbation is a Gaussian depression of 150&nbsp;km e-folding
-      radius, amplitude <i>A</i>(<i>p</i>) linear in ln(<i>p</i>) from
-      <strong>(a)</strong> 250&nbsp;m at 1000&nbsp;hPa to 20&nbsp;m at
-      300&nbsp;hPa (warm core) and <strong>(b)</strong> 100&nbsp;m at
-      1000&nbsp;hPa to 450&nbsp;m at 300&nbsp;hPa (cold core). Each of the
-      seven standard levels is drawn as a flat reference line with its own
-      perturbation curve, drawn as a vertical offset at one fixed scale for both panels and
-      filled light red or light blue. Dashed lines mark the 500&nbsp;km circle; the labeled
-      markers give the height range (max minus min) inside that
-      circle at 925 and 500&nbsp;hPa: 235 and 118&nbsp;m for the warm
-      core, 123 and 301&nbsp;m for the cold core. <strong>(c)</strong> That
-      same range plotted against ln(<i>p</i>) for both cores (markers at the
-      seven standard levels), computed on a 2D grid centered 30&deg;N 0&deg;E at 0.5&deg; spacing,
-      with the same 150&nbsp;km scale, built at Hart's own 50&nbsp;hPa
-      spacing, so that the regression in panel (c) is performed over the
-      layer definition Hart used rather than the standard-level
-      approximation. The shaded "lower band" (900&ndash;600&nbsp;hPa)
-      and "upper band" (600&ndash;300&nbsp;hPa) are the reference
-      implementation's bands: Hart's original layers at
-      50&nbsp;hPa spacing, not the
-      standard-level approximation (925/850/700 and 500/400/300&nbsp;hPa)
-      the operational package uses on models without 50&nbsp;hPa levels (Section 2). Each core's amplitude is
-      one single line in ln(<i>p</i>) over the
-      whole 1000&ndash;300&nbsp;hPa depth, a deliberate simplification for
-      the illustration, so the lower- and upper-band slopes come out
-      identical for each core by construction and not as a result:
-      &minus;V<sub>T</sub><sup>L</sup> =
-      &minus;V<sub>T</sub><sup>U</sup> = +191&nbsp;m for the warm core,
-      &minus;291&nbsp;m for the cold core. (<a href="#src-fig2">Appendix A</a>)</figcaption>
-  </figure>
-  <figure id="fig3">
-    <img src="figures/fig9_b_concept.png"
-         alt="Two-panel plan-view figure illustrating parameter B. Left: a warm-core vortex at the origin of a 1200 kilometer square, its thickness contours closing symmetrically around the center, a 500 kilometer dashed circle split by a northeast-pointing motion arrow into left and right halves shaded two neutral tints, and B annotated as near zero. Right: the same vortex on a north-south thickness gradient with the warm flank labeled to the south and the cold flank to the north, the same circle, motion arrow and split, and B annotated as positive and above the 10 meter line.">
-    <figcaption><strong>Figure B2.</strong> Parameter <i>B</i>, as a plan
-      view, on a <em>synthetic</em> case built for this figure alone,
-      evaluated with the storm-centered reference implementation as the
-      difference of the two half-circle means over the 500&nbsp;km circle
-      for a storm heading 45&deg; (northeast), on a grid centered
-      30&deg;N 0&deg;E.
-      <strong>(a)</strong> A warm-core vortex alone (a 60&nbsp;m 900&ndash;600&nbsp;hPa
-      thickness anomaly, 150&nbsp;km scale) on a flat 2480&nbsp;m thickness
-      background: the thickness contours (every 10&nbsp;m) close
-      symmetrically around the center, the circle's motion-relative left
-      and right halves (shaded two neutral tints, carrying no warm/cold
-      meaning here) average out, and <i>B</i> = &minus;0.1&nbsp;m, near
-      Hart's zero. <strong>(b)</strong> The same vortex superimposed on a
-      40&nbsp;m per 1000&nbsp;km north&ndash;south thickness gradient (warm
-      to the south): for northeast motion the right half of the circle is the south/east
-      half, which now averages warmer (thicker) than the left, and <i>B</i>
-      = +11.7&nbsp;m, above the 10&nbsp;m onset threshold of Evans and Hart
-      (2003). The layer here is Hart's own 900 to 600&nbsp;hPa, so <i>B</i>
-      is compared with his threshold directly; the rescaling of Section 2
-      applies only where the gridded product falls back to the 925 to
-      700&nbsp;hPa thickness. (<a href="#src-fig3">Appendix A</a>)</figcaption>
-  </figure>
-  <h3 id="appendix-b-window">The window on a synthetic domain, and the former square</h3>
-  <figure id="fig4">
-    <img src="figures/fig2_method.png"
-         alt="Two-panel method figure. Left: dZ profile against pressure for two synthetic vortices with their least-squares lower- and upper-band fit lines and slope values annotated, and Hart's original 50 hPa levels marked as faint right-axis ticks. Right: a map of the 925 hPa height of one synthetic warm-core vortex with the 500 km analysis circle drawn around its center, and the window's max and min points marked, the max on the circle's southwestern edge.">
-    <figcaption><strong>Figure B3.</strong> Method, on the <em>synthetic</em>
-    two-vortex domain. <strong>(a)</strong>
-      &Delta;Z (m) against pressure at the center of vortex A (deep warm
-      core, red) and vortex B (cold core, tilted, blue), computed by the
-      operational gridded code; solid lines are its
-      least-squares fits for the lower (925&ndash;700&nbsp;hPa)
-      and upper (500&ndash;300&nbsp;hPa) bands, annotated with the resulting
-      &minus;V<sub>T</sub> in meters. Faint ticks on the right axis mark Hart's
-      original 50&nbsp;hPa levels, which the seven standard levels on the left
-      axis only sparsely sample. <strong>(b)</strong> 925&nbsp;hPa height of
-      vortex A alone (vortex B omitted), contoured and filled, with the
-      500&nbsp;km analysis circle, Hart's window and the one this package
-      uses, drawn around the center; the labeled max and min are the two
-      values the window's &Delta;Z at 925&nbsp;hPa is built from. The
-      maximum sits on the circle's edge, to the south, because of the
-      background height gradient. (<a href="#src-fig4">Appendix A</a>)</figcaption>
-  </figure>
-  <figure id="fig5">
-    <img src="figures/fig3_gridded.png"
-         alt="Four-panel map figure over a synthetic domain: 1000 hPa height with both synthetic vortices visible; the gridded lower thermal wind field with a hatched terrain block; the gridded upper thermal wind field; and the joint classification field with 1000 hPa height contours overlaid, all with a terrain block outlined in dashed gray.">
-    <figcaption><strong>Figure B4.</strong> One input field and three of
-      the gridded products on the <em>synthetic</em> two-vortex domain (deep warm core,
-      symmetric, westerly steering,
-      at 28&deg;N 130&deg;W, tilted cold core at 50&deg;N 140&deg;W, a 750&nbsp;hPa terrain
-      block outlined dashed). <strong>(a)</strong> 1000&nbsp;hPa height, contoured
-      every 20&nbsp;m. <strong>(b)</strong> HVTL (925/850/700&nbsp;hPa)
-      and <strong>(c)</strong> HVTU (500/400/300&nbsp;hPa), sharing one
-      &minus;300 to +300&nbsp;m color range; away from either vortex both read
-      near neutral (ambient about &minus;15&nbsp;m, inside the near-zero
-      white band of the diverging colormap) because the synthetic
-      background gradient grows only modestly with height; on a real
-      baroclinic zone the ambient values are larger, which is why the
-      class and index products are restricted to detected closed lows.
-      In (b) the terrain block is hatched where the below-ground mask has
-      set the lower levels to NaN; the upper band in (c) is unmasked
-      because 750&nbsp;hPa surface pressure is above 500&nbsp;hPa, and the
-      block is outlined dashed in the other panels for reference. Along
-      the block's northern and southern edges HVTL reads &minus;50 to
-      &minus;86&nbsp;m: there the circle loses cells to the below-ground
-      mask at 925 and 850&nbsp;hPa but not at 700&nbsp;hPa, so the levels
-      are fitted over different footprints. The former square did not
-      show this here, because its northern and southern edges reached
-      past the sides of the block.
-      <strong>(d)</strong>
-      HCPSclass, the joint classification field, with 1000&nbsp;hPa height contoured thin
-      gray for reference: vortex A reads class 0, symmetric deep warm
-      core, at its center, with a fringe of class 2 on its poleward edge;
-      vortex B, tilted and cold at the surface center, reads class 5,
-      symmetric cold core, at and around its center, with class 4 over
-      its equatorward part. In both fringes the uniform westerly steering
-      carries <i>B</i> past 10&nbsp;m. The
-      reported class of a low is the value at its center; the pixels of a
-      dilated region are not all one class. (<a href="#src-fig5">Appendix A</a>)</figcaption>
-  </figure>
+  <h3 id="appendix-b-window">The former square window</h3>
   <p>
     The circle is the definition, and it replaced an earlier choice.
     Earlier versions of the package took the maximum, minimum and
@@ -1592,24 +1359,23 @@
     use Hart's circle, where cold cores had read 30 to 80&nbsp;m more
     negative. On synthetic vortices of 250 and 400&nbsp;km scale the
     square read the lower term high by factors of 1.02 and 1.22, where
-    the circle is within 0.2% of Hart's. The circle costs about what
-    the square did (Section 4). The square remains available as a
-    configuration option that reproduces the earlier numbers exactly.
-    The CAVE values of
-    Appendix C were read with it.
+    the circle is within 0.2% of Hart's, at about the same cost. The
+    square remains available as a configuration option that reproduces
+    the earlier numbers exactly; the first checks on the CAVE display,
+    made on five September 2026 GFS cycles before the archive existed,
+    were read with it and are not used here.
   </p>
   <h3 id="appendix-b-asymmetry">The asymmetry parameter on two identical vortices</h3>
   <figure id="fig6">
     <img src="figures/fig7_parameter_b.png"
          alt="Four-panel synthetic figure demonstrating parameter B. Top left: 925 to 700 hPa thickness contoured with steering-flow arrows and two identical warm-core vortex centers marked A and A prime, one in easterly steering and one in westerly steering. Top right: the gridded parameter B field, negative over the southern half and positive over the northern half, with the B equals 10 meter contour drawn. Bottom left: the classification field, vortex A reading class 0 over its whole footprint and vortex A prime reading class 2 throughout. Bottom right: Hart's asymmetry diagram with B on the vertical axis against the lower thermal wind, the four quadrants shaded, a schematic 168 hour transition trajectory, the onset and completion crossings annotated, and the two synthetic vortices plotted as diamonds at their computed values.">
-    <figcaption><strong>Figure B5.</strong> Parameter B and the
+    <figcaption><strong>Figure B1.</strong> Parameter B and the
       classification, on a <em>synthetic</em> case built for this figure
-      alone (not the two-vortex domain of Figures B3, B4 and B6): vortex A
+      alone: vortex A
       (deep warm core, 28&deg;N 130&deg;W, marked A) and an identical copy
       at 42&deg;N 140&deg;W (marked A&prime;), same amplitude and 150&nbsp;km
       scale, on a background whose 925 to 700&nbsp;hPa thickness decreases
-      northward at 40&nbsp;m per 1000&nbsp;km (warm to the south), stronger
-      than the background of Figures B3, B4 and B6 so that the environment
+      northward at 40&nbsp;m per 1000&nbsp;km (warm to the south), so that the environment
       represents a transitioning storm, but weak enough that the
       background gradient (Section 2) does not drive either core's lower
       thermal wind negative at the edge of its footprint. Steering is a uniform 12&nbsp;m/s westerly north of
@@ -1639,146 +1405,11 @@
       shape as Figure 1a in the live map's colors and shapes (this
       diagram has no upper term, so every marker is drawn filled). (<a href="#src-fig6">Appendix A</a>)</figcaption>
   </figure>
-  <h3 id="appendix-b-tilt">Amplitude, sign and tilt of the gridded thermal wind</h3>
-  <p>
-    Hart's thermal wind terms, &minus;V<sub>T</sub><sup>L</sup> and
-    &minus;V<sub>T</sub><sup>U</sup>, are the vertical derivative, with
-    respect to ln&nbsp;<i>p</i>, of the height range &Delta;<i>Z</i> over a
-    fixed 500&nbsp;km radius, a quantity proportional to the storm-relative
-    thermal wind through geostrophic balance at that length scale (Hart
-    2003). Evaluating &Delta;<i>Z</i> at the standard levels and regressing
-    it against ln&nbsp;<i>p</i> (Section 2) computes Hart's quantity
-    itself rather than inferring core structure from a related field.
-    Three properties follow. <strong>Amplitude.</strong> The window
-    captures the anomaly of a typical cyclone relative to its 500&nbsp;km
-    surroundings, not merely its curvature at the center; like Hart's own
-    parameters, &Delta;<i>Z</i> is defined relative to that radius and
-    therefore scales with storm size. <strong>Sign and hemisphere.</strong>
-    &Delta;<i>Z</i> is a scalar range with no directional component, so
-    the thermal wind terms need no sign convention and are the same in
-    both hemispheres; only parameter B's directional split needs the
-    factor <i>h</i> of Section 2. The circular window is isotropic up
-    to the grid's discretization of the disk (Section 2); no projected
-    grid has yet been tested, and every result
-    here is on a regular latitude-longitude grid. <strong>Tilt.</strong> A vertical
-    displacement of the upper-level center from the surface center does
-    not defeat the measure at the surface center, because each level's
-    &Delta;<i>Z</i> is evaluated over the same surface-anchored window at
-    every level, and as long as the displacement is smaller than the
-    500&nbsp;km radius that window still contains the displaced
-    anomaly's minimum, its center, so the height range at that level is
-    still set by the anomaly, though the anomaly's far side may extend
-    past the window edge. Under that condition the thermal wind at the
-    surface center continues to reflect the true vertical structure even
-    when the upper center sits well away from it. Away from the surface
-    center the pointwise field is not tilt-neutral: a point on the side
-    the upper center has moved away from sees the perturbation weaken with
-    height and reads warm in the upper band. That signature is confined to
-    the raw HVTL and HVTU fields; the class and index are evaluated only
-    inside the closed-low mask, which excludes it. Figure B6 demonstrates
-    both for a cyclone with a 393&nbsp;km upper-level displacement, 79% of
-    the radius; the tolerated displacement is 500&nbsp;km in every
-    direction, and the dependence of the terms
-    on tilt has not been mapped beyond this single case.
-  </p>
-  <figure id="fig8">
-    <img src="figures/fig4_tilt.png"
-         alt="Four-panel figure on a single synthetic, vertically tilted cold-core cyclone. Top left: tilt geometry, with 925 hPa height contoured solid and 300 hPa height contoured dashed, the surface low center marked with a plus, the 300 hPa height minimum marked with an open circle, and the horizontal displacement between them annotated. Top right: the gridded lower thermal wind field. Bottom left: the gridded upper thermal wind field. Bottom right: the joint classification field, all evaluated at the same fixed surface low center marked in the first panel.">
-    <figcaption><strong>Figure B6.</strong> The thermal wind terms on a
-      single <em>synthetic</em>, vertically tilted cold-core cyclone
-      (vortex B, its 300&nbsp;hPa height minimum displaced
-      393&nbsp;km from its surface center), on a uniform ocean surface
-      without Figure B4's terrain block and with the same uniform
-      8&nbsp;m/s westerly steering as Figure B4. The black plus in
-      every panel marks the fixed surface low center; the annotated value
-      is each field sampled there. <strong>(a)</strong> Tilt geometry:
-      925&nbsp;hPa height (solid contours) and 300&nbsp;hPa height (dashed
-      contours), with the surface center marked by the plus and the
-      300&nbsp;hPa height minimum marked by an open circle, the horizontal
-      displacement between the two annotated. <strong>(b)</strong> HVTL and
-      <strong>(c)</strong> HVTU (same definitions as Figure B4, plotted over
-      &plusmn;500&nbsp;m here against Figure B4's
-      &plusmn;300&nbsp;m to hold this vortex's stronger values), sampled at
-      the surface center marked in (a):
-      &minus;288&nbsp;m and &minus;296&nbsp;m, both clearly negative despite
-      the displacement, because each level's &Delta;<i>Z</i> is taken over
-      a window centered on the surface point and wide enough to still
-      contain the displaced upper-level anomaly's
-      center. The positive lobe east
-      of the center in (c) is the tilt signature away from the center:
-      points there see the upper low move away with height, so
-      &Delta;<i>Z</i> decreases upward and the upper band reads warm.
-      Its sharp western edge is an arc of the circular window's
-      boundary.
-      <strong>(d)</strong> HCPSclass at the same center: class 5 (symmetric
-      cold core), consistent with Figure B4d for
-      the same vortex under the same steering. The lobe in (c) lies
-      outside the closed-low mask and does not enter the class. (<a
-      href="#src-fig8">Appendix A</a>)</figcaption>
-  </figure>
-
-  <h3 id="appendix-b-storyboard">The synthetic life cycle as a forecaster would see it</h3>
-  <p>
-    In the deep warm core phase the gridded lower term runs 12% above
-    Hart's and the upper term 9% below (126 against 139&nbsp;m at
-    0&nbsp;h). The difference is the standard-level band, not the
-    window. On Hart's own circle (the reference implementation) the
-    925/850/700&nbsp;hPa regression returns 301&nbsp;m against 270&nbsp;m
-    for his 900 to 600&nbsp;hPa band at 0&nbsp;h (11.4%); the gridded
-    disk differs from that circle by 0.001&nbsp;m at 0&nbsp;h and 0.1% at
-    48&nbsp;h, where the former square window added 0.002% at 0&nbsp;h,
-    with the vortex scale at 150&nbsp;km, rising to 0.2% by 48&nbsp;h as
-    the scale approached 200&nbsp;km; and the environment adds nothing
-    through 24&nbsp;h and under 1% after. The cause
-    is the synthetic profile: its amplitude is not linear in
-    ln&nbsp;<i>p</i> but departs from the 900 to 600&nbsp;hPa chord by 2
-    to 7&nbsp;m at 925, 850 and 700&nbsp;hPa, which steepens the
-    three-level regression, and with a profile exactly linear in
-    ln&nbsp;<i>p</i> both bands agree to 0.0&nbsp;m. The upper term's
-    deficit has the same cause, a profile gentler between 400 and
-    300&nbsp;hPa than between 600 and 500&nbsp;hPa.
-  </p>
-  <p>
-    Figure B7 lays the same life cycle out as a forecaster would see it,
-    with the two phase diagrams drawn up to each hour: the 1000&nbsp;hPa
-    height and 1000 to 500&nbsp;hPa thickness, the class field, and the
-    900 to 600&nbsp;hPa thickness that <i>B</i> samples inside the
-    500&nbsp;km circle, the circle the thermal wind terms use as well,
-    at six hours, one in each class the gridded method
-    assigns. The class block turns yellow as the storm meets the
-    baroclinic zone, green as the upper core goes cold, blue as the lower
-    core follows, indigo once the thermal asymmetry has wrapped out, and
-    magenta when the lower core re-forms in the seclusion, and at each
-    step the current point on the diagrams sits in the matching
-    quadrant. The synthetic low's MSLP ring depth, the quantity the
-    detector tests, is 32, 30, 23, 8, 9 and 14&nbsp;hPa at those six
-    hours, all above the 5&nbsp;hPa floor.
-  </p>
-  <figure id="fig14">
-    <img src="figures/figE_lifecycle_storyboard.png"
-         alt="Six rows by five columns. Each row is one hour of the synthetic life cycle: 0, 60, 90, 120, 144 and 168 hours, labeled with the gridded class. Columns: 1000 hectopascal height contours with thickness contours and the storm track; the class field as a colored block over the low; the 900 to 600 hectopascal thickness anomaly with the 500 kilometer circle and the motion arrow; the B against lower thermal wind diagram with both trajectories drawn up to that hour; and the upper against lower thermal wind diagram. The storm moves from 22 north 150 east to 52 north 175 east, the block changes from red to yellow, green, blue, indigo and magenta, and the diagram points move from the symmetric warm quadrant through asymmetric warm and asymmetric cold to symmetric cold and back to symmetric warm.">
-    <figcaption><strong>Figure B7.</strong> The synthetic life cycle of
-      Figure 7 at six hours, one in each class the gridded method assigns. Rows: 0,
-      60, 90, 120, 144 and 168&nbsp;h, labeled with the gridded class.
-      <strong>(a)</strong> 1000&nbsp;hPa height (about 8&nbsp;m per hPa)
-      every 40&nbsp;m, 1000 to 500&nbsp;hPa thickness every 60&nbsp;m
-      (red, dashed), the track and the current center.
-      <strong>(b)</strong> HCPSclass as CAVE draws it, colors as in the
-      class table of Section 2. <strong>(c)</strong> 900 to 600&nbsp;hPa thickness every
-      20&nbsp;m (lines) and its anomaly from the zonal mean (fill,
-      &plusmn;80&nbsp;m), with the 500&nbsp;km circle (Hart's, the gridded
-      thermal wind's window, and the disk the gridded half-disks divide)
-      and the motion vector. <strong>(d)</strong> and
-      <strong>(e)</strong> Hart's two diagrams with both trajectories
-      drawn up to the row's hour, Hart's in gray and the gridded as the
-      live map's markers, the current points enlarged. An animated version with one frame
-      per 6&nbsp;h accompanies the figure (<a href="#src-fig14">Appendix A</a>).</figcaption>
-  </figure>
   <h3 id="appendix-b-extensions">Tests of the candidate extensions</h3>
   <figure id="fig17">
     <img src="figures/figC_extensions.png"
          alt="Four panels. Top left: lower and upper thermal wind at the center of a synthetic deep warm core against background height gradient strength, for the gradient along a grid axis and at 45 degrees, both falling steeply, with the values after background plane removal flat at the true value. Top right: lower term as a fraction of its true value against vortex scale for window radii of 300, 500 and 700 kilometers, falling with scale, and for a radius of 2.5 times the scale, flat at one to 400 kilometers and 0.95 at 600. Bottom left: Hart's B and the fore-aft component against the angle between the thickness gradient and the motion, B rising from zero to the full magnitude and the fore-aft component falling, with the 10 meter threshold marked. Bottom right: ratio of gridded to Hart's semicircle B at the center of a thickness dipole against the dipole scale from 200 to 1500 kilometers, the semicircle form flat at one and the former gradient form rising from about 0.2 toward one.">
-    <figcaption><strong>Figure B8.</strong> Synthetic tests of three
+    <figcaption><strong>Figure B2.</strong> Synthetic tests of three
       candidate extensions and of the semicircle <i>B</i>.
       <strong>(a)</strong> Terms at the center of a deep warm core (true
       value 191&nbsp;m, black line) on a background height gradient that
@@ -1803,181 +1434,7 @@
       (<a href="#src-fig17">Appendix A</a>)</figcaption>
   </figure>
 
-  <h2 id="appendix-c">Appendix C. The first checks on the CAVE display</h2>
-  <p>
-    The first checks were a small log of real GFS cases read on the
-    CAVE display from five cycles (Section 3; table below), sampled at
-    the MSLP center where values were recorded, with the method as it
-    stood at the time. They show the fields behaving as designed and
-    stand as illustrations; the comparison in numbers, over the archive
-    of 26 cycles, follows them.
-  </p>
-  <table>
-    <caption>The real cases evaluated to date, GFS 0.25&deg; forecasts of 2026 displayed in CAVE (Section 3). Forecast hours are hours from the cycle. Every case was sampled with the former first-order <i>B</i>, the closed-low detector on 1000&nbsp;hPa height and the former square window; the values and detections in this log predate the semicircle means, the MSLP detector and the circular window and are to be re-sampled.</caption>
-    <thead><tr><th scope="col">Cycle</th><th scope="col">Storm or region</th><th scope="col">Forecast hours</th><th scope="col">What was sampled</th><th scope="col">Figure</th></tr></thead>
-    <tbody>
-      <tr><td>17 Sep 1200 UTC</td><td>Typhoon Dujuan</td><td>72&nbsp;h</td><td>class and values (HVTL, HVTU, HCPSidx; <i>B</i> not sampled)</td><td>none</td></tr>
-      <tr><td>17 Sep 1200 UTC</td><td>Typhoon Dujuan</td><td>hour of leaving the deep warm core (valid 21 Sep 1800 UTC)</td><td>class only, compared with the Florida State diagram</td><td>none</td></tr>
-      <tr><td>17 Sep 1200 UTC</td><td>North Atlantic deep low</td><td>not recorded</td><td>class only (values not recorded)</td><td>none</td></tr>
-      <tr><td>19 Sep 1800 and 1200 UTC</td><td>Typhoon Dujuan, life cycle</td><td>12 to 144&nbsp;h</td><td>class only</td><td>C1</td></tr>
-      <tr><td>20 Sep 0600 UTC</td><td>Typhoon Dujuan</td><td>0 to 120&nbsp;h</td><td>values at one point per frame (all four products)</td><td>none</td></tr>
-      <tr><td>24 Sep 0600 UTC</td><td>North Atlantic</td><td>6 to 126&nbsp;h</td><td>class only, from colors</td><td>C2 and C3</td></tr>
-    </tbody>
-  </table>
-  <p>
-    Typhoon Dujuan at 984&nbsp;hPa (GFS 2026 September 17 1200 UTC, 72&nbsp;h forecast) read
-    HVTL = 120&nbsp;m and HVTU = 180&nbsp;m, a deep warm core (HCPSclass 0
-    or 2, the distinction resting on <i>B</i>, which was not sampled);
-    HCPSidx read 2.5 one grid point away, where the definition of
-    Section 2 evaluates to 2.6 at the sampled point. Hart's bands and
-    this package's differ (Section 2), so these magnitudes are not
-    compared with his published values here. For the same storm, the
-    first forecast hour at which the classification left the deep warm
-    core state (HCPSclass 0 or 2) in the same GFS run, valid 2026
-    September 21 1800 UTC, matched the hour the Florida State University
-    cyclone phase page showed the same run moving from deep to shallow
-    warm core, to within the 6&nbsp;h frame interval and with the page's
-    24&nbsp;h smoothing noted (Section 2). That hour is the loss of the
-    upper warm core, a sign that transition is under way, and not the
-    Evans and Hart onset, which depends on <i>B</i> and is not yet
-    validated. A deep extratropical low over the North Atlantic in the
-    same cycle classified in a cold-core class with both thermal wind
-    terms negative; its values were not recorded and the case is to be re-sampled.
-  </p>
-  <p>
-    The GFS runs of 2026 September 19 carried Typhoon Dujuan, the storm
-    of the 17 September run, through the whole life cycle (Figure C1):
-    class 0 at 12&nbsp;h and 2 by 30&nbsp;h (onset passed) in the
-    1800&nbsp;UTC run, then in the 1200&nbsp;UTC run 4 by 96&nbsp;h at
-    981&nbsp;hPa (completion passed), 3 at 114&nbsp;h as the storm
-    deepened to 964&nbsp;hPa over the Bering Sea, a single frame of 0 at
-    126&nbsp;h at 946&nbsp;hPa, and 1 at 144&nbsp;h: the warm seclusion
-    path of Section 2, with the lower core re-forming during rapid
-    deepening while the upper core stayed cold except for one frame. The
-    thermal wind and <i>B</i> values along that track have not yet been
-    sampled. The Florida State page's diagrams for the same run (0.5&deg;
-    GFS, 24&nbsp;h running mean; Hart, cited 2026) trace the same path:
-    a symmetric deep warm core cluster for the typhoon, <i>B</i> rising
-    past 10&nbsp;m with the lower core still warm, an asymmetric deep cold
-    core phase with &minus;V<sub>T</sub><sup>L</sup> near &minus;80&nbsp;m,
-    &minus;V<sub>T</sub><sup>U</sup> near &minus;300&nbsp;m and <i>B</i>
-    near 70&nbsp;m at 980&nbsp;hPa, then a return to a symmetric warm core
-    at 950&nbsp;hPa with the upper term straddling zero within a few tens
-    of meters. The gridded class sequence reproduces that path, and the
-    page's upper term at peak identifies the single frame of class 0 as a
-    marginal upper term rather than a deep warm core. The next cycle
-    (2026 September 20 0600 UTC) was sampled with all four products at
-    one point per frame: HVTL/HVTU/HB of +128/+176/6&nbsp;m at 0&nbsp;h
-    (class 0), +107/+147/13&nbsp;m at 24&nbsp;h (class 2, onset passed),
-    +114/&minus;102/36&nbsp;m at 48&nbsp;h (class 3), +22/&minus;284/46&nbsp;m
-    at 72&nbsp;h (class 3), +241/&minus;295/0.5&nbsp;m at 96&nbsp;h at
-    976&nbsp;hPa (class 1, the seclusion), and &minus;33/+3/20&nbsp;m at
-    120&nbsp;h (class 6, with an upper term of +3&nbsp;m that is a
-    threshold artifact and reads as class 4). The cold-phase upper term
-    matches the Florida State diagram's &minus;300&nbsp;m; the seclusion's
-    lower term is about twice the diagram's value, in the direction the
-    band difference predicts. These values were read with the former
-    square window, which on a GFS forecast moved warm-core terms by 1 to
-    10&nbsp;m and cold-core terms by about 50&nbsp;m (Appendix B). The
-    index equals its definition at every sampled point. At 946&nbsp;hPa
-    every level of both bands lies above the surface; the 1000&nbsp;hPa
-    height the closed-low detector used at the time was extrapolated
-    there, and the detector now reads MSLP, which is not. After the
-    below-ground mask is
-    applied, Greenland and the
-    high terrain of western North America carry no classification,
-    rather than one contaminated by extrapolated sub-surface heights.
-  </p>
-  <figure id="fig10">
-    <img src="figures/fig9_cave_lifecycle.jpg"
-         alt="Six cropped screen captures of the AWIPS CAVE display, each centered on Typhoon Dujuan in the western Pacific with MSLP contours, wind barbs and the HCPSclass field drawn as a colored block over the closed low: red for class 0 at 12 hours, yellow for class 2 at 30 hours, blue with green edges for class 4 at 96 hours, green with a blue flank for class 3 at 114 hours, red with a magenta corner for class 0 at 126 hours, and magenta for class 1 at 144 hours over the Bering Sea.">
-    <figcaption><strong>Figure C1.</strong> The HCPSclass field on the
-      operational CAVE display through the life cycle of Typhoon Dujuan,
-      cropped from full-screen captures (nothing altered beyond cropping
-      and the panel labels). GFS
-      0.25&deg;, with MSLP (yellow), 1000 to 500&nbsp;hPa thickness (red)
-      and surface wind barbs. <strong>(a)</strong>&nbsp;12&nbsp;h and
-      <strong>(b)</strong>&nbsp;30&nbsp;h of the 2026 September 19
-      1800&nbsp;UTC run; <strong>(c)</strong> to <strong>(f)</strong>
-      96, 114, 126 and 144&nbsp;h of the 1200&nbsp;UTC run. The class
-      colors follow the class table of Section 2: 0 red, 1 magenta, 2 yellow, 3 green, 4 blue.
-      The readout at the center of each block is the sampled class and
-      position; the storm reaches 946&nbsp;hPa at 57.8&deg;N by
-      144&nbsp;h. The product legend in the captures carries the class
-      name as installed at the time, which used "frontal" for the
-      asymmetric classes; the shipped definition now uses Hart's
-      term. The captures were made with the former square window
-      (Section 2), which painted the class as square blocks; the
-      shipped module paints round ones. (<a href="#src-fig10">Appendix A</a>)</figcaption>
-  </figure>
-
-  <figure id="fig11">
-    <img src="figures/fig10_cave_4panel.jpg"
-         alt="Four-panel screen capture of the AWIPS CAVE display over North America and the North Atlantic at 6 hours of the 24 September 0600 UTC GFS run. Top left: the class field with MSLP, a green and magenta block at a 959 hectopascal low south of Greenland and smaller blocks at other lows. Top right: HB in magenta bands along the polar front and the subtropical zone, with the band wrapped around the Greenland low and clear at its center. Bottom left: HVTL with 850 hectopascal wind, red at the Greenland low's center and blue along the front. Bottom right: HVTU with 300 hectopascal wind arrows, blue under the jet and at the Greenland low.">
-    <figcaption><strong>Figure C2.</strong> The four-panel CAVE
-      procedure on the North Atlantic at 6&nbsp;h of the 2026 September
-      24 0600&nbsp;UTC GFS run, cropped from a full-screen capture, with
-      the shipped colormaps. Top left HCPSclass with MSLP; top right HB
-      on the CPS_Asymmetry map (&plusmn;40&nbsp;m, magenta positive, teal
-      negative) with MSLP; bottom left HVTL on the core map
-      (&plusmn;300&nbsp;m) with the 850&nbsp;hPa wind; bottom right HVTU
-      on the core map with the 300&nbsp;hPa wind. The 959&nbsp;hPa low
-      south of Greenland carries the warm seclusion signature: red HVTL
-      and blue HVTU at the center, HB near zero there with the magenta
-      band wrapped around the low, and a class block of 3 with 1 on the
-      flanks. The capture predates the circular window (Section 2): the
-      square footprints of the thermal wind fields visible at every low
-      are the former square window's, and the shipped module paints
-      round ones. The class legend in the
-      capture carries the product name as installed at the
-      time. (<a href="#src-fig11">Appendix A</a>)</figcaption>
-  </figure>
-
-  <p>
-    Figures C2 and C3 show the four products on the North Atlantic,
-    the Ocean Prediction Center's own domain, in the 2026 September 24
-    0600&nbsp;UTC GFS run, Figure C2 the 6&nbsp;h frame in full and
-    Figure C3 five frames from 6 to 126&nbsp;h, with the shipped colormaps: the
-    class palette, the asymmetry map on HB, and the core map on the
-    thermal wind terms, with the 850&nbsp;hPa wind over HVTL and the
-    300&nbsp;hPa wind over HVTU. Away from the lows the three fields read
-    as environment maps: HB paints
-    the polar front as a magenta band from the Pacific Northwest across
-    the northern United States and out past Iceland, with a second band
-    along the Gulf coast and the subtropical Atlantic; HVTU is blue where
-    the 300&nbsp;hPa wind arrows run, the upper baroclinic zone under the
-    jet; HVTL is blue under the front, red over the interior where the
-    surface highs sit behind the fronts, and red across the subtropics
-    where the trade-wind easterlies fade with height. At 6&nbsp;h (Figure C2) a
-    959&nbsp;hPa low south of Greenland carries the warm seclusion
-    signature at its center, red HVTL, blue HVTU, HB near zero with the
-    magenta band wrapped around it, and a class block of 3 with 1 on the
-    flanks. Over the five days the class field types every low in the
-    domain on every frame, tropical cyclones in the eastern Pacific as
-    0 and 2, frontal waves on the northern band as 3 and 4, a Hudson Bay
-    low as 5, and successive Gulf of Alaska and Labrador lows through
-    their own transitions, with nothing tracked and no advisory. The
-    values at the 959&nbsp;hPa center were not sampled and the case is
-    entered in the validation log by its colors alone.
-  </p>
-  <figure id="fig12">
-    <img src="figures/fig11_cave_atlantic.jpg"
-         alt="Five rows by four columns of screen captures over North America and the North Atlantic at 6, 54, 78, 102 and 126 hours of the 24 September 0600 UTC GFS run. Columns: the class field with MSLP, showing colored blocks at each low; HB in magenta bands along the polar front and the subtropical zone; HVTL in blue bands under the fronts with red over the continental interior and the subtropics; HVTU in blue bands under the jet with 300 hectopascal wind arrows. In the first row a 959 hectopascal low south of Greenland shows a green and magenta class block, red HVTL, blue HVTU and a magenta HB band wrapped around it.">
-    <figcaption><strong>Figure C3.</strong> The four products on the
-      North Atlantic at 6, 54, 78, 102 and 126&nbsp;h of the 2026
-      September 24 0600&nbsp;UTC GFS run, cropped from full-screen captures.
-      Columns: HCPSclass with MSLP; HB on the CPS_Asymmetry map
-      (&plusmn;40&nbsp;m, magenta positive, teal negative) with MSLP;
-      HVTL on the core map (&plusmn;300&nbsp;m) with the 850&nbsp;hPa
-      wind; HVTU on the core map with the 300&nbsp;hPa wind. The 6&nbsp;h
-      frame holds the 959&nbsp;hPa warm seclusion south of Greenland.
-      The class legend in the captures predates the change to Hart's
-      term "asymmetric", and the square footprints the former square
-      window (Section 2). (<a href="#src-fig12">Appendix A</a>)</figcaption>
-  </figure>
-
-
-  <h2 id="appendix-d">Appendix D. Sensitivity and selection on the archive</h2>
+  <h2 id="appendix-c">Appendix C. Sensitivity and selection on the archive</h2>
   <p>
     Margins and flicker. Over the archive's 2205 classed fixes the
     nearest class-changing boundary is within 5&nbsp;m for 28% and
@@ -2149,10 +1606,9 @@
   </ul>
 
   <footer>
-    All figures except Figures 4, 5 and 6 and those of Appendix C are synthetic and are
+    All figures except Figures 4, 5 and 6 are synthetic and are
     regenerated by the scripts in
-    <code>cyclone_phase_space/article/figures/</code>. The figures of Appendix C
-    are screen captures of the operational display, cropped only, and
+    <code>cyclone_phase_space/article/figures/</code>;
     Figures 4, 5 and 6 are computed from the archive of real cases. Appendix A lists the script, the functions and the
     implementation behind each figure.
   </footer>
