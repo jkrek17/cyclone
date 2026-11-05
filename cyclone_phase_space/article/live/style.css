@@ -21,8 +21,6 @@ sup { vertical-align: 0.6em; margin-left: 0.5px; }
 .swatch-jet { height: 8px; background: linear-gradient(90deg, #b9f6ca, #5fdc8a, #1f9d55, #f5d90a); }
 .swatch-track { height: 0; border-radius: 0; border-top: 2px solid #e0362c; box-shadow: 0 3px 0 -1px #2f74e0; }
 .swatch-halo { width: 12px; height: 12px; margin: 0 2px; border-radius: 50%; border: 1px solid #e0362c; background: rgba(224, 54, 44, .1); }
-.swatch-foot { background: transparent; border: 1px dashed #e7eef8; border-radius: 1px; }
-.swatch-terrain { width: 10px; height: 10px; margin: 0 3px; border-radius: 50%; border: 1.2px solid var(--text-2); }
 .swatch-fade { background: linear-gradient(90deg, rgba(219, 149, 100, 1), rgba(219, 149, 100, .2)); }
 .off { opacity: .45; }
 .off input { cursor: default; }
@@ -157,7 +155,6 @@ body.side-open.has-sel .legend-note, body.side-open.has-sel .legend-keys { displ
 /* the class field's swatch in the layers panel: the markers themselves */
 .product-ramp.glyph-ramp { display: inline-flex; align-items: center; justify-content: center; height: 13px; box-shadow: none; overflow: visible; }
 .glyph-ramp .glyph { flex: none; margin: 0 -2.5px; }
-.legend-keys .k-terrain { width: 9px; height: 9px; border: 1.2px solid var(--text-2); border-radius: 50%; vertical-align: -1px; margin: 0 10px 0 3px; }
 
 /* ---------- Low tooltip ---------- */
 .tip-cls { display: flex; align-items: center; gap: 7px; margin: 0 0 6px; color: var(--text); font-weight: 600; }

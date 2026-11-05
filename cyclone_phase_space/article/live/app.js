@@ -6,7 +6,7 @@
    globe page.
 
    The rasters (Mercator images of the whole map, 85N to 85S) are one
-   image layer; the contours, footprints, circles, tracks and low dots are
+   image layer; the contours, circles, tracks and low dots are
    GeoJSON layers; names and numbers go on the kit's 2D overlay canvas,
    since the page loads no map fonts, skipping the far side of the globe.
    storms.js (tracks, names, selection, follow mode), card.js (legend,
@@ -33,11 +33,11 @@ const TERRAIN_HPA = 850;         // surface pressure below this: a false low ove
 const STALE_H = 12;              // hours before the data is called stale
 const RASTERS = ['hb', 'hvtl', 'hvtu'];
 const FIELDS = ['class', ...RASTERS];
-const LAYER_KEYS = { contours: 'c', circles: 'h', footprint: 'p', tracks: 'k', terrain: 'g', fade: 'x', z500: 'z', thick: 'n', jet: 'j' };
+const LAYER_KEYS = { contours: 'c', circles: 'h', tracks: 'k', fade: 'x', z500: 'z', thick: 'n', jet: 'j' };
 // Keys present in the link when the layer is off: the fade is on by default
 // and older links never carried it.
 const INVERTED_KEYS = new Set(['fade']);
-const HOTKEYS = { i: 'contours', k: 'tracks', o: 'circles', p: 'footprint', g: 'terrain', x: 'fade', z: 'z500', n: 'thick', j: 'jet' };
+const HOTKEYS = { i: 'contours', k: 'tracks', o: 'circles', x: 'fade', z: 'z500', n: 'thick', j: 'jet' };
 // The upper-air overlays: layer -> the frame file and the index.json layers flag.
 const UPPER = { z500: 'z500', thick: 'thick', jet: 'jet250' };
 const THICK_LINE = 540;          // dam; the bold rain/snow guide line
@@ -78,7 +78,7 @@ const ENDS = {
 // Reading notes per field, from the user guide; the clear band at zero is
 // added from the export (card.js, clearText), else CLEAR_OLD.
 const HELP = {
-  class: `${GLYPH_HELP} Read the class at the center marker, never the footprint edge. A transition runs from a filled red circle to a filled red triangle, a hollow red triangle, then a filled blue triangle (codes 0, 2, 3, 4).`,
+  class: `${GLYPH_HELP} Read the class at the center marker. A transition runs from a filled red circle to a filled red triangle, a hollow red triangle, then a filled blue triangle (codes 0, 2, 3, 4).`,
   hb: 'Magenta: warm air to the right of the deep-layer flow, the frontal geometry; teal: warm air on the left. More than 10 m at a low center is asymmetric (Hart\'s onset line, marked).',
   hvtl: 'Red is a warm lower core, blue a cold one. A hurricane reads +100 to +300 m; a center falling below 0 marks transition complete.',
   hvtu: 'Red is a warm upper core, blue is cold aloft. The upper core usually turns blue first as a transition gets under way.',
@@ -102,7 +102,7 @@ const S = {
   i: 0, field: 'class', playing: false, timer: 0, token: 0,
   speed: 'normal', bust: '',
   opacity: { hb: 0.7, hvtl: 0.7, hvtu: 0.7 },  // the ramps are opaque from 10% of the half range
-  layers: { contours: true, circles: true, footprint: false, tracks: true, terrain: false, fade: true,
+  layers: { contours: true, circles: true, tracks: true, fade: true,
     z500: false, thick: false, jet: false },
   centers: [], lows: null, mslp: null, z500: null, thick: null, sel: null, follow: null, ready: false, sideOpen: true,
 };
@@ -381,7 +381,7 @@ function buildMap(start) {
     K.land().then((g) => setData('coast', g)).catch(() => {});
     map.addSource('graticule', { type: 'geojson', data: K.graticule() });
     map.addLayer({ id: 'graticule', type: 'line', source: 'graticule', paint: K.GRATICULE_PAINT });
-    for (const id of ['thick', 'z500', 'contours', 'footprints', 'halos', 'tails', 'track', 'trackpts', 'lows', 'sel']) {
+    for (const id of ['thick', 'z500', 'contours', 'halos', 'tails', 'track', 'trackpts', 'lows', 'sel']) {
       map.addSource(id, { type: 'geojson', data: EMPTY, tolerance: 0.2 });
     }
     // 1000-500 hPa thickness: dashed, red above THICK_LINE, blue at and below it, that line bold
@@ -402,8 +402,6 @@ function buildMap(start) {
     map.addLayer({ id: 'iso-minor', type: 'line', source: 'contours', minzoom: LABEL_ZOOM,
       filter: ['!=', ['%', lev, WIDE_CINT], 0], paint: iso(0.6, 1) });
     map.addLayer({ id: 'iso-major', type: 'line', source: 'contours', filter: ['==', ['%', lev, 16], 0], paint: iso(0.85, 1.7) });
-    map.addLayer({ id: 'footprints', type: 'line', source: 'footprints',
-      paint: { 'line-color': ['get', 'hex'], 'line-width': 1, 'line-opacity': 0.9, 'line-dasharray': [2, 2] } });
     map.addLayer({ id: 'halos-fill', type: 'fill', source: 'halos', minzoom: HALO_ZOOM, paint: { 'fill-color': ['get', 'hex'], 'fill-opacity': 0.06 } });
     map.addLayer({ id: 'halos', type: 'line', source: 'halos', minzoom: HALO_ZOOM,
       paint: { 'line-color': ['get', 'hex'], 'line-opacity': 0.7, 'line-width': ['case', ['get', 'deep'], 1.5, 1] } });
@@ -426,12 +424,12 @@ function buildMap(start) {
       'circle-stroke-color': GLYPH_ALT,
       'circle-stroke-width': 1.4,
     } });
-    // The hit target of every low, and the ring of a terrain minimum; clear under a glyph.
+    // The hit target of every low; clear under a glyph.
     map.addLayer({ id: 'lows', type: 'circle', source: 'lows', paint: {
       'circle-radius': ['interpolate', ['linear'], ['zoom'], 0, ['case', ['get', 'deep'], 4.8, 3.2], LABEL_ZOOM, ['case', ['get', 'deep'], 6.5, 4.8]],
-      'circle-color': ['case', ['any', ['get', 'terrain'], ['has', 'glyph']], 'rgba(0,0,0,0)', ['get', 'hex']],
-      'circle-stroke-color': ['case', ['get', 'terrain'], '#a3b3c9', ['has', 'glyph'], 'rgba(0,0,0,0)', '#0b1220'],
-      'circle-stroke-width': ['case', ['get', 'terrain'], 1.2, 1],
+      'circle-color': ['case', ['has', 'glyph'], 'rgba(0,0,0,0)', ['get', 'hex']],
+      'circle-stroke-color': ['case', ['has', 'glyph'], 'rgba(0,0,0,0)', '#0b1220'],
+      'circle-stroke-width': 1,
     } });
     // The phase space glyphs (glyphs.js).
     addGlyphImages(map);
@@ -587,7 +585,7 @@ function centersOf(fc) {
   }
   return out;
 }
-const shown = (c) => S.layers.terrain || !c.terrain;
+const shown = (c) => !c.terrain;  // false lows over high ground are never drawn
 const isDeep = (c) => !blank(c.mslp) && +c.mslp < DEEP_HPA;
 
 // A circle of radius r km round a point, as a polygon ring.
@@ -612,25 +610,18 @@ function drawLows() {
     // a tracked low by its class from its own motion, else the field's
     const hex = coreHexOf(clsOf(c));
     const deep = isDeep(c);
-    const props = { k, hex, deep, terrain: c.terrain };
-    if (!c.terrain && classDiffers(c)) props.alt = true;
+    const props = { k, hex, deep };
+    if (classDiffers(c)) props.alt = true;
     // a phase space glyph in place of the dot, its halo in the lower core's color
-    const g = c.terrain ? null : glyphProps(c);
+    const g = glyphProps(c);
     if (g) Object.assign(props, g);
     lows.push({ type: 'Feature', properties: props, geometry: { type: 'Point', coordinates: [c.lon, c.lat] } });
-    if (S.layers.circles && !c.terrain) {
+    if (S.layers.circles) {
       halos.push({ type: 'Feature', properties: { hex: g ? g.halo : hex, deep }, geometry: { type: 'Polygon', coordinates: [circle(c.lat, c.lon, +c.radius_km || HALO_KM)] } });
     }
   });
   setData('lows', { type: 'FeatureCollection', features: lows });
   setData('halos', { type: 'FeatureCollection', features: halos });
-}
-
-// The product's own square footprint, as CAVE draws it: a dashed outline.
-function drawFootprints() {
-  const feats = !S.lows || !S.layers.footprint ? [] : S.lows.features.filter((f) => f.geometry?.type !== 'Point')
-    .map((f) => ({ ...f, properties: { hex: coreHexOf(f.properties?.cls) } }));
-  setData('footprints', { type: 'FeatureCollection', features: feats });
 }
 
 function drawSelection() {
@@ -727,7 +718,6 @@ async function show(i) {
   S.centers = centersOf(S.lows);
   S.ready = true;
   drawContours();
-  drawFootprints();
   drawLows();
   stormsFrame(S.i);
   followFrame();
@@ -839,8 +829,7 @@ function setLayer(k, on) {
   renderLegend();
   if (!S.ready) return;
   if (k === 'contours') drawContours();
-  if (k === 'footprint') drawFootprints();
-  if (k === 'circles' || k === 'terrain') { drawLows(); renderDeepest(); }
+  if (k === 'circles') { drawLows(); renderDeepest(); }
   if (k === 'tracks') drawTracks();
   if (k === 'jet') drawJet(S.index.hours[S.i]);
   if (k === 'z500' || k === 'thick') {
