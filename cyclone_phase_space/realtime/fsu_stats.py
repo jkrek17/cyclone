@@ -464,16 +464,19 @@ def scatter_figure(path: Path, rows: list[dict], err: dict) -> None:
     for i, (band, cols) in enumerate(BANDS.items()):
         for j, term in enumerate(TERMS):
             ax = axs[i, j]
-            for verified, mk, lab in ((False, "o", "one plot only"), (True, "o", "verified on both plots")):
-                for warm, col in ((True, "#c0392b"), (False, "#2471a3")):
+            # the live map's colors (article/live/glyphs.js): red a warm lower
+            # core, blue a cold one; every point filled, the hours read from one
+            # plot only faded and smaller (hollow is the map's "shallow")
+            for verified, mk, lab in ((False, "o", "one plot only (faded)"), (True, "o", "verified on both plots")):
+                for warm, col in ((True, "#e0362c"), (False, "#2f74e0")):
                     sel = [r for r in rows if r["verified"] == verified and r[cols[term]] is not None
                            and r["fsu_" + term] is not None and r["fsu_vtl"] is not None
                            and (r["fsu_vtl"] >= 0) == warm]
                     if not sel:
                         continue
-                    ax.scatter([r["fsu_" + term] for r in sel], [r[cols[term]] for r in sel], s=10 if verified else 7,
-                               marker=mk, facecolors=col if verified else "none", edgecolors=col, linewidths=0.6,
-                               alpha=0.75 if verified else 0.45,
+                    ax.scatter([r["fsu_" + term] for r in sel], [r[cols[term]] for r in sel], s=10 if verified else 6,
+                               marker=mk, facecolors=col, edgecolors="none", linewidths=0,
+                               alpha=0.8 if verified else 0.3,
                                label=f"{'warm' if warm else 'cold'} lower core, {lab}")
             allv = [v for r in rows for v in (r[cols[term]], r["fsu_" + term]) if v is not None]
             if allv:
@@ -669,16 +672,51 @@ CAVEATS = [
 ]
 
 
+def read_pairs(path: Path) -> list[dict]:
+    """The rows of fsu_pairs.csv back as pair_rows gives them: numbers as
+    floats, blanks as None, verified as 0 or 1, the ids as text."""
+    text = {"cycle", "storm", "valid", "flag_phase1", "flag_phase2"}
+    rows = []
+    with open(path, newline="") as f:
+        for r in csv.DictReader(f):
+            row = {}
+            for k, v in r.items():
+                if k in text:
+                    row[k] = v
+                elif v == "":
+                    row[k] = None
+                else:
+                    row[k] = float(v)
+            row["verified"] = int(row["verified"] or 0)
+            rows.append(row)
+    return rows
+
+
+def replot(out: Path) -> int:
+    """Redraw the two figures from the saved fsu_pairs.csv and
+    fsu_stats.json, without digitizing again (a style change only)."""
+    rows = read_pairs(out / "fsu_pairs.csv")
+    S = json.loads((out / "fsu_stats.json").read_text())
+    scatter_figure(out / "fig_fsu_scatter.png", rows, S["terms"]["verified"])
+    timing_figure(out / "fig_fsu_timing.png", S["timing"])
+    print(f"redrew the figures from {len(rows)} saved pairs in {out}")
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("--data-dir", default=str(HERE / "data"))
     ap.add_argument("--out", default=None, help="output directory (default DATA_DIR/validation)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--limit", type=int, default=0, help="only the first N storm-cycles (testing)")
+    ap.add_argument("--replot", action="store_true",
+                    help="only redraw the figures from the saved fsu_pairs.csv and fsu_stats.json")
     a = ap.parse_args(argv)
     data = Path(a.data_dir)
     out = Path(a.out) if a.out else data / "validation"
     out.mkdir(parents=True, exist_ok=True)
+    if a.replot:
+        return replot(out)
     t0 = time.time()
     scs = storm_cycles(data)
     tracks = {(c, s): read_track(d / "track.csv") for c, s, d in scs}

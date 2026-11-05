@@ -153,11 +153,15 @@
   </p>
   <figure id="fig1">
     <img src="figures/fig10_two_diagrams.png"
-         alt="Two-panel schematic of Hart's cyclone phase space diagrams sharing one 168-hour extratropical transition trajectory colored from light to dark blue by forecast hour. Left: parameter B against the lower thermal wind, the four asymmetry and warm/cold quadrants shaded and labeled, the trajectory crossing the B equals 10 meter onset line and then the negative lower thermal wind equals zero completion line, both crossings marked with an x, and a dashed branch toward a warm seclusion point in the symmetric warm core quadrant. Right: lower against upper thermal wind, the four structural quadrants shaded and labeled, the same trajectory and warm seclusion branch.">
+         alt="Two-panel schematic of Hart's cyclone phase space diagrams sharing one 168-hour extratropical transition trajectory drawn as the live map draws a track: red segments and markers while the lower core is warm and blue once it is cold, circles while symmetric and triangles once asymmetric, filled where deep and hollow where shallow. Left: parameter B against the lower thermal wind, the four asymmetry and warm/cold quadrants shaded and labeled, the trajectory crossing the B equals 10 meter onset line and then the negative lower thermal wind equals zero completion line, both crossings marked with an x, and a dashed branch toward a warm seclusion point in the symmetric warm core quadrant. Right: lower against upper thermal wind, the four structural quadrants shaded and labeled, the same trajectory and warm seclusion branch.">
     <figcaption><strong>Figure 1.</strong> Hart's (2003) two cyclone
       phase space diagrams, sharing one <em>schematic</em>
       extratropical transition trajectory (not data from any storm),
-      colored light to dark by forecast hour (0 to 168&nbsp;h).
+      0 to 168&nbsp;h, drawn with the live map's marker: color is the
+      lower core (red warm, blue cold), a triangle is asymmetric
+      (<i>B</i> above 10&nbsp;m), and a filled marker is deep (the upper
+      core agrees) while a hollow one is shallow. The quadrants are
+      tinted the same way.
       <strong>(a)</strong> <i>B</i> against
       &minus;V<sub>T</sub><sup>L</sup>, with Evans and Hart's (2003)
       <i>B</i> = 10&nbsp;m onset line and
@@ -341,23 +345,29 @@
     cells; the two with a cold lower and warm upper core, a
     perturbation peaking at mid-levels that the asymmetry does not
     further characterize, are merged, giving seven classes (table; the
-    quadrants are those of Figure 1). The colors form three groups so
-    that onset and completion read as abrupt shifts: reds for a
-    symmetric warm core, yellow and green for a storm in transition,
-    blues for a cold core.
+    quadrants are those of Figure 1). The live map and the figures here
+    mark each low with one marker that reads Hart's three axes
+    separately: color is the lower core (red warm, blue cold), a
+    triangle is asymmetric and a circle symmetric, and a filled marker
+    is deep while a hollow ring is shallow (table, Marker). CAVE draws
+    the class as a gridded field, which cannot carry a shape, so the
+    HCPSclass colormap keeps one color per class (table, CAVE color),
+    grouped so that onset and completion read as abrupt shifts: reds
+    for a symmetric warm core, yellow and green for a storm in
+    transition, blues for a cold core.
   </p>
   <table>
-    <caption>HCPSclass: the seven classes formed from the quadrants of Hart's two diagrams (asymmetric is Hart's term; the storm has a warm and a cold side, that is, it is frontal). A term of exactly zero counts as warm; <i>B</i> of exactly 10&nbsp;m counts as symmetric.</caption>
-    <thead><tr><th scope="col">Code</th><th scope="col">Color</th><th scope="col">Name</th><th scope="col"><i>B</i></th><th scope="col">&minus;V<sub>T</sub><sup>L</sup></th><th scope="col">&minus;V<sub>T</sub><sup>U</sup></th><th scope="col">Typical system</th></tr></thead>
+    <caption>HCPSclass: the seven classes formed from the quadrants of Hart's two diagrams (asymmetric is Hart's term; the storm has a warm and a cold side, that is, it is frontal). A term of exactly zero counts as warm; <i>B</i> of exactly 10&nbsp;m counts as symmetric. Marker: the live map's and the figures' (class 6 spans the <i>B</i> wall, so its marker is a circle or a triangle by its own <i>B</i>). CAVE color: the HCPSclass field in D2D and CAVE.</caption>
+    <thead><tr><th scope="col">Code</th><th scope="col">Marker</th><th scope="col">CAVE color</th><th scope="col">Name</th><th scope="col"><i>B</i></th><th scope="col">&minus;V<sub>T</sub><sup>L</sup></th><th scope="col">&minus;V<sub>T</sub><sup>U</sup></th><th scope="col">Typical system</th></tr></thead>
     <tbody>
-      <tr><td>0</td><td>red</td><td>symmetric deep warm core</td><td>&le; 10</td><td>warm</td><td>warm</td><td>hurricane, typhoon</td></tr>
-      <tr><td>1</td><td>magenta</td><td>symmetric shallow warm core</td><td>&le; 10</td><td>warm</td><td>cold</td><td>subtropical storm, or warm seclusion once <i>B</i> falls</td></tr>
-      <tr><td>2</td><td>yellow</td><td>asymmetric deep warm core</td><td>&gt; 10</td><td>warm</td><td>warm</td><td>hurricane meeting a trough, transition beginning</td></tr>
-      <tr><td>3</td><td>green</td><td>asymmetric shallow warm core</td><td>&gt; 10</td><td>warm</td><td>cold</td><td>transition under way</td></tr>
-      <tr><td>4</td><td>blue</td><td>asymmetric cold core</td><td>&gt; 10</td><td>cold</td><td>cold</td><td>extratropical low, transition complete</td></tr>
-      <tr><td>5</td><td>indigo</td><td>symmetric cold core</td><td>&le; 10</td><td>cold</td><td>cold</td><td>occluded or cutoff cold low</td></tr>
-      <tr><td>6</td><td>gray</td><td>shallow cold core (lower cold, upper warm)</td><td>any</td><td>cold</td><td>warm</td><td>perturbation peaking at mid-levels</td></tr>
-      <tr><td>blank</td><td colspan="6">no closed low in MSLP, below ground (HVTL missing), or <i>B</i> undefined (window-mean steering below 2&nbsp;m/s)</td></tr>
+      <tr><td>0</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled red circle"><path d="M -7 0 A 7 7 0 1 0 7 0 A 7 7 0 1 0 -7 0 Z" fill="#e0362c" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td>red</td><td>symmetric deep warm core</td><td>&le; 10</td><td>warm</td><td>warm</td><td>hurricane, typhoon</td></tr>
+      <tr><td>1</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow red circle"><path d="M -6.4 0 A 6.4 6.4 0 1 0 6.4 0 A 6.4 6.4 0 1 0 -6.4 0 Z" fill="#f2f5f9" stroke="#e0362c" stroke-width="2.8" stroke-linejoin="round"/></svg></td><td>magenta</td><td>symmetric shallow warm core</td><td>&le; 10</td><td>warm</td><td>cold</td><td>subtropical storm, or warm seclusion once <i>B</i> falls</td></tr>
+      <tr><td>2</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled red triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#e0362c" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td>yellow</td><td>asymmetric deep warm core</td><td>&gt; 10</td><td>warm</td><td>warm</td><td>hurricane meeting a trough, transition beginning</td></tr>
+      <tr><td>3</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow red triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#f2f5f9" stroke="#e0362c" stroke-width="2.8" stroke-linejoin="round"/></svg></td><td>green</td><td>asymmetric shallow warm core</td><td>&gt; 10</td><td>warm</td><td>cold</td><td>transition under way</td></tr>
+      <tr><td>4</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled blue triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#2f74e0" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td>blue</td><td>asymmetric cold core</td><td>&gt; 10</td><td>cold</td><td>cold</td><td>extratropical low, transition complete</td></tr>
+      <tr><td>5</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled blue circle"><path d="M -7 0 A 7 7 0 1 0 7 0 A 7 7 0 1 0 -7 0 Z" fill="#2f74e0" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td>indigo</td><td>symmetric cold core</td><td>&le; 10</td><td>cold</td><td>cold</td><td>occluded or cutoff cold low</td></tr>
+      <tr><td>6</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow blue circle"><path d="M -6.4 0 A 6.4 6.4 0 1 0 6.4 0 A 6.4 6.4 0 1 0 -6.4 0 Z" fill="#f2f5f9" stroke="#2f74e0" stroke-width="2.8" stroke-linejoin="round"/></svg> <svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow blue triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#f2f5f9" stroke="#2f74e0" stroke-width="2.8" stroke-linejoin="round"/></svg></td><td>gray</td><td>shallow cold core (lower cold, upper warm)</td><td>any</td><td>cold</td><td>warm</td><td>perturbation peaking at mid-levels</td></tr>
+      <tr><td>blank</td><td colspan="7">no closed low in MSLP, below ground (HVTL missing), or <i>B</i> undefined (window-mean steering below 2&nbsp;m/s)</td></tr>
     </tbody>
   </table>
   <p>
@@ -377,19 +387,21 @@
   </p>
   <figure id="fig7">
     <img src="figures/figJ_phase_space_3d.png"
-         alt="Six small perspective views, in two rows of three, of the same three-dimensional box seen from the same angle, whose axes are the lower thermal wind, parameter B and the upper thermal wind, all in meters. In every panel, planes at B equals 10 meters and at zero on both thermal wind axes cut the box into cells, drawn as translucent boxes in the seven class colors and numbered 0 to 6, with the gray class 6 cell spanning both sides of the B plane where the lower core is cold and the upper warm. Each panel traces one synthetic 168 hour life cycle, the gridded path as squares and line segments colored by class and Hart's path as a thin gray line with small circles, the start circled, the end boxed and markers growing with the central pressure depth and hours labeled every 12 hours, with a marker size legend below. Panel a, extratropical transition: from the symmetric deep warm core cell through the asymmetric warm cells to the asymmetric cold cell, then the symmetric cold cell and the symmetric shallow warm cell, with onset at 42 hours and completion at 108 hours marked with crosses. Panel b, tropical cyclone decay: a short straight path that stays in the symmetric deep warm core cell, moving toward the origin. Panel c, warm seclusion: from the asymmetric cold cell into the asymmetric shallow warm cell, the symmetric shallow warm cell and finally the symmetric cold cell. Panel d, cold-core occlusion: from the asymmetric cold cell into the symmetric cold cell. Panel e, tropical transition: from the asymmetric cold cell through the asymmetric and symmetric shallow warm cells into the symmetric deep warm core cell. Panel f, hybrid: a zigzag that crosses the B equals 10 meter plane back and forth between the symmetric and asymmetric shallow warm cells. A legend below names the seven classes and the path symbols.">
+         alt="Six small perspective views, in two rows of three, of the same three-dimensional box seen from the same angle, whose axes are the lower thermal wind, parameter B and the upper thermal wind, all in meters. In every panel, planes at B equals 10 meters and at zero on both thermal wind axes cut the box into cells, drawn as translucent boxes tinted red where the lower core is warm and blue where it is cold, stronger where the upper core agrees, and numbered 0 to 6, with the class 6 cell spanning both sides of the B plane where the lower core is cold and the upper warm. Each panel traces one synthetic 168 hour life cycle, the gridded path as the live map's markers (red or blue by the lower core, triangles where asymmetric, hollow where shallow) joined by segments in the same colors, and Hart's path as a thin gray line with small gray dots, the start circled, the end boxed and markers growing with the central pressure depth and hours labeled every 12 hours, with a marker size legend below. Panel a, extratropical transition: from the symmetric deep warm core cell through the asymmetric warm cells to the asymmetric cold cell, then the symmetric cold cell and the symmetric shallow warm cell, with onset at 42 hours and completion at 108 hours marked with crosses. Panel b, tropical cyclone decay: a short straight path that stays in the symmetric deep warm core cell, moving toward the origin. Panel c, warm seclusion: from the asymmetric cold cell into the asymmetric shallow warm cell, the symmetric shallow warm cell and finally the symmetric cold cell. Panel d, cold-core occlusion: from the asymmetric cold cell into the symmetric cold cell. Panel e, tropical transition: from the asymmetric cold cell through the asymmetric and symmetric shallow warm cells into the symmetric deep warm core cell. Panel f, hybrid: a zigzag that crosses the B equals 10 meter plane back and forth between the symmetric and asymmetric shallow warm cells. A legend below shows each class's marker and the path symbols.">
     <figcaption><strong>Figure 2.</strong> A rendering of Hart's (2003)
       three-dimensional phase space, with six <em>synthetic</em> life
       cycles traced through it. The planes <i>B</i> = 10&nbsp;m,
       &minus;V<sub>T</sub><sup>L</sup> = 0 and
       &minus;V<sub>T</sub><sup>U</sup> = 0 are his thresholds; they cut
-      the space into the cells of HCPSclass, drawn in the colors of the
-      class table, with class 6 one box spanning both halves of the
-      <i>B</i> plane. Each panel is one 168&nbsp;h archetype built from
+      the space into the cells of HCPSclass, tinted as the live map's
+      phase space: red where the lower core is warm, blue where it is
+      cold, stronger where the upper core agrees, with class 6 one box
+      spanning both halves of the <i>B</i> plane. Each panel is one 168&nbsp;h archetype built from
       a prescribed vortex, a storm-attached thickness dipole, a
       baroclinic zone and a track, evaluated every 6&nbsp;h by the
-      gridded method (squares, colored by class) and by Hart's method
-      (open circles). As on Hart's diagrams the marker grows with the
+      gridded method (the live map's marker: color the lower core,
+      triangle asymmetric, hollow shallow) and by Hart's method (gray
+      dots). As on Hart's diagrams the marker grows with the
       central pressure depth and the hour is labeled every 12&nbsp;h;
       an &times; marks onset and completion. Hart's method passes
       through the same cells in the same order by construction, the
@@ -503,7 +515,7 @@
   <p>
     Because half of the archive's hours sit within 10&nbsp;m of the
     <i>B</i> = 10&nbsp;m wall and the class changes at 21% of six-hour
-    steps (Section 6), the live map colors each tracked low by a
+    steps (Section 6), the live map marks each tracked low by a
     hysteresis class: the class of the previous hour is kept until
     <i>B</i> has moved 5&nbsp;m past its wall (above 15&nbsp;m to become
     asymmetric, below 5&nbsp;m to become symmetric) or a thermal wind
@@ -650,14 +662,14 @@
   </p>
   <figure id="fig18">
     <img src="figures/figK_fsu_scatter.png"
-         alt="Six scatter plots of our values against the Florida State diagrams' digitized values, our value on the vertical axis, each with a one-to-one line. Top row, the standard bands: B with bias about 8 meters, the lower thermal wind with bias about 12 meters and the upper with bias near minus 3 meters. Bottom row, Hart's bands and the track-motion B: B with bias about 2 meters, the lower thermal wind about 14 meters low and the upper about 7 meters low, all three tighter to the line. Points are red for a warm lower core and blue for a cold one, filled where verified on both diagrams and hollow where read from one.">
+         alt="Six scatter plots of our values against the Florida State diagrams' digitized values, our value on the vertical axis, each with a one-to-one line. Top row, the standard bands: B with bias about 8 meters, the lower thermal wind with bias about 12 meters and the upper with bias near minus 3 meters. Bottom row, Hart's bands and the track-motion B: B with bias about 2 meters, the lower thermal wind about 14 meters low and the upper about 7 meters low, all three tighter to the line. Points are red for a warm lower core and blue for a cold one, solid where verified on both diagrams and faded where read from one.">
     <figcaption><strong>Figure 4.</strong> Ours against the Florida
       State diagrams at the paired hours of the archive, both as
       24&nbsp;h running means. Top row: standard-level bands and the
       steering-flow <i>B</i>. Bottom row: Hart's bands and the
       track-motion <i>B</i>. Red, a warm lower core on the diagram;
-      blue, cold; filled, verified on both diagrams; hollow, timed on
-      one. The titles carry the bias, root mean square and count of the
+      blue, cold, as on the live map; solid, verified on both diagrams;
+      faded, timed on one. The titles carry the bias, root mean square and count of the
       verified set. (<a href="#src-fig18">Appendix A</a>)</figcaption>
   </figure>
   <figure id="fig19" class="half">
@@ -681,19 +693,20 @@
   </p>
   <figure id="figM">
     <img src="figures/figM_fsu_case.png"
-         alt="Three panels. Panels a and b are Hart's two diagrams, B against the lower thermal wind and the upper against the lower thermal wind, with the quadrants shaded, the 10 meter line and the zero lines drawn. One real storm is traced on both: our trajectory from 0 to 198 hours as squares colored by class and sized by central pressure, joined by a dark line and labeled every 12 hours, and the Florida State page's digitized values at nine verified hours as hollow circles of the same sizes. The storm sits in the symmetric deep warm core quadrant for its first four days near B of zero and lower thermal wind of 60 to 170 meters, then climbs steeply through the asymmetric warm core quadrant into the asymmetric cold core quadrant between 114 and 144 hours, where the two sides diverge most, and returns to warm core after 156 hours. Panel c plots B, the lower and the upper thermal wind against forecast hour for both sides, with our minimum sea level pressure as a gray line on a right axis, and two class strips above it, ours and Florida State's, with onset and completion ticks: onset at 114 hours on both, completion at 138 hours on ours and 144 on Florida State's. A size legend along the bottom gives 990, 970, 950 and 930 hectopascals.">
+         alt="Three panels. Panels a and b are Hart's two diagrams, B against the lower thermal wind and the upper against the lower thermal wind, with the quadrants shaded, the 10 meter line and the zero lines drawn. One real storm is traced on both: our trajectory from 0 to 198 hours as the live map's markers, red or blue by the lower core, triangles where asymmetric and hollow where shallow, sized by central pressure, joined by segments in the same colors and labeled every 12 hours, and the Florida State page's digitized values at nine verified hours as gray dots joined by a dashed gray line. The storm sits in the symmetric deep warm core quadrant for its first four days near B of zero and lower thermal wind of 60 to 170 meters, then climbs steeply through the asymmetric warm core quadrant into the asymmetric cold core quadrant between 114 and 144 hours, where the two sides diverge most, and returns to warm core after 156 hours. Panel c plots B, the lower and the upper thermal wind against forecast hour for both sides, with our minimum sea level pressure as a gray line on a right axis, and two rows of class markers above it, ours and Florida State's, with onset and completion ticks: onset at 114 hours on both, completion at 138 hours on ours and 144 on Florida State's. A size legend along the bottom gives 990, 970, 950 and 930 hectopascals.">
     <figcaption><strong>Figure 6.</strong> One real storm-cycle on
       Hart's two diagrams: the western Pacific typhoon of the
-      00&nbsp;UTC 2&nbsp;October 2026 GFS run, ours (squares colored by
-      HCPSclass and sized by central pressure, hours labeled every
+      00&nbsp;UTC 2&nbsp;October 2026 GFS run, ours (the live map's
+      marker, color the lower core, triangle asymmetric, hollow shallow,
+      sized by central pressure, hours labeled every
       12&nbsp;h, start circled, end boxed; Hart's layers, track-motion
       <i>B</i>, 24&nbsp;h mean) against the Florida State page's
       digitized values at the nine hours verified on both of its
-      diagrams (hollow circles). (a)&nbsp;<i>B</i> against
+      diagrams (gray dots). (a)&nbsp;<i>B</i> against
       &minus;V<sub>T</sub><sup>L</sup>; (b)&nbsp;&minus;V<sub>T</sub><sup>U</sup>
       against &minus;V<sub>T</sub><sup>L</sup>; (c)&nbsp;the three
       parameters and our MSLP against forecast hour, with each side's
-      class strip and its onset and completion. Onset is 114&nbsp;h on
+      class as a row of markers and its onset and completion. Onset is 114&nbsp;h on
       both sides; completion 138&nbsp;h on ours and 144&nbsp;h on the
       page's, whose &minus;V<sub>T</sub><sup>L</sup> at 138&nbsp;h is
       still +5&nbsp;m against our &minus;42&nbsp;m. Over the nine hours
@@ -735,20 +748,20 @@
   </p>
   <figure id="fig13">
     <img src="figures/figD_lifecycle.png"
-         alt="Three panels comparing Hart's method and the gridded method on one synthetic life cycle. Left: B against the lower thermal wind, two loops colored light to dark by hour, Hart's in gray and the gridded in red both reaching 40 meters, with a dotted third curve for the former first-order gridded B reaching about 30 meters, both loops starting in the symmetric warm quadrant, crossing into asymmetric warm, then asymmetric cold, and returning through symmetric cold to symmetric warm. Center: upper against lower thermal wind, both trajectories running from deep warm to shallow warm to deep cold and back to shallow warm. Right: time series of B and the two thermal wind terms for both methods, the former first-order B dotted, with two class strips along the top showing the sequence 0, 2, 3, 4, 5, 1 for each, onset and completion each at the same hour for both.">
+         alt="Three panels comparing Hart's method and the gridded method on one synthetic life cycle. Left: B against the lower thermal wind, two loops, Hart's as gray dots light to dark by hour and the gridded as the live map's markers, red or blue by the lower core, triangles where asymmetric and hollow where shallow, both reaching 40 meters, with a dotted third curve for the former first-order gridded B reaching about 30 meters, both loops starting in the symmetric warm quadrant, crossing into asymmetric warm, then asymmetric cold, and returning through symmetric cold to symmetric warm. Center: upper against lower thermal wind, both trajectories running from deep warm to shallow warm to deep cold and back to shallow warm. Right: time series of B and the two thermal wind terms for both methods, the former first-order B dotted, with two rows of class markers along the top showing the sequence 0, 2, 3, 4, 5, 1 for each, onset and completion each at the same hour for both.">
     <figcaption><strong>Figure 7.</strong> One <em>synthetic</em>
       transition life cycle (0 to 168&nbsp;h, 6&nbsp;h frames)
       evaluated with Hart's method (circular 500&nbsp;km window,
       50&nbsp;hPa levels, semicircle <i>B</i>; gray) and with the
       operational gridded functions (circular window, standard levels,
-      semicircle-mean <i>B</i>; red), both at the storm center and
+      semicircle-mean <i>B</i>; the live map's marker), both at the storm center and
       driven by the same motion vector, with the package's earlier
       first-order <i>B</i> dotted. <strong>(a)</strong> <i>B</i> against
       &minus;V<sub>T</sub><sup>L</sup>; <strong>(b)</strong>
       &minus;V<sub>T</sub><sup>U</sup> against
       &minus;V<sub>T</sub><sup>L</sup>; <strong>(c)</strong> the three
       parameters against forecast hour with each method's class as a
-      strip along the top. Both walk 0, 2, 3, 4, 5, 1 with onset at
+      row of markers along the top. Both walk 0, 2, 3, 4, 5, 1 with onset at
       42&nbsp;h and completion at 108&nbsp;h. (<a href="#src-fig13">Appendix A</a>)</figcaption>
   </figure>
 
@@ -1011,8 +1024,10 @@
       &minus;V<sub>T</sub><sup>U</sup>) triples are the array
       <code>FIG10_TRAJ</code> listed in the script, one per 24&nbsp;h from 0
       to 168&nbsp;h, and the warm seclusion endpoint is
-      <code>FIG10_SECLUSION_END</code>. Quadrant colors, labels and axis
-      limits come from <code>diagram_style.py</code>, and the 10&nbsp;m
+      <code>FIG10_SECLUSION_END</code>. Quadrant tints, labels and axis
+      limits come from <code>diagram_style.py</code>, the markers and
+      track colors from <code>glyph_style.py</code> (the live map's
+      <code>live/glyphs.js</code> in matplotlib), and the 10&nbsp;m
       onset line from <code>cps_HartCPS.B_THRESHOLD_M</code>.</dd>
 
     <dt id="src-fig7">Figure 2</dt>
@@ -1046,8 +1061,10 @@
       same without drawing). The cell
       boundaries are the thresholds of the class table in Section 2, <i>B</i> against 10&nbsp;m
       (<code>cps_HartCPS.B_THRESHOLD_M</code>) and both thermal wind
-      terms against 0, and the cell colors are those of the shipped
-      <code>CPS_HartClass</code> colormap; the static figure is drawn with
+      terms against 0, and the cells, path and markers follow the live
+      map (<code>glyph_style.py</code>; a 3-D Plotly scatter has no
+      triangle, so the interactive cube draws its markers as filled or
+      hollow circle and triangle characters); the static figure is drawn with
       matplotlib's <code>mplot3d</code>, all panels from one viewing
       angle (elevation 20&deg;, azimuth &minus;40&deg;). The same script writes the
       interactive version,
@@ -1117,7 +1134,9 @@
       agreements, the confusion matrices and the split of the
       disagreements, is <code>realtime/class_cells.py</code> on the
       pairs file (<code>class_cells.md</code> and
-      <code>class_cells.json</code> beside it).</dd>
+      <code>class_cells.json</code> beside it). <code>fsu_stats.py
+      --replot</code> redraws Figures 4 and 5 from the saved pairs and
+      statistics without digitizing again.</dd>
     <dt id="src-fig19">Figure 5</dt>
     <dd><code>realtime/fsu_stats.py</code>
       (<code>fig_fsu_timing.png</code>, copied to
@@ -1157,8 +1176,8 @@
       hour. Quadrants, corner labels and limits are
       <code>diagram_style.py</code> (<i>B</i>'s lower limit opened to
       &minus;30&nbsp;m for the labels along <i>B</i> = 0, and the deep warm
-      core label moved to its quadrant's inner corner), the class strips are
-      <code>track_cps.class_strip</code>, and hour labels every 12&nbsp;h are
+      core label moved to its quadrant's inner corner), the markers are
+      <code>glyph_style.py</code>, and hour labels every 12&nbsp;h are
       placed by the same eight-direction rule as Figure 2. The script prints
       the verified hours, both sides' onset and completion, the per-hour
       values and the mean and RMS difference of each parameter. The
@@ -1617,7 +1636,8 @@
       <strong>(d)</strong> The two vortices plotted on Hart's asymmetry
       diagram, <i>B</i> against &minus;V<sub>T</sub><sup>L</sup>, at their
       computed values, with a schematic transition trajectory of the same
-      shape as Figure 1a. (<a href="#src-fig6">Appendix A</a>)</figcaption>
+      shape as Figure 1a in the live map's colors and shapes (this
+      diagram has no upper term, so every marker is drawn filled). (<a href="#src-fig6">Appendix A</a>)</figcaption>
   </figure>
   <h3 id="appendix-b-tilt">Amplitude, sign and tilt of the gridded thermal wind</h3>
   <p>
@@ -1743,15 +1763,15 @@
       <strong>(a)</strong> 1000&nbsp;hPa height (about 8&nbsp;m per hPa)
       every 40&nbsp;m, 1000 to 500&nbsp;hPa thickness every 60&nbsp;m
       (red, dashed), the track and the current center.
-      <strong>(b)</strong> HCPSclass, colors as in the class table of
-      Section 2. <strong>(c)</strong> 900 to 600&nbsp;hPa thickness every
+      <strong>(b)</strong> HCPSclass as CAVE draws it, colors as in the
+      class table of Section 2. <strong>(c)</strong> 900 to 600&nbsp;hPa thickness every
       20&nbsp;m (lines) and its anomaly from the zonal mean (fill,
       &plusmn;80&nbsp;m), with the 500&nbsp;km circle (Hart's, the gridded
       thermal wind's window, and the disk the gridded half-disks divide)
       and the motion vector. <strong>(d)</strong> and
       <strong>(e)</strong> Hart's two diagrams with both trajectories
-      drawn up to the row's hour, Hart's in gray and the gridded in red,
-      the current points enlarged. An animated version with one frame
+      drawn up to the row's hour, Hart's in gray and the gridded as the
+      live map's markers, the current points enlarged. An animated version with one frame
       per 6&nbsp;h accompanies the figure (<a href="#src-fig14">Appendix A</a>).</figcaption>
   </figure>
   <h3 id="appendix-b-extensions">Tests of the candidate extensions</h3>

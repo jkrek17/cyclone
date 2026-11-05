@@ -15,7 +15,7 @@ thermal wind.
 
 The figure follows Hart's conventions: marker size grows with the central
 pressure depth (`mslp_hpa`, the GFS minimum at the fix; the Florida State
-markers, hollow, use our MSLP at the same hour so the two sides are on one
+markers, gray dots, use our MSLP at the same hour so the two sides are on one
 scale), the hour is labeled every 12 h on our trajectory, the quadrants are
 shaded in the house style of `diagram_style.py` with the 10 m onset line
 and the zero lines, and a third panel shows the three parameters against
@@ -53,6 +53,7 @@ sys.path.insert(0, str(HERE))
 
 import track_cps as tc  # noqa: E402  (selects the Agg backend through gfs_cps)
 import diagram_style as ds  # noqa: E402
+import glyph_style as gs  # noqa: E402  (the live map's marker)
 
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib import patheffects  # noqa: E402
@@ -66,6 +67,7 @@ B_THR = float(tc.B_THR)
 CLASS_PALETTE = tc.CLASS_PALETTE
 PATH_EDGE = "#3a3a37"
 FSU_EDGE = "#0b0b0b"
+FSU_GRAY = "#6f6e69"  # the Florida State side on the diagrams: gray dots, not a class
 PURPLE, RED, BLUE = "#8e44ad", "#d62d2d", "#2a78d6"
 HOUR_STEP, HOUR_MAJOR = 12.0, 24.0
 
@@ -200,10 +202,11 @@ def hour_labels(ax, hours, x, y, diam, extra_xy=()):
 # --------------------------------------------------------------- figure
 def draw_diagram(ax, ours, fsu, vert, xlim, ylim):
     """One of Hart's diagrams: `vert` is "B" or "VTU" against -V_T^L. Our
-    trajectory as a dark line with class-colored squares sized by MSLP and
-    hour labels; the FSU values as hollow circles at the same hours and
-    sizes, joined by a dashed line where consecutive verified hours are
-    6 h apart."""
+    trajectory as the live map draws a track (segments in the lower core's
+    color, the map's marker at each fix: color the lower core, triangle
+    asymmetric, hollow shallow), sized by MSLP, with hour labels; the FSU
+    values as gray dots at the same hours, joined by a dashed gray line
+    where consecutive verified hours are 6 h apart."""
     ax.set_xlim(*xlim)
     ax.set_ylim(*ylim)
     if vert == "B":
@@ -222,9 +225,11 @@ def draw_diagram(ax, ours, fsu, vert, xlim, ylim):
     x, y, h = ours["VTL"], ours[vert], ours["hours"]
     diam = marker_diameter(ours["MSLP"])
     ok = np.isfinite(x) & np.isfinite(y)
-    ax.plot(x[ok], y[ok], "-", color=PATH_EDGE, lw=1.5, zorder=5, solid_capstyle="round")
-    cols = [CLASS_PALETTE[int(c)] if np.isfinite(c) else "white" for c in ours["CLS"]]
-    ax.scatter(x, y, s=diam ** 2, marker="s", c=cols, edgecolor=PATH_EDGE, linewidth=0.5, zorder=6)
+    axes_ours = [gs.axes_of_class(c, b) for c, b in zip(ours["CLS"], ours["B"])]
+    gs.draw_core_path(ax, x, y, axes_ours, lw=1.5, zorder=5)
+    for k in range(len(x)):
+        if ok[k]:
+            gs.draw_glyph(ax, x[k], y[k], axes_ours[k], size_pt=float(diam[k]), zorder=6)
     for hour, marker in ((ours["onset"], "x"), (ours["completion"], "x")):
         if np.isfinite(hour):
             i = int(np.argmin(np.abs(h - hour)))
@@ -234,15 +239,16 @@ def draw_diagram(ax, ours, fsu, vert, xlim, ylim):
         ax.scatter([x[i]], [y[i]], s=(diam[i] + 4.5) ** 2, marker=marker, facecolor="none",
                    edgecolor=ds.TEXT_DARK, linewidth=1.1, zorder=8)
 
-    # FSU: hollow circles sized with our MSLP at the same hour
+    # FSU: gray dots, a little smaller than ours at the same hour
     fh = fsu["hours"]
     idx = np.array([int(np.argmin(np.abs(h - t))) for t in fh])
     fd = diam[idx]
     fx, fy = fsu["VTL"], fsu[vert]
     for a, b in zip(range(len(fh) - 1), range(1, len(fh))):
         if fh[b] - fh[a] <= 6.0 + 1e-6:
-            ax.plot(fx[[a, b]], fy[[a, b]], "--", color=FSU_EDGE, lw=0.9, zorder=7)
-    ax.scatter(fx, fy, s=fd ** 2, marker="o", facecolor="none", edgecolor=FSU_EDGE, linewidth=1.1, zorder=10)
+            ax.plot(fx[[a, b]], fy[[a, b]], "--", color=FSU_GRAY, lw=0.9, zorder=7)
+    ax.scatter(fx, fy, s=(0.6 * fd) ** 2, marker="o", facecolor=FSU_GRAY, edgecolor="white", linewidth=0.6,
+               zorder=10)
     for hour in (fsu["onset"], fsu["completion"]):
         if np.isfinite(hour):
             i = int(np.argmin(np.abs(fh - hour)))
@@ -251,6 +257,18 @@ def draw_diagram(ax, ours, fsu, vert, xlim, ylim):
     ax.set_xlabel(ds.AXIS_LABEL_VTL)
     ax.set_ylabel(ds.AXIS_LABEL_B if vert == "B" else ds.AXIS_LABEL_VTU)
     return hour_labels(ax, h, x, y, diam, extra_xy=np.column_stack([fx, fy]))
+
+
+def glyph_row(ax, hours, axes_list, rect):
+    """A row above ax with the class of each fix as the live map's marker
+    (color the lower core, triangle asymmetric, hollow shallow), in place of
+    a strip of class colors; blank where the class is missing."""
+    strip = ax.inset_axes(rect, sharex=ax)
+    strip.set_ylim(0, 1)
+    gs.glyph_strip(strip, hours, axes_list, 0.5, size_pt=4.2, zorder=4, clip_on=False)
+    strip.set_yticks([])
+    strip.tick_params(axis="x", labelbottom=False, bottom=False)
+    return strip
 
 
 def draw_series(ax, ours, fsu):
@@ -287,9 +305,11 @@ def draw_series(ax, ours, fsu):
 
     # class strips: ours over the FSU's (verified hours only), then the
     # onset and completion of each side as labeled ticks between them
-    s_ours = tc.class_strip(ax, h, ours["CLS"], [0.0, 1.145, 1.0, 0.05], "ours ")
+    s_ours = glyph_row(ax, h, [gs.axes_of_class(c, b) for c, b in zip(ours["CLS"], ours["B"])],
+                       [0.0, 1.145, 1.0, 0.05])
     s_ours.set_ylabel("ours", rotation=0, ha="right", va="center", fontsize=7.5)
-    s_fsu = tc.class_strip(ax, fsu["hours"], fsu["CLS"], [0.0, 1.075, 1.0, 0.05], "FSU ")
+    s_fsu = glyph_row(ax, fsu["hours"], [gs.axes_of_class(c, b) for c, b in zip(fsu["CLS"], fsu["B"])],
+                      [0.0, 1.075, 1.0, 0.05])
     s_fsu.set_ylabel("FSU", rotation=0, ha="right", va="center", fontsize=7.5)
     for strip in (s_ours, s_fsu):
         for sp in strip.spines.values():
@@ -318,9 +338,9 @@ def make_figure(ours, fsu, cycle, storm):
         "ytick.labelsize": 7, "axes.labelsize": 8.5,
     })
     fig = plt.figure(figsize=(13.0, 5.2))
-    gs = fig.add_gridspec(1, 3, width_ratios=[1.0, 1.0, 1.28], left=0.045, right=0.945, bottom=0.175, top=0.775,
+    grid = fig.add_gridspec(1, 3, width_ratios=[1.0, 1.0, 1.28], left=0.045, right=0.945, bottom=0.175, top=0.775,
                           wspace=0.27)
-    axa, axb, axc = (fig.add_subplot(gs[0, k]) for k in range(3))
+    axa, axb, axc = (fig.add_subplot(grid[0, k]) for k in range(3))
 
     xlim = tc.limits(ds.FIG10_VTL_LIM, ours["VTL"], fsu["VTL"])
     # B's lower limit is opened from the house -20 m to -30 m: the typhoon's
@@ -342,10 +362,11 @@ def make_figure(ours, fsu, cycle, storm):
 
     # legends: the two sides and the marks, then the marker size scale
     side_handles = [
-        Line2D([0], [0], marker="s", color=PATH_EDGE, markerfacecolor=CLASS_PALETTE[0], markeredgecolor=PATH_EDGE,
-               lw=1.5, markersize=6, label="ours: Hart's layers, track-motion B, 24 h mean (square colored by class)"),
-        Line2D([0], [0], marker="o", color=FSU_EDGE, markerfacecolor="none", markeredgecolor=FSU_EDGE, lw=0.9,
-               ls="--", markersize=6, label="Florida State page, digitized (verified hours; hollow)"),
+        Line2D([0], [0], color=gs.WARM, lw=1.5,
+               label="ours: Hart's layers, track-motion B, 24 h mean (the live map's marker)",
+               **{k: v for k, v in gs.glyph_kw((1, 1, False), 6.0).items() if k != "linestyle"}),
+        Line2D([0], [0], marker="o", color=FSU_GRAY, markerfacecolor=FSU_GRAY, markeredgecolor="white", lw=0.9,
+               ls="--", markersize=4.5, label="Florida State page, digitized (verified hours; gray)"),
         Line2D([0], [0], marker="o", color="none", markerfacecolor="none", markeredgecolor=ds.TEXT_DARK,
                markersize=7, markeredgewidth=1.1, label="start (0 h), hours every 12 h"),
         Line2D([0], [0], marker="s", color="none", markerfacecolor="none", markeredgecolor=ds.TEXT_DARK,
@@ -355,12 +376,16 @@ def make_figure(ours, fsu, cycle, storm):
     ]
     fig.legend(handles=side_handles, loc="upper left", bbox_to_anchor=(0.045, 0.952), ncol=2, frameon=False,
                handlelength=2.0, columnspacing=1.6, fontsize=7.2)
-    size_handles = [Line2D([0], [0], marker="s", color="none", markerfacecolor=CLASS_PALETTE[0],
-                           markeredgecolor=PATH_EDGE, markeredgewidth=0.5, markersize=float(marker_diameter(p)),
-                           label=f"{p:.0f}") for p in SIZE_LEGEND_HPA]
+    marker_key = [((1, 1, False), "warm lower core"), ((0, 0, False), "cold lower core"),
+                  ((1, 1, True), "triangle: asymmetric"), ((1, 0, False), "hollow: shallow")]
+    fig.legend(handles=gs.legend_handles(5.5, marker_key), loc="lower left", bbox_to_anchor=(0.045, 0.005),
+               ncol=2, frameon=False, handletextpad=0.3, columnspacing=1.2, fontsize=7.0)
+    size_handles = [Line2D([0], [0], color="none", label=f"{p:.0f}",
+                           **{k: v for k, v in gs.glyph_kw((1, 1, False), float(marker_diameter(p))).items()
+                              if k != "linestyle"}) for p in SIZE_LEGEND_HPA]
     fig.legend(handles=size_handles, loc="lower center", bbox_to_anchor=(0.5, 0.005), ncol=len(size_handles),
                frameon=False, handlelength=1.6, columnspacing=1.0, fontsize=7.2,
-               title="Marker size: MSLP at the fix (hPa), deeper is bigger; the Florida State markers take ours "
+               title="Marker size: MSLP at the fix (hPa), deeper is bigger; the Florida State dots take ours "
                      "at the same hour", title_fontsize=7.4)
     fig.savefig(OUT_PNG, dpi=300, facecolor="white")
     plt.close(fig)

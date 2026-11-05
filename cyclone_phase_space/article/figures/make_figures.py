@@ -170,6 +170,9 @@ from diagram_style import (  # noqa: E402
     FIG10_B_LIM, FIG10_VTL_LIM, FIG10_VTU_LIM,
     draw_b_vtl_quadrants, draw_vtu_vtl_quadrants,
 )
+# Marks of a low (Figure 1's trajectory) use the live map's marker:
+# glyph_style.py.
+import glyph_style as gs  # noqa: E402
 
 OUT_DIR = HERE
 
@@ -1089,11 +1092,9 @@ FIG7_STEERING_BLEND_WIDTH_DEG = 2.0
 FIG7_STEERING_TURN_MS = 2.5
 FIG7_STEERING_TURN_WIDTH_DEG = 1.2
 
-#: Colors reused for Hart's own B-vs-lower-thermal-wind diagram quadrants
-#: (panel (d) of this figure, and Figure 10 panel a); three colors
-#: borrowed from CATEGORY_COLORS purely for visual consistency with the
-#: rest of this script's palette.
-STAGE_COLORS = [CATEGORY_COLORS[2], CATEGORY_COLORS[3], CATEGORY_COLORS[1]]  # pale gray, orange, blue
+#: Hart's B-vs-lower-thermal-wind quadrants in panel (d) of this figure:
+#: the lower core's color, as diagram_style draws Figure 1 panel (a) and as
+#: the live map marks a low (glyph_style.py).
 
 
 def fig7_rate_per_1000km(p):
@@ -1427,15 +1428,15 @@ def make_fig7(lat_vals, lon_vals, lat2d, lon2d, dx2d, dy_m):
     ax_d.set_aspect(map_box_hw_ratio * (xlim[1] - xlim[0]) / (ylim[1] - ylim[0]))
 
     quadrants = [
-        (0, 1e4, -1e4, cps_HartCPS.B_THRESHOLD_M, STAGE_COLORS[0], "symmetric warm core"),
-        (0, 1e4, cps_HartCPS.B_THRESHOLD_M, 1e4, STAGE_COLORS[1], "asymmetric warm core"),
-        (-1e4, 0, cps_HartCPS.B_THRESHOLD_M, 1e4, STAGE_COLORS[2], "asymmetric cold core"),
-        (-1e4, 0, -1e4, cps_HartCPS.B_THRESHOLD_M, "#4a3aa7", "symmetric cold core"),
+        (0, 1e4, -1e4, cps_HartCPS.B_THRESHOLD_M, gs.WARM, "symmetric warm core"),
+        (0, 1e4, cps_HartCPS.B_THRESHOLD_M, 1e4, gs.WARM, "asymmetric warm core"),
+        (-1e4, 0, cps_HartCPS.B_THRESHOLD_M, 1e4, gs.COLD, "asymmetric cold core"),
+        (-1e4, 0, -1e4, cps_HartCPS.B_THRESHOLD_M, gs.COLD, "symmetric cold core"),
     ]
     for x0, x1, y0, y1, color, _ in quadrants:
         x0c, x1c = max(x0, xlim[0]), min(x1, xlim[1])
         y0c, y1c = max(y0, ylim[0]), min(y1, ylim[1])
-        ax_d.add_patch(Rectangle((x0c, y0c), x1c - x0c, y1c - y0c, facecolor=color, alpha=0.30, edgecolor="none", zorder=0))
+        ax_d.add_patch(Rectangle((x0c, y0c), x1c - x0c, y1c - y0c, facecolor=color, alpha=0.12, edgecolor="none", zorder=0))
 
     # Quadrant labels sit in the panel's own corners (axes fraction, so
     # they track xlim/ylim automatically), each inset just enough to
@@ -1480,10 +1481,13 @@ def make_fig7(lat_vals, lon_vals, lat2d, lon2d, dx2d, dy_m):
     )
     hours = np.arange(0, 24 * traj.shape[0], 24)
     labeled_hours = (0, 48, 96, 168)  # every other point, per the style rules
-    ax_d.plot(traj[:, 1], traj[:, 0], color=TEXT_SECONDARY, linewidth=2.0, zorder=5)
+    # The live map's marker, color the lower core and a triangle where
+    # asymmetric; this diagram has no upper term, so every marker is drawn
+    # filled (deep) and the caption says depth is not shown.
+    traj_axes = [(int(v > 0), int(v > 0), bool(b > cps_HartCPS.B_THRESHOLD_M)) for b, v in traj]
+    gs.draw_core_path(ax_d, traj[:, 1], traj[:, 0], traj_axes, lw=2.0, zorder=5)
     for k, (bval, vval) in enumerate(traj):
-        color = CMAP_SEQ_BLUE(k / (traj.shape[0] - 1))
-        ax_d.plot(vval, bval, marker="o", markersize=7, markerfacecolor=color, markeredgecolor="white", markeredgewidth=0.8, zorder=6)
+        gs.draw_glyph(ax_d, vval, bval, traj_axes[k], size_pt=6.5, zorder=6)
         if hours[k] not in labeled_hours:
             continue
         va, ha, dx_txt, dy_txt = "bottom", "left", 8, 8
@@ -2013,12 +2017,16 @@ def make_fig10():
     ax_a.axhline(b_thr, color=TEXT_DARK, linewidth=1.0, zorder=2)
     ax_a.axvline(0, color=TEXT_DARK, linewidth=1.0, zorder=2)
 
-    ax_a.plot(FIG10_TRAJ[:, 1], FIG10_TRAJ[:, 0], color=TEXT_SECONDARY, linewidth=2.0, zorder=5)
+    # The trajectory as the live map draws a track: each segment in the
+    # lower core's color, the map's marker at each point (color the lower
+    # core, triangle asymmetric, hollow shallow).
+    fig10_axes = [gs.axes_of_values(*FIG10_TRAJ[k]) for k in range(FIG10_TRAJ.shape[0])]
+    seclusion_axes = gs.axes_of_values(*FIG10_SECLUSION_END)
+    gs.draw_core_path(ax_a, FIG10_TRAJ[:, 1], FIG10_TRAJ[:, 0], fig10_axes, lw=2.0, zorder=5)
     labeled_hours = (0, 48, 96, 168)
     for k in range(FIG10_TRAJ.shape[0]):
         bval, vtl = FIG10_TRAJ[k, 0], FIG10_TRAJ[k, 1]
-        color = CMAP_SEQ_BLUE(k / (FIG10_TRAJ.shape[0] - 1))
-        ax_a.plot(vtl, bval, marker="o", markersize=7, markerfacecolor=color, markeredgecolor="white", markeredgewidth=0.8, zorder=6)
+        gs.draw_glyph(ax_a, vtl, bval, fig10_axes[k], size_pt=7.5, zorder=6)
         if hours[k] not in labeled_hours:
             continue
         dx_txt, dy_txt, ha, va = 8, 8, "left", "bottom"
@@ -2032,7 +2040,7 @@ def make_fig10():
 
     seclusion_a = np.vstack([FIG10_TRAJ[-1, [1, 0]], FIG10_SECLUSION_END[[1, 0]]])
     ax_a.plot(seclusion_a[:, 0], seclusion_a[:, 1], color=TEXT_SECONDARY, linewidth=1.6, linestyle="--", zorder=5)
-    ax_a.plot(FIG10_SECLUSION_END[1], FIG10_SECLUSION_END[0], marker="D", markersize=6.5, markerfacecolor=CMAP_SEQ_BLUE(1.0), markeredgecolor="white", markeredgewidth=0.8, zorder=6)
+    gs.draw_glyph(ax_a, FIG10_SECLUSION_END[1], FIG10_SECLUSION_END[0], seclusion_axes, size_pt=7.5, zorder=6)
     ax_a.annotate(
         "warm seclusion\n(some storms)", (FIG10_SECLUSION_END[1], FIG10_SECLUSION_END[0]),
         textcoords="offset points", xytext=(-14, 4), fontsize=6.7, color=TEXT_SECONDARY, style="italic", ha="right", va="center",
@@ -2069,11 +2077,10 @@ def make_fig10():
     ax_b.axhline(0, color=TEXT_DARK, linewidth=1.0, zorder=2)
     ax_b.axvline(0, color=TEXT_DARK, linewidth=1.0, zorder=2)
 
-    ax_b.plot(FIG10_TRAJ[:, 1], FIG10_TRAJ[:, 2], color=TEXT_SECONDARY, linewidth=2.0, zorder=5)
+    gs.draw_core_path(ax_b, FIG10_TRAJ[:, 1], FIG10_TRAJ[:, 2], fig10_axes, lw=2.0, zorder=5)
     for k in range(FIG10_TRAJ.shape[0]):
         vtl, vtu = FIG10_TRAJ[k, 1], FIG10_TRAJ[k, 2]
-        color = CMAP_SEQ_BLUE(k / (FIG10_TRAJ.shape[0] - 1))
-        ax_b.plot(vtl, vtu, marker="o", markersize=7, markerfacecolor=color, markeredgecolor="white", markeredgewidth=0.8, zorder=6)
+        gs.draw_glyph(ax_b, vtl, vtu, fig10_axes[k], size_pt=7.5, zorder=6)
         dx_txt, dy_txt, va, ha = 8, 8, "bottom", "left"
         if k == FIG10_TRAJ.shape[0] - 1:
             # Up-left instead of down-right: down-right runs into the
@@ -2096,7 +2103,7 @@ def make_fig10():
 
     seclusion_b = np.vstack([FIG10_TRAJ[-1, [1, 2]], FIG10_SECLUSION_END[[1, 2]]])
     ax_b.plot(seclusion_b[:, 0], seclusion_b[:, 1], color=TEXT_SECONDARY, linewidth=1.6, linestyle="--", zorder=5)
-    ax_b.plot(FIG10_SECLUSION_END[1], FIG10_SECLUSION_END[2], marker="D", markersize=6.5, markerfacecolor=CMAP_SEQ_BLUE(1.0), markeredgecolor="white", markeredgewidth=0.8, zorder=6)
+    gs.draw_glyph(ax_b, FIG10_SECLUSION_END[1], FIG10_SECLUSION_END[2], seclusion_axes, size_pt=7.5, zorder=6)
     ax_b.annotate(
         "warm seclusion\n(some storms)", (FIG10_SECLUSION_END[1], FIG10_SECLUSION_END[2]),
         textcoords="offset points", xytext=(10, -4), fontsize=6.7, color=TEXT_SECONDARY, style="italic", ha="left", va="top",

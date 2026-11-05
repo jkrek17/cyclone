@@ -127,26 +127,35 @@
 
   <div class="table-wrap">
   <table>
-    <thead><tr><th scope="col">Code</th><th scope="col">Name</th><th scope="col">B</th><th scope="col">Lower</th><th scope="col">Upper</th><th scope="col">What it usually is</th></tr></thead>
+    <thead><tr><th scope="col">Code</th><th scope="col">Map marker</th><th scope="col">D2D colour</th><th scope="col">Name</th><th scope="col">B</th><th scope="col">Lower</th><th scope="col">Upper</th><th scope="col">What it usually is</th></tr></thead>
     <tbody>
-      <tr><td><span class="swatch c0"></span>0</td><td>symmetric deep warm core</td><td>&le; 10</td><td>warm</td><td>warm</td><td>hurricane, typhoon</td></tr>
-      <tr><td><span class="swatch c1"></span>1</td><td>symmetric shallow warm core</td><td>&le; 10</td><td>warm</td><td>cold</td><td>subtropical storm, or a warm seclusion</td></tr>
-      <tr><td><span class="swatch c2"></span>2</td><td>asymmetric deep warm core</td><td>&gt; 10</td><td>warm</td><td>warm</td><td>hurricane meeting a trough; transition beginning</td></tr>
-      <tr><td><span class="swatch c3"></span>3</td><td>asymmetric shallow warm core</td><td>&gt; 10</td><td>warm</td><td>cold</td><td>transition under way; coastal hybrid lows</td></tr>
-      <tr><td><span class="swatch c4"></span>4</td><td>asymmetric cold core</td><td>&gt; 10</td><td>cold</td><td>cold</td><td>ordinary extratropical low; transition complete</td></tr>
-      <tr><td><span class="swatch c5"></span>5</td><td>symmetric cold core</td><td>&le; 10</td><td>cold</td><td>cold</td><td>occluded or cut-off cold low</td></tr>
-      <tr><td><span class="swatch c6"></span>6</td><td>shallow cold core</td><td>any</td><td>cold</td><td>warm</td><td>rare; a mid-level perturbation</td></tr>
-      <tr><td>blank</td><td colspan="5">not a closed low (no 5 hPa ring), below ground, or the steering flow too weak to define B</td></tr>
+      <tr><td>0</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled red circle"><path d="M -7 0 A 7 7 0 1 0 7 0 A 7 7 0 1 0 -7 0 Z" fill="#e0362c" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td><span class="swatch c0"></span>red</td><td>symmetric deep warm core</td><td>&le; 10</td><td>warm</td><td>warm</td><td>hurricane, typhoon</td></tr>
+      <tr><td>1</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow red circle"><path d="M -6.4 0 A 6.4 6.4 0 1 0 6.4 0 A 6.4 6.4 0 1 0 -6.4 0 Z" fill="#f2f5f9" stroke="#e0362c" stroke-width="2.8" stroke-linejoin="round"/></svg></td><td><span class="swatch c1"></span>magenta</td><td>symmetric shallow warm core</td><td>&le; 10</td><td>warm</td><td>cold</td><td>subtropical storm, or a warm seclusion</td></tr>
+      <tr><td>2</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled red triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#e0362c" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td><span class="swatch c2"></span>yellow</td><td>asymmetric deep warm core</td><td>&gt; 10</td><td>warm</td><td>warm</td><td>hurricane meeting a trough; transition beginning</td></tr>
+      <tr><td>3</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow red triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#f2f5f9" stroke="#e0362c" stroke-width="2.8" stroke-linejoin="round"/></svg></td><td><span class="swatch c3"></span>green</td><td>asymmetric shallow warm core</td><td>&gt; 10</td><td>warm</td><td>cold</td><td>transition under way; coastal hybrid lows</td></tr>
+      <tr><td>4</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled blue triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#2f74e0" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td><span class="swatch c4"></span>blue</td><td>asymmetric cold core</td><td>&gt; 10</td><td>cold</td><td>cold</td><td>ordinary extratropical low; transition complete</td></tr>
+      <tr><td>5</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="filled blue circle"><path d="M -7 0 A 7 7 0 1 0 7 0 A 7 7 0 1 0 -7 0 Z" fill="#2f74e0" stroke="#0b1220" stroke-width="1.1" stroke-linejoin="round"/></svg></td><td><span class="swatch c5"></span>indigo</td><td>symmetric cold core</td><td>&le; 10</td><td>cold</td><td>cold</td><td>occluded or cut-off cold low</td></tr>
+      <tr><td>6</td><td class="mk"><svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow blue circle"><path d="M -6.4 0 A 6.4 6.4 0 1 0 6.4 0 A 6.4 6.4 0 1 0 -6.4 0 Z" fill="#f2f5f9" stroke="#2f74e0" stroke-width="2.8" stroke-linejoin="round"/></svg> <svg class="glyph" viewBox="-12 -12 24 24" width="18" height="18" role="img" aria-label="hollow blue triangle"><path d="M 0 -9.1 L 7.88 4.55 L -7.88 4.55 Z" fill="#f2f5f9" stroke="#2f74e0" stroke-width="2.8" stroke-linejoin="round"/></svg></td><td><span class="swatch c6"></span>grey</td><td>shallow cold core</td><td>any</td><td>cold</td><td>warm</td><td>rare; a mid-level perturbation</td></tr>
+      <tr><td>blank</td><td colspan="7">not a closed low (no 5 hPa ring), below ground, or the steering flow too weak to define B</td></tr>
     </tbody>
   </table>
   </div>
 
   <p>
-    The colours are grouped so the big events jump out: reds for a symmetric
-    warm core, yellow and green for a storm in transition, blues for a cold
-    core. A classic extratropical transition walks 0, 2, 3, 4. A warm
-    seclusion re-forms a shallow warm core after the transition and walks
-    back from 4 to 3, or to 1 once the bent-back front wraps up and B falls.
+    The live map marks each low with one marker that reads the three numbers
+    separately. Colour is the lower core: red warm, blue cold. Shape is the
+    front: a triangle when B is over 10 m, a circle when it is not. Fill is
+    the upper core: filled when it agrees with the lower core (deep), a
+    hollow ring when it does not (shallow). Class 6 sits on both sides of
+    the B line, so its marker is a circle or a triangle by its own B. D2D
+    draws the class as a field, which cannot carry a shape, so there each
+    class keeps a colour of its own, grouped so the big events jump out:
+    reds for a symmetric warm core, yellow and green for a storm in
+    transition, blues for a cold core. A classic extratropical transition
+    walks 0, 2, 3, 4: a red circle, a red triangle, a hollow red triangle,
+    a blue triangle. A warm seclusion re-forms a shallow warm core after
+    the transition and walks back from 4 to 3, or to 1 once the bent-back
+    front wraps up and B falls.
   </p>
 
   <figure>
@@ -155,40 +164,44 @@
     <figcaption><strong>Hart's two diagrams.</strong> These are the plots on the
       FSU pages. The left diagram is B against the lower thermal wind, with the
       10 m onset line; the right is upper against lower thermal wind. The
-      quadrant names are the class names above. The live map draws these two
-      diagrams for every tracked low, and a 3-D view of all three numbers at
-      once.</figcaption>
+      quadrant names are the class names above. The schematic track is drawn
+      as the live map draws one: red while the lower core is warm, blue once
+      it is cold, triangles once it is frontal, hollow where the upper core
+      disagrees. The live map draws these two diagrams for every tracked low,
+      and a 3-D view of all three numbers at once.</figcaption>
   </figure>
 
   <h2>3. Reading the maps</h2>
   <p>
-    On the live map every closed low carries a dot in its class colour, and
+    On the live map every closed low carries the marker of its class (red or
+    blue for the lower core, a triangle if frontal, hollow if shallow), and
     clicking a low plots its track through the three-dimensional phase space
     on the right, with the current hour marked and the timeline driving both.
     A low that has stayed closed for a day or more has a track, and for such
     a low B is taken from the storm's own motion, the way Hart defined it;
     the B field, and D2D, take the motion from the steering flow instead,
     because one frame has no track. The two usually agree. Where they do
-    not, the dot carries a thin ring in the field's colour and the card gives
+    not, the marker carries a thin grey ring and the card gives
     both values. Every low's card also gives the margin: how many metres the
     low sits from the nearest class boundary. A margin under 5 m means the
-    colour could go either way; under 10 m, treat the class as provisional
-    and read the trend. For a tracked low the colour holds until the low has
+    marker could go either way; under 10 m, treat the class as provisional
+    and read the trend. For a tracked low the marker holds until the low has
     crossed a boundary by that margin (5 m in B, 10 m in a thermal wind), so
-    the dot does not flip back and forth while a storm sits on a line; the
+    the marker does not flip back and forth while a storm sits on a line; the
     card shows the strict class as well whenever the two differ; a margin
     under 5 m is marked in amber. In D2D,
     load HCPSclass as an image with MSLP contours; D2D shows the strict
-    class, one frame at a time, so there the margin is your own read of how
+    class in the D2D colours of the table, one frame at a time, so there the margin is your own read of how
     far HB is from 10 m and HVTL from zero. Three things to know about what
     you see, on either display:
   </p>
   <ul>
-    <li><strong>A coloured blob appears only at a closed low.</strong> The
-      detector needs a 5 hPa closed ring in MSLP; the blob extends 200 km
-      around the centre so it is easy to see. The colour is the class at the
-      low's pressure minimum. If a low you can see has no blob, it is not
-      closed by 5 hPa in that model at that hour.</li>
+    <li><strong>A class appears only at a closed low.</strong> The
+      detector needs a 5 hPa closed ring in MSLP. The live map puts a marker
+      on the low's pressure minimum; in D2D the class is a coloured blob that
+      extends 200 km around the centre so it is easy to see, its colour the
+      class at the minimum. If a low you can see has no marker or blob, it is
+      not closed by 5 hPa in that model at that hour.</li>
     <li><strong>The thermal wind and B maps are computed everywhere, but only
       mean something at a low.</strong> Away from lows they show the ambient
       thermal ridge and trough (a blue swath along the polar front, red over
@@ -250,7 +263,7 @@
     <li><strong>Timing a transition.</strong> Onset is the first frame B
       crosses 10 m; completion is the first frame the lower term turns
       negative. Read the crossings from the HB and HVTL maps or the live map's
-      diagrams, not from the colour changing, because a storm can jump 0 to 4
+      diagrams, not from the marker or colour changing, because a storm can jump 0 to 4
       in one frame if both lines are crossed at once.</li>
     <li><strong>The post-tropical handoff.</strong> Class 4 with a cold lower
       core is an extratropical low whatever its history; class 2 or 3 is a
@@ -290,7 +303,7 @@
     <li><strong>A class is a state, not an event.</strong> Half of all hours
       on record sit within 10 m of a boundary, most of them the B = 10 m
       line. Look at the margin and the trend over several hours, not the
-      colour alone; on the map a tracked low's colour already waits for the
+      marker alone; on the map a tracked low's marker already waits for the
       crossing to be clear.</li>
     <li><strong>Terrain.</strong> Near the Rockies, Greenland or the Andes the
       lower term is blank or thin and the class may be missing. Nothing is
@@ -305,11 +318,14 @@
 
   <h2>7. The five-second checklist</h2>
   <ol class="checklist">
-    <li>Is there a blob? If not, the low is not closed by 5 hPa.</li>
-    <li>What colour, and how big is the margin? Red or magenta: no
-      front through the centre. Yellow or green: warm core with a front,
-      transition under way. Blue or indigo: cold core. Under 5 m from a
-      line: either colour is possible.</li>
+    <li>Is there a marker (in D2D, a blob)? If not, the low is not closed by
+      5 hPa.</li>
+    <li>What marker, and how big is the margin? Red circle: warm core, no
+      front through the centre. Red triangle: warm core with a front,
+      transition under way. Blue: cold core, a triangle while still frontal,
+      a circle once occluded or cut off. Hollow: the upper core disagrees,
+      a shallow core. In D2D the same reads red or magenta, yellow or green,
+      blue or indigo. Under 5 m from a line: either marker is possible.</li>
     <li>Where does HB change sign around the low? That is where the warm
       sector is, and the triple point.</li>
     <li>Is the low moving with its steering flow? If not, discount B.</li>

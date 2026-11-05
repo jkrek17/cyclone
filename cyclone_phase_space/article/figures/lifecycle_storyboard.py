@@ -45,6 +45,19 @@ from lifecycle_comparison import (  # noqa: E402
     RADIUS_KM, CLASS_PALETTE, CLASS_NAMES, RED, BLUE, PURPLE,
 )
 import diagram_style as ds  # noqa: E402  (make_fig10's own quadrant colors/labels/lines/limits)
+import glyph_style as gs  # noqa: E402  (the live map's marker for the gridded path)
+
+
+def _grid_trail(ax, d, vert, i):
+    """The gridded path up to frame i as the live map draws a track: lower
+    core colored segments, the map's marker small at past frames and large
+    at frame i (color the lower core, triangle asymmetric, hollow shallow)."""
+    j = i + 1
+    a = [gs.axes_of_class(c, b) for c, b in zip(d["CLS_grid"], d["B_grid"])]
+    gs.draw_core_path(ax, d["VTL_grid"][:j], d[f"{vert}_grid"][:j], a[:j], lw=0.9, zorder=2, halo=False)
+    for k in range(i):
+        gs.draw_glyph(ax, d["VTL_grid"][k], d[f"{vert}_grid"][k], a[k], size_pt=3.0, zorder=2.5)
+    gs.draw_glyph(ax, d["VTL_grid"][i], d[f"{vert}_grid"][i], a[i], size_pt=9.0, zorder=5)
 
 SNAPSHOT_HOURS = [0.0, 60.0, 90.0, 120.0, 144.0, 168.0]
 FIG_PATH = HERE / "figE_lifecycle_storyboard.png"
@@ -239,9 +252,8 @@ def draw_panel_d(ax, d, i, xlim, ylim, fs=7, quad_fontsize=None):
     j = i + 1
     ds.draw_b_vtl_quadrants(ax, xlim, ylim, 10.0, fontsize=quad_fontsize)
     ax.plot(d["VTL_hart"][:j], d["B_hart"][:j], "-o", color="0.6", ms=2.5, lw=0.9, mfc="0.6", zorder=2)
-    ax.plot(d["VTL_grid"][:j], d["B_grid"][:j], "-s", color=RED, alpha=0.55, ms=2.5, lw=0.9, zorder=2)
-    ax.plot(d["VTL_hart"][i], d["B_hart"][i], "o", color="0.15", ms=9, zorder=5)
-    ax.plot(d["VTL_grid"][i], d["B_grid"][i], "s", color=RED, ms=9, zorder=5)
+    ax.plot(d["VTL_hart"][i], d["B_hart"][i], "o", color="0.35", ms=7, zorder=4.5)
+    _grid_trail(ax, d, "B", i)
     ax.axhline(10.0, color=ds.TEXT_DARK, lw=1.0, zorder=3)
     ax.axvline(0.0, color=ds.TEXT_DARK, lw=1.0, zorder=3)
     ax.set_xlim(*xlim)
@@ -267,9 +279,8 @@ def draw_panel_e(ax, d, i, xlim, ylim, fs=7, quad_fontsize=None):
     }
     ds.draw_vtu_vtl_quadrants(ax, xlim, ylim, label_overrides=label_overrides, fontsize=quad_fontsize)
     ax.plot(d["VTL_hart"][:j], d["VTU_hart"][:j], "-o", color="0.6", ms=2.5, lw=0.9, mfc="0.6", zorder=2)
-    ax.plot(d["VTL_grid"][:j], d["VTU_grid"][:j], "-s", color=RED, alpha=0.55, ms=2.5, lw=0.9, zorder=2)
-    ax.plot(d["VTL_hart"][i], d["VTU_hart"][i], "o", color="0.15", ms=9, zorder=5)
-    ax.plot(d["VTL_grid"][i], d["VTU_grid"][i], "s", color=RED, ms=9, zorder=5)
+    ax.plot(d["VTL_hart"][i], d["VTU_hart"][i], "o", color="0.35", ms=7, zorder=4.5)
+    _grid_trail(ax, d, "VTU", i)
     ax.axhline(0.0, color=ds.TEXT_DARK, lw=1.0, zorder=3)
     ax.axvline(0.0, color=ds.TEXT_DARK, lw=1.0, zorder=3)
     ax.set_xlim(*xlim)
