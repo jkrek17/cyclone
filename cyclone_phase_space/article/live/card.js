@@ -146,8 +146,6 @@ function renderLegend() {
   if (S.layers.circles) keys.push('<span><i class="k-halo"></i>200 km circle</span>');
   if (S.layers.tracks) keys.push('<span><i class="k-track"></i>Selected track, by lower core, a marker every 6 h</span>',
     '<span><i style="border-top:1px solid rgba(231,238,248,0.55)"></i>Last 24 h of motion</span>');
-  if (S.layers.footprint) keys.push('<span><i style="border-top:1px dashed #e7eef8"></i>Product footprint</span>');
-  if (S.layers.terrain) keys.push('<span><i class="k-terrain"></i>Terrain minimum</span>');
   h += `<div class="legend-keys">${keys.join('')}</div>`;
   el.innerHTML = h;
 }

@@ -10,7 +10,7 @@
    (Path2D), straight to a canvas in the phase space (glyphDraw) and
    inlined as SVG in the legend and the panels, so they always match.
    Everything else that marks a low by its class follows the same code:
-   tracks, footprints and the cells of the phase space take the lower
+   tracks and the cells of the phase space take the lower
    core's color (coreHexOf), a deep cell stronger than a shallow one.
    Uses the globals from app.js and storms.js. */
 'use strict';
