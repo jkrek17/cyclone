@@ -15,7 +15,7 @@ space, and as AWIPS II derived parameters for CAVE.
 
 | Path | What it is |
 |---|---|
-| `cyclone_phase_space/D2D/` | The AWIPS install set: one Python module, five derived-parameter definitions and two colormaps. |
+| `cyclone_phase_space/D2D/` | The AWIPS install set: one Python module, five derived-parameter definitions and three colormaps. |
 | `cyclone_phase_space/cps/` | The storm-centered reference implementation of Hart's method. |
 | `cyclone_phase_space/realtime/` | The engine outside AWIPS: the six-hourly export behind the live map, the tracker, the daily collection against the Florida State diagrams, the digitizer and the archive statistics, with the archive under `realtime/data/`. |
 | `cyclone_phase_space/article/` | The article, its figure scripts, the forecasters' guide and the live map page. |

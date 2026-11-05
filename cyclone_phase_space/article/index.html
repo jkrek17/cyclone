@@ -143,9 +143,9 @@
     phase page (Hart, cited 2026), drawn for the cyclones its tracker
     finds in a fixed set of models, which National Hurricane Center
     forecasters cite as supporting evidence (National Hurricane Center
-    2008a,b, 2023; Hart 2021), and the International Workshop on
-    Tropical Cyclones has called for further diagnostics built on the
-    phase space (WMO 2025). Those diagrams show one storm at a time,
+    2008a,b, 2023; Hart 2021), and a 2025 WMO workshop on cyclone
+    types and phase transitions has called for further diagnostics built
+    on the phase space (WMO 2025). Those diagrams show one storm at a time,
     off the forecaster's workstation. The product described here turns
     the phase space around: the map first, every closed low classified
     on every frame, and the storm's path through the space one click
@@ -470,7 +470,7 @@
     footprint is one Python module, five derived-parameter definitions
     (HVTL, HVTU, HB, HCPSidx, HCPSclass), each carrying its method
     blocks in the order of the product table so that a model is read on
-    the richest level set it carries, and two colormaps. HVTL and HVTU
+    the richest level set it carries, and three colormaps. HVTL and HVTU
     are &minus;V<sub>T</sub><sup>L</sup> and
     &minus;V<sub>T</sub><sup>U</sup>, positive for a warm core; HB is
     <i>B</i> in meters after any rescaling.
@@ -662,24 +662,24 @@
   </p>
   <figure id="fig18">
     <img src="figures/figK_fsu_scatter.png"
-         alt="Six scatter plots of our values against the Florida State diagrams' digitized values, our value on the vertical axis, each with a one-to-one line. Top row, the standard bands: B with bias about 8 meters, the lower thermal wind with bias about 12 meters and the upper with bias near minus 3 meters. Bottom row, Hart's bands and the track-motion B: B with bias about 2 meters, the lower thermal wind about 14 meters low and the upper about 7 meters low, all three tighter to the line. Points are red for a warm lower core and blue for a cold one, solid where verified on both diagrams and faded where read from one.">
+         alt="Six scatter plots of our values against the Florida State diagrams' digitized values, our value on the vertical axis, each with a one-to-one line. Top row, Hart's bands and the track-motion B: B with bias under 1 meter, the lower thermal wind about 14 meters low and the upper about 7 meters low, all three tight to the line. Bottom row, the standard bands and the steering-flow B: B about 8 meters high, the lower thermal wind about 12 meters high and the upper about 2 meters low, with more scatter. Points are red for a warm lower core and blue for a cold one, solid where verified on both diagrams and faded where read from one.">
     <figcaption><strong>Figure 4.</strong> Ours against the Florida
       State diagrams at the paired hours of the archive, both as
-      24&nbsp;h running means. Top row: standard-level bands and the
-      steering-flow <i>B</i>. Bottom row: Hart's bands and the
-      track-motion <i>B</i>. Red, a warm lower core on the diagram;
+      24&nbsp;h running means. Top row: Hart's bands and the
+      track-motion <i>B</i>. Bottom row: standard-level bands and the
+      steering-flow <i>B</i>. Red, a warm lower core on the diagram;
       blue, cold, as on the live map; solid, verified on both diagrams;
       faded, timed on one. The titles carry the bias, root mean square and count of the
       verified set. (<a href="#src-fig18">Appendix A</a>)</figcaption>
   </figure>
   <figure id="fig19" class="half">
     <img src="figures/figL_fsu_timing.png"
-         alt="Two histograms of ours minus the Florida State diagram's hour, in hours, for onset on the left and completion on the right, each with a blue outline for the standard bands and an orange outline for Hart's bands. Completion with Hart's bands piles up in the bin at zero; the standard bands spread from minus 27 to plus 21 hours. Onset counts are small for both.">
+         alt="Two histograms of ours minus the Florida State diagram's hour, in hours, for onset on the left and completion on the right, each with a blue outline for Hart's bands and an orange outline for the standard bands. Completion with Hart's bands piles up in the bin at zero; the standard bands spread from minus 27 to plus 21 hours. Onset counts are small for both.">
     <figcaption><strong>Figure 5.</strong> Onset (left) and completion
       (right) hour, ours minus the diagram's, for the storms both sides
-      carry across the threshold inside the run, with the standard bands
-      and the steering-flow <i>B</i> (blue) and Hart's bands and the
-      track-motion <i>B</i> (orange). (<a href="#src-fig19">Appendix A</a>)</figcaption>
+      carry across the threshold inside the run, with Hart's bands and the
+      track-motion <i>B</i> (blue) and the standard bands
+      and the steering-flow <i>B</i> (orange). (<a href="#src-fig19">Appendix A</a>)</figcaption>
   </figure>
   <p>
     Figure 6 shows what the statistics of Figures 4 and 5 are made of,
@@ -810,7 +810,7 @@
       the breadth of the low (Figure 9): nothing is detected at
       5&nbsp;hPa or less, a compact 6.25&nbsp;hPa low is, and a broad
       low needs 12.5 to 15&nbsp;hPa; an open trough is never detected.
-      On the archive 44% of MSLP minima below 980&nbsp;hPa receive a
+      On three frames of one archived run, 44% of MSLP minima below 980&nbsp;hPa receive a
       class, 26%
       between 980 and 1000&nbsp;hPa and 3% above, and 1% of minima within
       25&deg; of the equator, so the classified population is the deep
@@ -1010,7 +1010,7 @@
     pressure over 118&deg;W to 108&deg;W, 35&deg;N to 48&deg;N, with
     1013&nbsp;hPa elsewhere. The synthetic cases carry no separate
     pressure field, so every script that calls the closed-low detector
-    (Figures 7, 8, 9 and the synthetic figures of Appendix B that show the mask) builds its MSLP input from the
+    (Figures 2 and 7 and the synthetic figures of Appendix B that show the mask) builds its MSLP input from the
     1000&nbsp;hPa height as 1000&nbsp;hPa + <i>Z</i><sub>1000</sub>/(8&nbsp;m
     per hPa).
   </p>
@@ -1124,7 +1124,7 @@
       and paired at the shared valid hours. The standard-band values
       are <code>hvtl</code>, <code>hvtu</code>, <code>hb</code>; Hart's
       are <code>hvtl_hart</code>, <code>hvtu_hart</code> and the
-      track-motion <code>hb_track</code>, all from
+      track-motion <code>hb_hart</code> on the 900 to 600&nbsp;hPa thickness, all from
       <code>track_cps.py</code>. The statistics, the pairs and this
       figure are written to <code>realtime/data/validation/</code>, with
       48 hand-read points on five diagrams
@@ -1227,11 +1227,11 @@
       800&nbsp;km) at 45&deg;N 165&deg;E on a 0.25&deg; grid, with the
       open trough, flat-centered and elongated lows built the same way. The same script runs the other sensitivity
       experiments quoted in the text: the completion-timing morph and the
-      grid-resolution comparison of Section 6, the steering-proxy test of
-      Section 2 (<code>cps_HartCPS.steering</code>,
-      <code>steering_window_mean</code>), and the height-noise test of
-      Section 6 (5&nbsp;m Gaussian noise on every level, 60
-      realizations).</dd>
+      grid-resolution comparison, the steering-proxy test
+      (<code>cps_HartCPS.steering</code>,
+      <code>steering_window_mean</code>) and the height-noise test
+      (5&nbsp;m Gaussian noise on every level, 60
+      realizations), all in Appendix B.</dd>
 
     <dt id="src-fig2">Figure B1</dt>
     <dd><code>make_figures.py</code> (<code>make_fig8</code>,
@@ -1477,7 +1477,7 @@
       implementation's bands: Hart's original layers at
       50&nbsp;hPa spacing, not the
       standard-level approximation (925/850/700 and 500/400/300&nbsp;hPa)
-      the operational package in Section 2 uses. Each core's amplitude is
+      the operational package uses on models without 50&nbsp;hPa levels (Section 2). Each core's amplitude is
       one single line in ln(<i>p</i>) over the
       whole 1000&ndash;300&nbsp;hPa depth, a deliberate simplification for
       the illustration, so the lower- and upper-band slopes come out
@@ -1508,8 +1508,8 @@
       = +11.7&nbsp;m, above the 10&nbsp;m onset threshold of Evans and Hart
       (2003). The layer here is Hart's own 900 to 600&nbsp;hPa, so <i>B</i>
       is compared with his threshold directly; the rescaling of Section 2
-      applies only to the gridded product, which works on 925 to
-      700&nbsp;hPa. (<a href="#src-fig3">Appendix A</a>)</figcaption>
+      applies only where the gridded product falls back to the 925 to
+      700&nbsp;hPa thickness. (<a href="#src-fig3">Appendix A</a>)</figcaption>
   </figure>
   <h3 id="appendix-b-window">The window on a synthetic domain, and the former square</h3>
   <figure id="fig4">
@@ -1595,8 +1595,8 @@
     the circle is within 0.2% of Hart's. The circle costs about what
     the square did (Section 4). The square remains available as a
     configuration option that reproduces the earlier numbers exactly.
-    The real-case values of
-    Section 5 were read with it.
+    The CAVE values of
+    Appendix C were read with it.
   </p>
   <h3 id="appendix-b-asymmetry">The asymmetry parameter on two identical vortices</h3>
   <figure id="fig6">
@@ -1819,9 +1819,9 @@
       <tr><td>17 Sep 1200 UTC</td><td>Typhoon Dujuan</td><td>72&nbsp;h</td><td>class and values (HVTL, HVTU, HCPSidx; <i>B</i> not sampled)</td><td>none</td></tr>
       <tr><td>17 Sep 1200 UTC</td><td>Typhoon Dujuan</td><td>hour of leaving the deep warm core (valid 21 Sep 1800 UTC)</td><td>class only, compared with the Florida State diagram</td><td>none</td></tr>
       <tr><td>17 Sep 1200 UTC</td><td>North Atlantic deep low</td><td>not recorded</td><td>class only (values not recorded)</td><td>none</td></tr>
-      <tr><td>19 Sep 1800 and 1200 UTC</td><td>Typhoon Dujuan, life cycle</td><td>12 to 144&nbsp;h</td><td>class only</td><td>10</td></tr>
+      <tr><td>19 Sep 1800 and 1200 UTC</td><td>Typhoon Dujuan, life cycle</td><td>12 to 144&nbsp;h</td><td>class only</td><td>C1</td></tr>
       <tr><td>20 Sep 0600 UTC</td><td>Typhoon Dujuan</td><td>0 to 120&nbsp;h</td><td>values at one point per frame (all four products)</td><td>none</td></tr>
-      <tr><td>24 Sep 0600 UTC</td><td>North Atlantic</td><td>6 to 126&nbsp;h</td><td>class only, from colors</td><td>11 and 12</td></tr>
+      <tr><td>24 Sep 0600 UTC</td><td>North Atlantic</td><td>6 to 126&nbsp;h</td><td>class only, from colors</td><td>C2 and C3</td></tr>
     </tbody>
   </table>
   <p>
@@ -1878,7 +1878,7 @@
     lower term is about twice the diagram's value, in the direction the
     band difference predicts. These values were read with the former
     square window, which on a GFS forecast moved warm-core terms by 1 to
-    10&nbsp;m and cold-core terms by about 50&nbsp;m (Section 2). The
+    10&nbsp;m and cold-core terms by about 50&nbsp;m (Appendix B). The
     index equals its definition at every sampled point. At 946&nbsp;hPa
     every level of both bands lies above the surface; the 1000&nbsp;hPa
     height the closed-low detector used at the time was extrapolated
