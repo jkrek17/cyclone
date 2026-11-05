@@ -25,13 +25,16 @@ GRID_COLOR = "#dedcd5"
 
 CATEGORY_COLORS = ["#4a3aa7", "#2a78d6", "#c3c2b7", "#eb6834", "#e34948"]
 
-# Panel (a)/(d): B versus -V_T^L. Colors and corner positions exactly as
-# make_figures.make_fig10's own quadrants_a/label_pos_a.
+# Panel (a)/(d): B versus -V_T^L. The quadrants take the lower core's color,
+# as the live map's markers and cube cells do (glyph_style.py): red where the
+# lower core is warm, blue where it is cold; B's wall is the black line.
+from glyph_style import WARM as _WARM, COLD as _COLD, CELL_ALPHA as _CELL_ALPHA  # noqa: E402
+
 B_VTL_QUADRANT_COLORS = {
-    "symmetric warm core": CATEGORY_COLORS[2],
-    "asymmetric warm core": CATEGORY_COLORS[3],
-    "asymmetric cold core": CATEGORY_COLORS[1],
-    "symmetric cold core": CATEGORY_COLORS[0],
+    "symmetric warm core": _WARM,
+    "asymmetric warm core": _WARM,
+    "asymmetric cold core": _COLD,
+    "symmetric cold core": _COLD,
 }
 B_VTL_LABEL_POS = {
     "asymmetric cold core": (0.04, 0.83, "left", "top"),
@@ -39,20 +42,26 @@ B_VTL_LABEL_POS = {
     "symmetric cold core": (0.04, 0.04, "left", "bottom"),
     "symmetric warm core": (0.97, 0.04, "right", "bottom"),
 }
-B_VTL_QUADRANT_ALPHA = 0.30
+B_VTL_QUADRANT_ALPHA = 0.12
 B_VTL_LABEL_FONTSIZE = 7.2
 
-# Panel (b)/(e): -V_T^U versus -V_T^L. Colors exactly as quadrants_b;
-# label positions generalize label_pos_b's "lim * fraction" formula to
-# separate x/y limits (reduces to the original when xlim == ylim == (-lim,
-# lim), which is what make_fig10 itself passes).
+# Panel (b)/(e): -V_T^U versus -V_T^L. The lower core's color again, a deep
+# quadrant (upper core agreeing) stronger than a shallow one, as the live
+# cube's cells; label positions generalize label_pos_b's "lim * fraction"
+# formula to separate x/y limits.
 VTU_VTL_QUADRANT_COLORS = {
-    "deep warm core": "#e34948",
-    "shallow warm core": "#eb6834",
-    "deep cold core": "#2a78d6",
-    "shallow cold core": "#4a3aa7",
+    "deep warm core": _WARM,
+    "shallow warm core": _WARM,
+    "deep cold core": _COLD,
+    "shallow cold core": _COLD,
 }
-VTU_VTL_QUADRANT_ALPHA = 0.11
+VTU_VTL_QUADRANT_ALPHAS = {
+    "deep warm core": _CELL_ALPHA[0],
+    "shallow warm core": _CELL_ALPHA[1],
+    "deep cold core": _CELL_ALPHA[0],
+    "shallow cold core": _CELL_ALPHA[1],
+}
+VTU_VTL_QUADRANT_ALPHA = 0.11  # the mean, for callers that fill one alpha
 VTU_VTL_LABEL_FONTSIZE = 7.3
 
 # make_fig10's own axis limits, for lining up with it exactly. Panel (a)/(d):
@@ -83,7 +92,7 @@ def widen_limits(lim, *value_arrays):
 
 
 def draw_b_vtl_quadrants(ax, xlim, ylim, b_thr, label_overrides=None, fontsize=None):
-    """The four B-vs-$-V_T^L$ quadrant rectangles (alpha 0.30, zorder 0)
+    """The four B-vs-$-V_T^L$ quadrant rectangles (lower-core red or blue, alpha 0.12, zorder 0)
     and their italic corner labels, exactly as make_fig10 panel (a):
     symmetric/asymmetric split by `b_thr` (B's own onset threshold),
     warm/cold split at $-V_T^L$ = 0.
@@ -118,7 +127,7 @@ def draw_b_vtl_quadrants(ax, xlim, ylim, b_thr, label_overrides=None, fontsize=N
 
 
 def draw_vtu_vtl_quadrants(ax, xlim, ylim, label_overrides=None, fontsize=None):
-    """The four $-V_T^U$-vs-$-V_T^L$ quadrant rectangles (alpha 0.11,
+    """The four $-V_T^U$-vs-$-V_T^L$ quadrant rectangles (lower-core red or blue, deep stronger than shallow,
     zorder 0) and their italic corner labels, exactly as make_fig10 panel
     (b): deep/shallow split by $-V_T^U$ = 0, warm/cold split by
     $-V_T^L$ = 0.
@@ -142,9 +151,9 @@ def draw_vtu_vtl_quadrants(ax, xlim, ylim, label_overrides=None, fontsize=None):
     ]
     overrides = label_overrides or {}
     fs = VTU_VTL_LABEL_FONTSIZE if fontsize is None else fontsize
-    for x0, x1, y0, y1, color, _ in quadrants:
+    for x0, x1, y0, y1, color, name in quadrants:
         ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor=color,
-                                alpha=VTU_VTL_QUADRANT_ALPHA, edgecolor="none", zorder=0))
+                                alpha=VTU_VTL_QUADRANT_ALPHAS[name], edgecolor="none", zorder=0))
     label_pos = {
         "deep warm core": (x1lim * 0.55, y1lim * 0.90),
         "shallow warm core": (x1lim * 0.55, y0lim * 0.90),

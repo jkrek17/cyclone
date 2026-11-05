@@ -185,6 +185,16 @@ th, td {
   vertical-align: top;
 }
 
+/* The live map's low marker (live/glyphs.js), inline in the class table. */
+svg.glyph {
+  display: inline-block;
+  vertical-align: -0.2em;
+}
+
+td.mk {
+  white-space: nowrap;
+}
+
 thead th {
   background: var(--table-head-bg);
   font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;

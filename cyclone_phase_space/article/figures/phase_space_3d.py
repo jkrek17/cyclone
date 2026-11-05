@@ -69,6 +69,7 @@ import numpy as np
 
 import lifecycle_comparison as lc  # sets up sys.path, Agg backend, hc.ORIENTATION_MODE
 import diagram_style as ds
+import glyph_style as gs
 
 import matplotlib.pyplot as plt
 from matplotlib import patheffects
@@ -91,15 +92,15 @@ BASE_XLIM = (-320.0, 320.0)
 BASE_YLIM = (-20.0, 80.0)
 BASE_ZLIM = (-320.0, 320.0)
 
-# HCPSclass colors: D2D/colormaps/Grid/CPS_HartClass.cmap, identical to
-# lifecycle_comparison.CLASS_PALETTE (the Figure 13 class strips).
-CLASS_PALETTE = lc.CLASS_PALETTE
 CLASS_NAMES = lc.CLASS_NAMES
-CLASS_HEX = {k: to_hex(v) for k, v in CLASS_PALETTE.items()}
 
-HART_COLOR = "#8f8e89"
+HART_COLOR = gs.REF_GRAY
 PATH_EDGE = "#3a3a37"
-CELL_ALPHA = 0.10
+# The cells and the path take the live map's colors (glyph_style.py): the
+# lower core's red or blue, a deep cell stronger than a shallow one, and the
+# map's marker at every frame (triangle asymmetric, hollow shallow).
+CELL_HEX = {c: gs.core_hex(gs.CORES[c][0]) for c in range(7)}
+CELL_ALPHAS = {c: (0.11 if gs.CORES[c][0] == gs.CORES[c][1] else 0.04) for c in range(7)}
 VIEW = (20, -40)  # elevation, azimuth (degrees) of every static panel
 BOX_ASPECT = (1.0, 1.2, 0.9)  # -V_T^L, B, -V_T^U: B drawn a little longer, its range being narrow
 HOUR_STEP = 12.0  # hour labels, as on Hart's diagrams (his are every 6 h frame; 12 h keeps them legible)
@@ -396,6 +397,28 @@ def _choose_label(anchor, text, fontsize, dist, path_pts, boxes, angles=None):
     return best[1], best[2], best[3]
 
 
+def point_axes(d, m="grid"):
+    """The map's marker axes (lower warm, upper warm, asymmetric) of every
+    frame, from its class and, for class 6, its B; None where missing."""
+    return [gs.axes_of_class(c, b) for c, b in zip(d[f"CLS_{m}"], d[f"B_{m}"])]
+
+
+def scatter_glyphs(ax, x, y, z, axes_list, diam, zorder=8):
+    """The map's markers on a 3-D axes, one scatter per kind of marker,
+    `diam` the circle's diameter in points per frame."""
+    groups = {}
+    for i, a in enumerate(axes_list):
+        if a is None or not (np.isfinite(x[i]) and np.isfinite(y[i]) and np.isfinite(z[i])):
+            continue
+        groups.setdefault(a, []).append(i)
+    for a, ii in groups.items():
+        kw = gs.glyph_kw(a)
+        k = 1.3 if a[2] else 1.0
+        ax.scatter(np.asarray(x)[ii], np.asarray(y)[ii], np.asarray(z)[ii], s=(k * np.asarray(diam)[ii]) ** 2,
+                   marker=kw["marker"], facecolor=kw["markerfacecolor"], edgecolor=kw["markeredgecolor"],
+                   linewidth=0.5 if a[0] == a[1] else 1.1, depthshade=False, zorder=zorder)
+
+
 def draw_panel(ax, d, lims, letter):
     xlim, ylim, zlim = lims
     hours = d["hours"]
@@ -413,7 +436,7 @@ def draw_panel(ax, d, lims, letter):
 
     # -- the seven cells, translucent, edges light
     for c, box in cells.items():
-        poly = Poly3DCollection(box_faces(*box), facecolor=CLASS_PALETTE[c], alpha=CELL_ALPHA,
+        poly = Poly3DCollection(box_faces(*box), facecolor=CELL_HEX[c], alpha=CELL_ALPHAS[c],
                                 edgecolor=(0.3, 0.3, 0.3, 0.12), linewidth=0.25)
         poly.set_zorder(1)
         ax.add_collection3d(poly)
@@ -454,27 +477,27 @@ def draw_panel(ax, d, lims, letter):
 
     traj = np.concatenate([np.column_stack([d[f"VTL_{m}"], d[f"B_{m}"], d[f"VTU_{m}"]]) for m in ("hart", "grid")])
     for c, pos in place_cell_labels(ax, cells, traj, lims, label_avoid).items():
-        ax.text(*pos, str(c), color=CLASS_PALETTE[c], fontsize=9, fontweight="bold", ha="center", va="center",
+        ax.text(*pos, str(c), color=CELL_HEX[c], fontsize=9, fontweight="bold", ha="center", va="center",
                 zorder=3, path_effects=[_halo(2.0)])
 
-    # -- Hart's path: thin gray line and open circles, sized by the central
-    # pressure like the gridded markers
+    # -- Hart's path: thin gray line and small gray dots, sized by the
+    # central pressure like the gridded markers (gray: the reference, not a
+    # class)
     diam = marker_diameter(d["MSLP"])  # points
     ax.plot(d["VTL_hart"], d["B_hart"], d["VTU_hart"], "-", color=HART_COLOR, lw=0.8, alpha=0.9, zorder=4)
-    ax.scatter(d["VTL_hart"], d["B_hart"], d["VTU_hart"], s=(0.85 * diam) ** 2, marker="o", facecolor="white",
-               edgecolor=HART_COLOR, linewidth=0.6, depthshade=False, zorder=5)
+    ax.scatter(d["VTL_hart"], d["B_hart"], d["VTU_hart"], s=(0.55 * diam) ** 2, marker="o", facecolor=HART_COLOR,
+               edgecolor="white", linewidth=0.4, depthshade=False, zorder=5)
 
-    # -- gridded path colored by class: a dark casing, then class-colored
-    # halves, then square markers whose size grows with the depth
+    # -- gridded path as the live map draws a track: a dark casing, then
+    # halves in the lower core's color, then the map's marker at every frame
+    # (color the lower core, triangle asymmetric, hollow shallow) whose size
+    # grows with the depth
     ax.plot(d["VTL_grid"], d["B_grid"], d["VTU_grid"], "-", color=PATH_EDGE, lw=2.6, alpha=0.85, zorder=6,
             solid_capstyle="round")
     for c, segs in class_segments(d["VTL_grid"], d["B_grid"], d["VTU_grid"], d["CLS_grid"]).items():
-        lc3 = Line3DCollection(segs, colors=[CLASS_PALETTE[c]], linewidths=1.6, zorder=7)
+        lc3 = Line3DCollection(segs, colors=[CELL_HEX[c]], linewidths=1.6, zorder=7)
         ax.add_collection3d(lc3)
-    ok = np.isfinite(d["CLS_grid"])
-    cols = [CLASS_PALETTE[int(round(c))] for c in d["CLS_grid"][ok]]
-    ax.scatter(d["VTL_grid"][ok], d["B_grid"][ok], d["VTU_grid"][ok], s=diam[ok] ** 2, marker="s", c=cols,
-               edgecolor=PATH_EDGE, linewidth=0.45, depthshade=False, zorder=8)
+    scatter_glyphs(ax, d["VTL_grid"], d["B_grid"], d["VTU_grid"], point_axes(d), diam, zorder=8)
 
     # -- start and end markers (just outside the sized marker), then the
     # hour labels chosen above
@@ -540,16 +563,16 @@ def make_png(ds_list, lims):
         fig.text(x0 + 0.018, y0 + ph - 0.012 - 0.20 / fig_h, t2, fontsize=7.8, color=ds.TEXT_SECONDARY,
                  ha="left", va="top")
 
-    class_handles = [Patch(facecolor=CLASS_PALETTE[c], alpha=0.6, edgecolor="none", label=f"{c}  {CLASS_NAMES[c]}")
-                     for c in range(7)]
+    class_handles = gs.class_handles(CLASS_NAMES, size_pt=6.0)
     fig.legend(handles=class_handles, loc="lower left", bbox_to_anchor=(0.015, 0.004), ncol=4, fontsize=7.3,
-               frameon=False, title="HCPSclass cells (B = 10 m, $-V_T^L$ = 0, $-V_T^U$ = 0), path colored by class",
+               frameon=False, title="HCPSclass cells and the live map's marker: color the lower core (red warm, "
+                                    "blue cold), triangle asymmetric, hollow shallow; deep cells tinted stronger",
                title_fontsize=7.8, handlelength=1.3, columnspacing=1.1, alignment="left")
     path_handles = [
-        Line2D([0], [0], marker="s", color=PATH_EDGE, markerfacecolor=CLASS_HEX[0], markeredgecolor=PATH_EDGE,
-               lw=1.6, markersize=4.5, label="gridded, standard levels"),
-        Line2D([0], [0], marker="o", color=HART_COLOR, markerfacecolor="white", lw=0.8, markersize=3.5,
-               label="Hart, 50 hPa levels"),
+        Line2D([0], [0], color=gs.WARM, lw=1.6, label="gridded, standard levels",
+               **{k: v for k, v in gs.glyph_kw((1, 1, False), 4.5).items() if k != "linestyle"}),
+        Line2D([0], [0], marker="o", color=HART_COLOR, markerfacecolor=HART_COLOR, markeredgecolor="white",
+               lw=0.8, markersize=3.0, label="Hart, 50 hPa levels (gray)"),
         Line2D([0], [0], marker="o", color="none", markerfacecolor="none", markeredgecolor=ds.TEXT_DARK,
                markersize=6.5, markeredgewidth=1.1, label="start (0 h), hours every 12 h"),
         Line2D([0], [0], marker="s", color="none", markerfacecolor="none", markeredgecolor=ds.TEXT_DARK,
@@ -562,8 +585,8 @@ def make_png(ds_list, lims):
                handlelength=1.8, columnspacing=1.1, alignment="left")
     # marker size legend: the central pressure derived from the vortex
     size_handles = [
-        Line2D([0], [0], marker="s", color="none", markerfacecolor=CLASS_HEX[0], markeredgecolor=PATH_EDGE,
-               markeredgewidth=0.45, markersize=float(marker_diameter(p)), label=f"{p:.0f} hPa")
+        Line2D([0], [0], color="none", label=f"{p:.0f} hPa",
+               **{k: v for k, v in gs.glyph_kw((1, 1, False), float(marker_diameter(p))).items() if k != "linestyle"})
         for p in SIZE_LEGEND_HPA]
     fig.legend(handles=size_handles, loc="lower left", bbox_to_anchor=(0.015, 0.082), ncol=len(size_handles),
                fontsize=7.3, frameon=False, handlelength=1.8, columnspacing=1.6, alignment="left",
@@ -621,6 +644,27 @@ def _hour_label_idx(d, scale):
     return sorted(idx)
 
 
+GLYPH_CHAR = {(True, False): "\u25cf", (True, True): "\u25b2", (False, False): "\u25cb", (False, True): "\u25b3"}
+
+
+def plotly_glyphs(axes_list, diam):
+    """Per-frame Plotly marker arrays for the live map's marker on a 2-D
+    scatter: symbol, fill, edge color and width, size (px)."""
+    sym, fill, edge, width, size = [], [], [], [], []
+    for a, dm in zip(axes_list, diam):
+        if a is None:
+            sym.append("circle"); fill.append(gs.MISSING); edge.append(gs.MISSING); width.append(0)
+            size.append(round(float(0.85 * dm), 1))
+            continue
+        deep = a[0] == a[1]
+        sym.append("triangle-up" if a[2] else "circle")
+        fill.append(gs.core_hex(a[0]) if deep else gs.HOLLOW)
+        edge.append(gs.INK if deep else gs.core_hex(a[0]))
+        width.append(1 if deep else 2.5)
+        size.append(round(float(dm * (1.3 if a[2] else 1.0)), 1))
+    return sym, fill, edge, width, size
+
+
 def scenario_traces(d, key):
     """The Plotly traces of one life cycle in the three-dimensional view,
     each tagged with meta = key. Markers are sized by the derived central
@@ -630,13 +674,13 @@ def scenario_traces(d, key):
     diam = marker_diameter(d["MSLP"], PX_PER_PT)
     traces = []
 
-    # Hart's storm-centered path: thin gray line, open circles
+    # Hart's storm-centered path: thin gray line, small gray dots
     traces.append(dict(
-        type="scatter3d", mode="lines+markers", name="Hart, 50 hPa levels", legendgroup="hart",
+        type="scatter3d", mode="lines+markers", name="Hart, 50 hPa levels (gray)", legendgroup="hart",
         x=_r(d["VTL_hart"]), y=_r(d["B_hart"]), z=_r(d["VTU_hart"]),
         line=dict(color=HART_COLOR, width=2),
-        marker=dict(size=_r(0.85 * diam), sizemode="diameter", symbol="circle", color="#ffffff",
-                    line=dict(color=HART_COLOR, width=1)),
+        marker=dict(size=_r(0.55 * diam), sizemode="diameter", symbol="circle", color=HART_COLOR,
+                    line=dict(color="#ffffff", width=1)),
         text=["Hart, 50 hPa levels<br>" + _hover(d, i, "hart") for i in range(len(hours))],
         hovertemplate="%{text}<extra></extra>",
     ))
@@ -653,16 +697,21 @@ def scenario_traces(d, key):
             ys += _r(s[:, 1]) + [None]
             zs += _r(s[:, 2]) + [None]
         traces.append(dict(type="scatter3d", mode="lines", legendgroup="grid", showlegend=False,
-                           x=xs, y=ys, z=zs, hoverinfo="skip", line=dict(color=CLASS_HEX[c], width=6)))
-    cols = [CLASS_HEX[int(round(c))] if np.isfinite(c) else "#ffffff" for c in d["CLS_grid"]]
+                           x=xs, y=ys, z=zs, hoverinfo="skip", line=dict(color=CELL_HEX[c], width=6)))
+    # the map's marker at every frame; a 3-D scatter has no triangle, so the
+    # markers are drawn as text glyphs (filled or hollow circle or triangle)
+    # in the lower core's color
+    pa = point_axes(d)
     traces.append(dict(
-        type="scatter3d", mode="markers", name="gridded, standard levels (colored by class, sized by depth)",
-        legendgroup="grid",
+        type="scatter3d", mode="text", name="gridded, standard levels (the map's marker, sized by depth)",
+        legendgroup="grid", showlegend=True,
         x=_r(d["VTL_grid"]), y=_r(d["B_grid"]), z=_r(d["VTU_grid"]),
-        marker=dict(size=_r(diam), sizemode="diameter", symbol="square", color=cols,
-                    line=dict(color=PATH_EDGE, width=1)),
-        text=["gridded, standard levels<br>" + _hover(d, i, "grid") for i in range(len(hours))],
-        hovertemplate="%{text}<extra></extra>",
+        text=[GLYPH_CHAR[(a[0] == a[1], a[2])] if a else "\u25cf" for a in pa],
+        textposition="middle center",
+        textfont=dict(color=[gs.core_hex_of(a) for a in pa],
+                      size=[round(float(1.35 * dm * (1.15 if a and a[2] else 1.0)), 1) for a, dm in zip(pa, diam)]),
+        hovertext=["gridded, standard levels<br>" + _hover(d, i, "grid") for i in range(len(hours))],
+        hovertemplate="%{hovertext}<extra></extra>",
     ))
     # start and end
     traces.append(dict(
@@ -721,7 +770,7 @@ def shared_traces(lims):
             type="mesh3d", name=f"{c}  {CLASS_NAMES[c]}", legendgroup=f"c{c}", showlegend=True,
             x=[x0, x1, x1, x0, x0, x1, x1, x0], y=[y0, y0, y1, y1, y0, y0, y1, y1],
             z=[z0, z0, z0, z0, z1, z1, z1, z1], i=tri_i, j=tri_j, k=tri_k,
-            color=CLASS_HEX[c], opacity=0.12, flatshading=True,
+            color=CELL_HEX[c], opacity=round(CELL_ALPHAS[c] * 1.1, 3), flatshading=True,
             lighting=dict(ambient=1.0, diffuse=0.0, specular=0.0, fresnel=0.0),
             hovertemplate=f"class {c}<br>{CLASS_NAMES[c]}<extra></extra>",
         ))
@@ -729,7 +778,7 @@ def shared_traces(lims):
         traces.append(dict(
             type="scatter3d", mode="text", legendgroup=f"c{c}", showlegend=False, hoverinfo="skip",
             x=[x], y=[y], z=[z], text=[f"<b>{c}</b> {CLASS_NAMES[c]}"],
-            textfont=dict(color=CLASS_HEX[c] if c not in (2, 6) else {2: "#a88b00", 6: "#77766f"}[c], size=11),
+            textfont=dict(color=CELL_HEX[c], size=11),
         ))
     xs, ys, zs = [], [], []
     for line in dividing_plane_outlines(xlim, ylim, zlim):
@@ -760,17 +809,17 @@ def scenario_traces_2d(d, key):
     idx = _hour_label_idx(d, span)
     minor = [hours[i] % HOUR_MAJOR != 0 for i in idx]
     ev = events_of(d)
-    cols = [CLASS_HEX[int(round(c))] if np.isfinite(c) else "#ffffff" for c in d["CLS_grid"]]
+    sym, fill, edge, width, size = plotly_glyphs(point_axes(d), diam)
     traces = []
     for p, (xa, ya, vert) in enumerate(PANELS_2D):
         first = p == 0
         ax_kw = dict(xaxis=xa, yaxis=ya)
         traces.append(dict(
-            type="scatter", mode="lines+markers", name="Hart, 50 hPa levels", legendgroup="hart",
+            type="scatter", mode="lines+markers", name="Hart, 50 hPa levels (gray)", legendgroup="hart",
             showlegend=first, x=_r(d["VTL_hart"]), y=_r(d[f"{vert}_hart"]),
             line=dict(color=HART_COLOR, width=1.2),
-            marker=dict(size=_r(0.85 * diam), sizemode="diameter", symbol="circle", color="#ffffff",
-                        line=dict(color=HART_COLOR, width=1)),
+            marker=dict(size=_r(0.55 * diam), sizemode="diameter", symbol="circle", color=HART_COLOR,
+                        line=dict(color="#ffffff", width=1)),
             text=["Hart, 50 hPa levels<br>" + _hover(d, i, "hart") for i in range(len(hours))],
             hovertemplate="%{text}<extra></extra>", **ax_kw,
         ))
@@ -785,12 +834,12 @@ def scenario_traces_2d(d, key):
                 xs += _r(s[:, 0]) + [None]
                 ys += _r(s[:, 1]) + [None]
             traces.append(dict(type="scatter", mode="lines", legendgroup="grid", showlegend=False, x=xs, y=ys,
-                               hoverinfo="skip", line=dict(color=CLASS_HEX[c], width=2.5), **ax_kw))
+                               hoverinfo="skip", line=dict(color=CELL_HEX[c], width=2.5), **ax_kw))
         traces.append(dict(
-            type="scatter", mode="markers", name="gridded, standard levels (colored by class, sized by depth)",
+            type="scatter", mode="markers", name="gridded, standard levels (the map's marker, sized by depth)",
             legendgroup="grid", showlegend=first, x=_r(d["VTL_grid"]), y=_r(d[f"{vert}_grid"]),
-            marker=dict(size=_r(diam), sizemode="diameter", symbol="square", color=cols,
-                        line=dict(color=PATH_EDGE, width=1)),
+            marker=dict(size=size, sizemode="diameter", symbol=sym, color=fill,
+                        line=dict(color=edge, width=width)),
             text=["gridded, standard levels<br>" + _hover(d, i, "grid") for i in range(len(hours))],
             hovertemplate="%{text}<extra></extra>", **ax_kw,
         ))
@@ -967,12 +1016,14 @@ def make_html(ds_list, lims):
         "presents it as two cross-sections for legibility, B against the lower term and the upper term "
         "against the lower; the three-dimensional view here is a rendering of the same space, and the "
         f"two-diagram view shows the same path on his two diagrams. The planes B = 10 m, {_vtl_html()} = 0 and "
-        f"{_vtu_html()} = 0 are his thresholds; they divide the space into the seven colored HCPSclass cells, "
+        f"{_vtu_html()} = 0 are his thresholds; they divide the space into the seven HCPSclass cells, tinted "
+        "red where the lower core is warm and blue where it is cold, deeper where the upper core agrees, "
         "class 6 (cold below, warm above) spanning both sides of B = 10 m, and in the two-diagram view they "
         "are the lines between his shaded quadrants. Choose a life cycle with the buttons: each is a synthetic "
         "168 h storm whose height fields are built from a vortex profile, a thermal dipole across the track, "
         "a background gradient and a track, and whose path is computed frame by frame by the gridded method "
-        "(squares, colored by class) and by Hart's storm-centered method (gray circles). As on Hart's "
+        "(the live map's marker: color the lower core, a triangle when asymmetric, hollow when shallow) "
+        "and by Hart's storm-centered method (gray dots). As on Hart's "
         "diagrams, the marker grows with the central pressure depth (the archetypes prescribe no pressure, "
         "so it is derived from the vortex's 1000 hPa amplitude at 8 m per hPa below 1013 hPa; the sizes "
         + ", ".join(f"{s['hpa']:.0f}" for s in sizes) + " hPa are shown beside the buttons) and the hour "

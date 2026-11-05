@@ -349,13 +349,16 @@ the User Guide's "Using it on shift"). `HCPSclass`'s own crossings
 (0 to 2 or 3, then to 4 or 5) are the usual signature of the same two
 events but can lag or lead them by a frame near a strict line.
 
-![Hart's phase space in three dimensions, six small panels from one viewing angle, each with the seven HCPSclass cells drawn as translucent colored boxes cut by the planes B = 10 m, -VTL = 0 and -VTU = 0 and one synthetic life cycle's gridded path (colored by class) and Hart path (gray) threading through them](../article/figures/figJ_phase_space_3d.png)
+![Hart's phase space in three dimensions, six small panels from one viewing angle, each with the seven HCPSclass cells drawn as translucent boxes tinted by the lower core cut by the planes B = 10 m, -VTL = 0 and -VTU = 0 and one synthetic life cycle's gridded path (the live map's markers) and Hart path (gray) threading through them](../article/figures/figJ_phase_space_3d.png)
 
 The figure (article Figure 7, from `cyclone_phase_space/article/figures/phase_space_3d.py`)
 draws that space with -VTL, B and -VTU on the axes, the seven cells as
-boxes in the class colors (code 6 spanning both sides of B = 10 m), and
-six synthetic 168 h life cycles, one per panel, each as the gridded path
-(colored by the class it assigns) and Hart's path (gray): the
+boxes tinted as the live map's phase space (red where the lower core is
+warm, blue where it is cold, stronger where deep; code 6 spanning both
+sides of B = 10 m), and six synthetic 168 h life cycles, one per panel,
+each as the gridded path (the live map's marker for the class it assigns:
+color the lower core, triangle asymmetric, hollow shallow) and Hart's
+path (gray): the
 extratropical transition of section 2.8 (classes 0, 2, 3, 4, 5, 1), a
 tropical cyclone that decays without transition (0 throughout), a warm
 seclusion (4, 3, 1, 5), a cold-core low that occludes (4, 5), the

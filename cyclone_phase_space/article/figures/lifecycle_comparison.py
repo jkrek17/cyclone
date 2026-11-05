@@ -83,6 +83,7 @@ import cps as ch  # noqa: E402
 from experiments import make_grid, dist_km, std_height, LEVELS, ANCHOR_P  # noqa: E402
 from band_comparison import ARCHETYPES  # noqa: E402
 import diagram_style as ds  # noqa: E402  (make_fig10's own quadrant colors/labels/lines/limits)
+import glyph_style as gs  # noqa: E402  (the live map's marker, for the gridded path and class rows)
 
 hc.ORIENTATION_MODE = 0  # rows increase northward on these grids, as in experiments_extensions.py
 
@@ -1024,7 +1025,11 @@ def main():
 def make_figure(hours, lats, lons, B_hart, VTL_hart, VTU_hart, B_grid, VTL_grid, VTU_grid, CLS_grid, CLS_hart,
                  onset_hart, onset_grid, completion_hart, completion_grid, B_grid_former):
     cmap_hart = LinearSegmentedColormap.from_list("hart_gray", ["#c9c9c9", "#000000"])
-    cmap_grid = LinearSegmentedColormap.from_list("grid_red", ["#fbdede", RED])
+    # The gridded path as the live map draws a track: segments in the lower
+    # core's color and the map's marker at every frame (color the lower core,
+    # triangle asymmetric, hollow shallow); Hart's path stays gray.
+    axes_grid = [gs.axes_of_class(c, b) for c, b in zip(CLS_grid, B_grid)]
+    axes_hart = [gs.axes_of_class(c, b) for c, b in zip(CLS_hart, B_hart)]
 
     # Panels (a)/(b)'s background (quadrant colors/labels, reference lines,
     # grid, axis labels) and limits match make_figures.make_fig10 (the
@@ -1048,14 +1053,15 @@ def make_figure(hours, lats, lons, B_hart, VTL_hart, VTU_hart, B_grid, VTL_grid,
     ax.set_ylim(*ylim_b)
     ds.draw_b_vtl_quadrants(ax, xlim_vtl, ylim_b, 10.0)
     ax.plot(VTL_hart, B_hart, "-", color="0.75", lw=1.0, zorder=1)
-    ax.plot(VTL_grid, B_grid, "-", color=RED, alpha=0.35, lw=1.0, zorder=1)
+    gs.draw_core_path(ax, VTL_grid, B_grid, axes_grid, lw=1.1, zorder=1.5, halo=False)
     # Former, first-order gradient form of gridded B (parameter_b_grid_gradient),
     # plotted against the SAME VTL_grid (VTL does not depend on which B form is
     # used) -- thin dotted, no markers, so it reads as a comparison trace behind
     # the two marker series rather than competing with them for attention.
-    ax.plot(VTL_grid, B_grid_former, ":", color=RED, alpha=0.55, lw=1.0, zorder=1)
-    ax.scatter(VTL_hart, B_hart, c=hours, cmap=cmap_hart, s=32, marker="o", zorder=3, edgecolor="white", linewidth=0.4)
-    ax.scatter(VTL_grid, B_grid, c=hours, cmap=cmap_grid, s=32, marker="s", zorder=4, edgecolor="white", linewidth=0.4)
+    ax.plot(VTL_grid, B_grid_former, ":", color=ds.TEXT_SECONDARY, alpha=0.7, lw=1.0, zorder=1)
+    ax.scatter(VTL_hart, B_hart, c=hours, cmap=cmap_hart, s=22, marker="o", zorder=3, edgecolor="white", linewidth=0.4)
+    for x, y, a in zip(VTL_grid, B_grid, axes_grid):
+        gs.draw_glyph(ax, x, y, a, size_pt=5.0, zorder=4)
     ax.axhline(10.0, color=ds.TEXT_DARK, lw=1.0, zorder=2)
     ax.axvline(0.0, color=ds.TEXT_DARK, lw=1.0, zorder=2)
     ax.set_xlabel(ds.AXIS_LABEL_VTL)
@@ -1076,9 +1082,10 @@ def make_figure(hours, lats, lons, B_hart, VTL_hart, VTU_hart, B_grid, VTL_grid,
     }
     ds.draw_vtu_vtl_quadrants(ax, xlim_vtl, ylim_vtu, label_overrides=label_overrides_b)
     ax.plot(VTL_hart, VTU_hart, "-", color="0.75", lw=1.0, zorder=1)
-    ax.plot(VTL_grid, VTU_grid, "-", color=RED, alpha=0.35, lw=1.0, zorder=1)
-    ax.scatter(VTL_hart, VTU_hart, c=hours, cmap=cmap_hart, s=32, marker="o", zorder=3, edgecolor="white", linewidth=0.4)
-    ax.scatter(VTL_grid, VTU_grid, c=hours, cmap=cmap_grid, s=32, marker="s", zorder=4, edgecolor="white", linewidth=0.4)
+    gs.draw_core_path(ax, VTL_grid, VTU_grid, axes_grid, lw=1.1, zorder=1.5, halo=False)
+    ax.scatter(VTL_hart, VTU_hart, c=hours, cmap=cmap_hart, s=22, marker="o", zorder=3, edgecolor="white", linewidth=0.4)
+    for x, y, a in zip(VTL_grid, VTU_grid, axes_grid):
+        gs.draw_glyph(ax, x, y, a, size_pt=5.0, zorder=4)
     ax.axhline(0.0, color=ds.TEXT_DARK, lw=1.0, zorder=2)
     ax.axvline(0.0, color=ds.TEXT_DARK, lw=1.0, zorder=2)
     ax.set_xlabel(ds.AXIS_LABEL_VTL)
@@ -1087,12 +1094,18 @@ def make_figure(hours, lats, lons, B_hart, VTL_hart, VTU_hart, B_grid, VTL_grid,
     ax.grid(True, color=ds.GRID_COLOR, linewidth=0.5, zorder=0.2)
 
     handles = [
-        Line2D([0], [0], marker="o", color="0.4", lw=1.0, markersize=6, label="Hart, 50 hPa levels"),
-        Line2D([0], [0], marker="s", color=RED, lw=1.0, markersize=6, label="gridded, standard levels"),
-        Line2D([0], [0], ls=":", color=RED, alpha=0.55, lw=1.4,
+        Line2D([0], [0], marker="o", color="0.4", lw=1.0, markersize=5, label="Hart, 50 hPa levels (gray, light to dark by hour)"),
+        Line2D([0], [0], color=gs.WARM, lw=1.1, label="gridded, standard levels",
+               **{k: v for k, v in gs.glyph_kw((1, 1, False), 5.5).items() if k != "linestyle"}),
+        Line2D([0], [0], ls=":", color=ds.TEXT_SECONDARY, alpha=0.7, lw=1.4,
                label="gridded, first-order gradient (former)"),
     ]
     fig.legend(handles=handles, loc="upper center", ncol=3, fontsize=8, bbox_to_anchor=(0.5, 1.0), frameon=False)
+    fig.legend(handles=gs.legend_handles(5.5, [
+        ((1, 1, False), "warm lower core"), ((0, 0, False), "cold lower core"),
+        ((1, 1, True), "triangle: asymmetric (B > 10 m)"), ((1, 0, False), "hollow: shallow (upper core differs)"),
+    ]), loc="upper center", ncol=4, fontsize=7.5, bbox_to_anchor=(0.5, 0.955), frameon=False,
+        title=None, handletextpad=0.3, columnspacing=1.4)
 
     # -- (c) time series, with the gridded class as a strip along the top
     ax = axes[2]
@@ -1123,16 +1136,13 @@ def make_figure(hours, lats, lons, B_hart, VTL_hart, VTU_hart, B_grid, VTL_grid,
     TICK_BAND_Y = (320.0, 360.0)
     TICK_LABEL_Y = 312.0
 
-    # Two class strips: gridded on top, Hart just below it, same palette, row-labeled
-    # beside the strips in the margin opened up on the right by right_pad.
-    strip_rows = (("gridded", CLS_grid, GRID_STRIP_Y), ("Hart", CLS_hart, HART_STRIP_Y))
-    for label, cls_arr, (y0, y1) in strip_rows:
-        for h, cls in zip(hours, cls_arr):
-            if not np.isfinite(cls):
-                continue
-            ax.add_patch(Rectangle((h - 3.0, y0), 6.0, y1 - y0, facecolor=CLASS_PALETTE[int(round(cls))],
-                                    edgecolor="none", zorder=2))
-        ax.text(hours.max() + 0.08 * right_pad, (y0 + y1) / 2.0, label, fontsize=8, color="0.2",
+    # Two rows of the class as the map's markers, one per 6 h frame: gridded on
+    # top, Hart just below it, row-labeled beside them in the margin opened up
+    # on the right by right_pad.
+    strip_rows = (("gridded", axes_grid, GRID_STRIP_Y), ("Hart", axes_hart, HART_STRIP_Y))
+    for label, axes_arr, (y0, y1) in strip_rows:
+        gs.glyph_strip(ax, hours, axes_arr, (y0 + y1) / 2.0, size_pt=4.4, every=None, zorder=4, clip_on=False)
+        ax.text(hours.max() + 0.22 * right_pad, (y0 + y1) / 2.0, label, fontsize=8, color="0.2",
                 ha="left", va="center")
 
     # Onset/completion ticks in their own data-coordinate band above the strips'
