@@ -575,9 +575,9 @@
     },
     {
       "name": "AUTO_261025_01",
-      "lat": 46.99,
-      "lon": -179.89,
-      "cycle": "2026110812",
+      "lat": 48.17,
+      "lon": -163.53,
+      "cycle": "2026110912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026102512: 954.67 hPa, TROP.",
@@ -772,9 +772,9 @@
     },
     {
       "name": "AUTO_261102_01",
-      "lat": 51.52,
-      "lon": -151.89,
-      "cycle": "2026110812",
+      "lat": 52.23,
+      "lon": -142.82,
+      "cycle": "2026110912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026110212: 966.49 hPa, NPAC.",
@@ -820,8 +820,9 @@
       "cycle": "2026110812",
       "fhr0": 0,
       "fhr1": null,
-      "notes": "Found automatically at 0 h of 2026110412: 973.31 hPa, NPAC.",
-      "active": true
+      "notes": "Found automatically at 0 h of 2026110412: 973.31 hPa, NPAC. Inactive from 2026110912: no closed low within 400 km of the seed.",
+      "active": false,
+      "ended_cycle": "2026110912"
     },
     {
       "name": "AUTO_261104_02",
@@ -841,8 +842,9 @@
       "cycle": "2026110812",
       "fhr0": 0,
       "fhr1": null,
-      "notes": "Found automatically at 0 h of 2026110512: 970.04 hPa, NPAC.",
-      "active": true
+      "notes": "Found automatically at 0 h of 2026110512: 970.04 hPa, NPAC. Inactive from 2026110912: no closed low within 400 km of the seed.",
+      "active": false,
+      "ended_cycle": "2026110912"
     },
     {
       "name": "AUTO_261107_01",
@@ -851,8 +853,9 @@
       "cycle": "2026110812",
       "fhr0": 0,
       "fhr1": null,
-      "notes": "Found automatically at 0 h of 2026110712: 966.19 hPa, NPAC.",
-      "active": true
+      "notes": "Found automatically at 0 h of 2026110712: 966.19 hPa, NPAC. Inactive from 2026110912: no closed low within 400 km of the seed.",
+      "active": false,
+      "ended_cycle": "2026110912"
     },
     {
       "name": "AUTO_261107_02",
@@ -861,17 +864,48 @@
       "cycle": "2026110812",
       "fhr0": 0,
       "fhr1": null,
-      "notes": "Found automatically at 0 h of 2026110712: 976.44 hPa, NATL.",
-      "active": true
+      "notes": "Found automatically at 0 h of 2026110712: 976.44 hPa, NATL. Inactive from 2026110912: no closed low within 400 km of the seed.",
+      "active": false,
+      "ended_cycle": "2026110912"
     },
     {
       "name": "AUTO_261108_01",
-      "lat": 42.39,
-      "lon": -22.51,
-      "cycle": "2026110812",
+      "lat": 44.76,
+      "lon": -20.07,
+      "cycle": "2026110912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026110812: 970.05 hPa, NATL.",
+      "active": true
+    },
+    {
+      "name": "AUTO_261109_01",
+      "lat": 24.18,
+      "lon": 135.4,
+      "cycle": "2026110912",
+      "fhr0": 0,
+      "fhr1": null,
+      "notes": "Found automatically at 0 h of 2026110912: 973.98 hPa, NPAC.",
+      "active": true
+    },
+    {
+      "name": "AUTO_261109_02",
+      "lat": 72.44,
+      "lon": 27.9,
+      "cycle": "2026110912",
+      "fhr0": 0,
+      "fhr1": null,
+      "notes": "Found automatically at 0 h of 2026110912: 976.30 hPa, 72.4N 27.9E.",
+      "active": true
+    },
+    {
+      "name": "AUTO_261109_03",
+      "lat": 47.47,
+      "lon": -156.55,
+      "cycle": "2026110912",
+      "fhr0": 0,
+      "fhr1": null,
+      "notes": "Found automatically at 0 h of 2026110912: 979.71 hPa, NPAC.",
       "active": true
     }
   ]
