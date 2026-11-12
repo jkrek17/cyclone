@@ -1,0 +1,33 @@
+{
+  "cycle": "2026111112",
+  "mslp_below_hpa": 980.0,
+  "lat_above": 0.0,
+  "max_per_day": 6,
+  "lows": [
+    {
+      "lat": 59.03,
+      "lon": -146.45,
+      "mslp_hpa": 970.53,
+      "basin": "NPAC",
+      "action": "added",
+      "storm": "AUTO_261111_01"
+    },
+    {
+      "lat": 55.87,
+      "lon": -137.48,
+      "mslp_hpa": 973.24,
+      "basin": "NPAC",
+      "action": "known",
+      "storm": "AUTO_261102_01",
+      "distance_km": 0
+    },
+    {
+      "lat": 49.92,
+      "lon": -174.68,
+      "mslp_hpa": 975.53,
+      "basin": "NPAC",
+      "action": "added",
+      "storm": "AUTO_261111_02"
+    }
+  ]
+}
