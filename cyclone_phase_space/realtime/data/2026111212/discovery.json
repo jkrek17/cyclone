@@ -1,0 +1,17 @@
+{
+  "cycle": "2026111212",
+  "mslp_below_hpa": 980.0,
+  "lat_above": 0.0,
+  "max_per_day": 6,
+  "lows": [
+    {
+      "lat": 49.04,
+      "lon": -148.15,
+      "mslp_hpa": 961.1,
+      "basin": "NPAC",
+      "action": "known",
+      "storm": "AUTO_261111_02",
+      "distance_km": 0
+    }
+  ]
+}
