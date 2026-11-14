@@ -1,0 +1,37 @@
+{
+  "cycle": "2026111012",
+  "name": "AUTO_261109_02",
+  "status": "ok",
+  "code_version": "3ccb284",
+  "seed": {
+    "lat": 67.28,
+    "lon": 61.74,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026110912 at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 6,
+  "fixes": 2,
+  "start": {
+    "lat": 66.46,
+    "lon": 62.64,
+    "mslp_hpa": 983.3
+  },
+  "end": {
+    "lat": 65.76,
+    "lon": 62.66,
+    "mslp_hpa": 987.0
+  },
+  "min_mslp_hpa": 983.3,
+  "onset_standard_h": 0,
+  "completion_standard_h": 0,
+  "onset_hart_h": 0,
+  "completion_hart_h": 0,
+  "bands": "hart",
+  "class_sequence": "4 0, - 6",
+  "class_sequence_standard": "4 0, - 6",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +12, +18 h (998 hPa at +18 h)"
+}

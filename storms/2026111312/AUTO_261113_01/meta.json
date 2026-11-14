@@ -1,0 +1,49 @@
+{
+  "cycle": "2026111312",
+  "name": "AUTO_261113_01",
+  "status": "ok",
+  "code_version": "459874c",
+  "seed": {
+    "lat": 59.02,
+    "lon": 23.25,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "automatic discovery at 0 h of 2026111312"
+  },
+  "start_fhr": 0,
+  "end_fhr": 18,
+  "fixes": 4,
+  "start": {
+    "lat": 59.02,
+    "lon": 23.25,
+    "mslp_hpa": 978.9
+  },
+  "end": {
+    "lat": 62.27,
+    "lon": 32.05,
+    "mslp_hpa": 982.7
+  },
+  "min_mslp_hpa": 978.9,
+  "onset_standard_h": 0,
+  "completion_standard_h": 0,
+  "onset_hart_h": 0,
+  "completion_hart_h": 0,
+  "bands": "hart",
+  "class_sequence": "4 0-12, - 18",
+  "class_sequence_standard": "5 0, 4 6-12, - 18",
+  "fsu_number": 15,
+  "fsu": {
+    "number": 15,
+    "lat": 59.27,
+    "lon": 23.23,
+    "distance_km": 28,
+    "url": "http://moe.met.fsu.edu/cyclonephase/gfs/fcst/archive/26111312/15.html"
+  },
+  "track_end": "no minimum within 600 km of 63.0,36.1 at or below 1007 hPa and within 1080 km of the last fix at +30 h",
+  "discovered": {
+    "lat": 59.02,
+    "lon": 23.25,
+    "mslp_hpa": 978.86,
+    "basin": "59.0N 23.2E"
+  }
+}
