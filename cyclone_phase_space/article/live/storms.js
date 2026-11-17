@@ -53,9 +53,11 @@ const HYST_DEFAULT = { b_hi: 15, b_lo: 5, vt_m: 10 };
 
 const ST = { list: [], byKey: new Map(), built: false, hover: null, selected: null, trackB: false, hyst: false };
 
+// AUTO_<YYMMDD>_<NN> reads "AUTO MMDD-NN": the day the low was first found
+// and its number that day, so storms from different days never share a label.
 function stormLabel(name) {
-  const m = /^AUTO_\d{6}_(\d+)$/.exec(name);
-  return m ? `AUTO ${m[1]}` : String(name).replace(/_/g, ' ');
+  const m = /^AUTO_\d{2}(\d{4})_(\d+)$/.exec(name);
+  return m ? `AUTO ${m[1]}-${m[2]}` : String(name).replace(/_/g, ' ');
 }
 
 // "15N 155E": whole degrees, for a storm's subtitle.
