@@ -130,8 +130,8 @@ then the upper warm core is usually lost next (HCPSclass moves from 2
 to 3), and finally the lower thermal wind turns negative (HCPSclass
 reaches 4, the Evans and Hart completion). Some storms then curve back
 toward the warm side as a warm seclusion re-forms a shallow warm core
-near the surface (HCPSclass back to 1, with the upper term still
-cold), which is one reason those systems can deepen unexpectedly over
+near the surface (HCPSclass back to 3 while B stays above 10 m, or
+to 1 if B also falls, with the upper term still cold), which is one reason those systems can deepen unexpectedly over
 cold water. Section 6 walks through spotting this sequence on shift.
 
 ![Cross-sections showing a warm-core storm's height dip shrinking with altitude and a cold-core low's dip growing with altitude, with the resulting height-range-versus-pressure slope on the right](../article/figures/fig8_thermal_wind_concept.png)
@@ -342,7 +342,7 @@ Reading the three together at a low center (HVTL, HVTU, HB):
 - red, blue, magenta: transition under way, upper core gone (class 3).
 - blue, blue, magenta: extratropical low on a front (class 4).
 - blue, blue, clear: mature occluded low (class 5).
-- red, blue, clear: warm seclusion (class 1).
+- red, blue, clear: subtropical storm, or a warm seclusion once B falls (class 1). A seclusion that keeps B above 10 m reads red, blue, magenta (class 3), the same as transition under way: tell them apart by whether HVTL has just come back from blue.
 
 Away from a low center the three fields are still physical, but they
 describe the environment rather than a storm. HB is the thickness

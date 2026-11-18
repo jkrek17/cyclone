@@ -72,10 +72,13 @@ geometry you draw.
 | 3 asymmetric shallow warm core | transition under way | warm and cold front, upper core gone |
 | 4 asymmetric cold core | extratropical low on a front | warm and cold front, occluding |
 | 5 symmetric cold core | mature occluded low | occluded front spiraling into the center (Norwegian) |
-| 1 symmetric shallow warm core | warm seclusion | bent-back warm front, fractured cold front, T-bone (Shapiro-Keyser) |
+| 1 symmetric shallow warm core | warm seclusion once B falls (class 3 while B stays above 10 m) | bent-back warm front, fractured cold front, T-bone (Shapiro-Keyser) |
 | 6 shallow cold core | rare; lower cold, upper warm | treat as 4 or 5 and check the numbers |
 
-The class 1 call is the one worth the most. A warm seclusion has the
+The seclusion call is the one worth the most. It reads as class 1
+once B falls below 10 m, or as class 3 straight after class 4 while the
+bent-back front keeps B above it; either way the sign is HVTL turning
+warm again under a cold HVTU. A warm seclusion has the
 warm air wrapped into the center, so the front near the center is a
 bent-back warm front around the poleward side and the cold front is
 fractured to the east, not a spiral. That geometry is judged from
