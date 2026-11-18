@@ -442,9 +442,10 @@ line, not cold/symmetric), and why a joint class carries information
 neither parameter alone does. `hart_class` does not use history: it looks
 only at the current frame's B, VTL, and VTU, so a storm that re-forms
 a low-level warm core after transitioning (a warm seclusion) reads
-back as a warm class (0/1) rather than staying "stuck" at a cold one
--- this is the warm-seclusion signature, read off the joint class
-turning warm again, not a sign the transition never completed.
+back as a lower-warm class (3 while B stays above 10 m, 1 if B also
+falls) rather than staying "stuck" at a cold one -- this is the
+warm-seclusion signature, read off VTL turning warm again, not a sign
+the transition never completed.
 
 Relation to Hart's storm-centered diagrams
 ---------------------------------------------
@@ -2763,9 +2764,10 @@ def hart_class(
     shallow warm core, the upper thermal wind has gone negative first)
     to 4 (asymmetric cold core, VTL has now gone negative too: Evans and
     Hart's completion). A warm seclusion is a storm that reaches 4 and
-    then re-forms a warm core at low levels while still asymmetric, i.e.
-    4 then back to 1 (not 0, since B commonly stays above 10 m through
-    the seclusion) -- a drop in code number that looks like a
+    then re-forms a warm core at low levels under a still-cold upper
+    core, i.e. 4 then back to 3 while B stays above 10 m (the bent-back
+    front commonly keeps it there), or to 1 if B also falls -- a drop in
+    code number that looks like a
     regression only if the sequence is read as strictly increasing;
     read correctly, it is the seclusion signature itself. Evans and
     Hart's own onset is the first frame whose code is 2 or 3 (B crossed
