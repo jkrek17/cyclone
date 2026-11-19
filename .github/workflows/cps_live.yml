@@ -16,10 +16,12 @@
 # An older cycle published this way stays up only until the next check,
 # which puts the newest back.
 #
-# Nothing else runs on this push except the site publish, which listens for
-# this workflow; the
-# cps-live tree has no .github/workflows, and pushes made with the workflow's
-# GITHUB_TOKEN do not start other workflows anyway.
+# The last step starts the site publish (cyclone_publish.yml) with
+# workflow_dispatch. The publish cannot listen for this workflow's
+# completion instead: when this run was itself started with a GITHUB_TOKEN
+# (by the check), GitHub does not raise workflow_run for it. Nothing else
+# runs on the push: the cps-live tree has no .github/workflows, and pushes
+# made with the workflow's GITHUB_TOKEN do not start other workflows anyway.
 
 name: CPS live map data
 
@@ -33,6 +35,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: cps-live
@@ -102,3 +105,8 @@ jobs:
           git commit -q -m "CPS live data $CYCLE"
           git remote add origin "$REMOTE"
           git push --force origin cps-live
+
+      - name: Start the site publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run cyclone_publish.yml -R "$GITHUB_REPOSITORY" --ref main
