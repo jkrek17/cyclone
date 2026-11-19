@@ -9,14 +9,15 @@
 # and the guide at .../cyclone/forecasters/. Nothing on the site links
 # anywhere else.
 #
-# Runs after every live data export and daily collection, on a push that
-# changes the pages, and by hand.
+# Runs after every daily collection, when a live data export starts it
+# (cps_live.yml's last step; a run started by the 30-minute check gets no
+# workflow_run event), on a push that changes the pages, and by hand.
 
 name: Publish cyclone site
 
 on:
   workflow_run:
-    workflows: ["CPS live map data", "CPS daily collection"]
+    workflows: ["CPS daily collection"]
     types: [completed]
   push:
     branches: [main]
