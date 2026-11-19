@@ -26,7 +26,9 @@ space, and as AWIPS II derived parameters for CAVE.
 
 ## Workflows
 
-- `CPS live map data` exports the newest GFS cycle four times a day to the
+- `CPS live check` runs every 30 minutes and, when a GFS cycle newer than
+  the one on the map has its f198 posted, starts `CPS live map data`.
+- `CPS live map data` exports that GFS cycle (each of the four a day) to the
   orphan branch `cps-live`.
 - `CPS daily collection` follows the watched storms in the 12 UTC run and
   commits their tracks and diagrams under `cyclone_phase_space/realtime/data/`.

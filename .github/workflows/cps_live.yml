@@ -1,9 +1,9 @@
 # Data for the live global cyclone phase space web map
-# (cyclone_phase_space/realtime/export_web.py). Four times a day, about
-# 3 h 40 min after each GFS cycle, when the 0.25 degree f198 is usually
-# posted, the newest cycle whose f198 exists (the script probes NOMADS, then
-# the AWS bucket, and falls back to the previous cycle when it is missing) is
-# exported to GeoJSON and Web Mercator PNGs and published as the single
+# (cyclone_phase_space/realtime/export_web.py). The "CPS live check" workflow
+# (cps_live_check.yml) looks every 30 minutes for a GFS cycle newer than the
+# one on the map whose 0.25 degree f198 is posted, and starts this workflow
+# for it; it has no schedule of its own. That cycle is exported to GeoJSON
+# and Web Mercator PNGs and published as the single
 # commit of the orphan branch cps-live, under latest/ (with the daily
 # collection's storm diagrams under storms/<cycle>/<NAME>/):
 #
@@ -12,7 +12,9 @@
 # The branch is rebuilt from nothing and force-pushed every run, so it never
 # accumulates history (about 35 MB per cycle), and main is never touched.
 # Run it by hand (Actions > CPS live map data > Run workflow) with a cycle to
-# publish a particular run.
+# publish a particular run; blank takes the newest cycle whose f198 is posted.
+# An older cycle published this way stays up only until the next check,
+# which puts the newest back.
 #
 # Nothing else runs on this push except the site publish, which listens for
 # this workflow; the
@@ -22,8 +24,6 @@
 name: CPS live map data
 
 on:
-  schedule:
-    - cron: '40 3,9,15,21 * * *'
   workflow_dispatch:
     inputs:
       cycle:

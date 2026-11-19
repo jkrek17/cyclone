@@ -1,0 +1,77 @@
+# Starts the live map export as soon as a new GFS cycle is ready. Every 30
+# minutes this compares the cycle the map shows (the "cycle" of the cps-live
+# branch's latest/index.json) with the newest cycle whose 0.25 degree f198 is
+# posted (cyclone_phase_space/realtime/check_cycle.py, NOMADS then AWS).
+# When the newest is later, it starts "CPS live map data" (cps_live.yml) for
+# that cycle through workflow_dispatch; otherwise it stops after a few
+# seconds. GitHub delays scheduled runs by hours and drops some of them
+# outright (the old four fixed slots ran about twice a day in November
+# 2026), so many cheap checks replace four slots that each had to land.
+#
+# No pip install and no commit: this workflow only reads, and it does not
+# start the site publish (which listens for the export, not for this). A
+# workflow_dispatch made with the workflow's GITHUB_TOKEN does start the
+# target workflow; that is the one event GitHub allows a token to trigger.
+#
+# Any other machine can start the export the same way, for example a cron
+# job on a work server calling
+#   gh workflow run cps_live.yml -R jkrek17/cyclone -f cycle=YYYYMMDDHH
+# with a token that has Actions write access to this repository.
+
+name: CPS live check
+
+on:
+  schedule:
+    - cron: '7,37 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: cps-live-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          sparse-checkout: cyclone_phase_space/realtime/check_cycle.py
+          sparse-checkout-cone-mode: false
+
+      - name: Cycle on the map now
+        id: published
+        run: |
+          cyc=""
+          if git fetch -q --depth 1 --filter=blob:none origin cps-live 2>/dev/null; then
+            cyc=$(git show FETCH_HEAD:latest/index.json 2>/dev/null \
+              | python3 -c 'import json,sys; print(json.load(sys.stdin).get("cycle",""))' 2>/dev/null || true)
+          fi
+          echo "map shows: ${cyc:-nothing}"
+          echo "cycle=$cyc" >> "$GITHUB_OUTPUT"
+
+      - name: Newest posted cycle
+        id: newest
+        run: python3 cyclone_phase_space/realtime/check_cycle.py --published "${{ steps.published.outputs.cycle }}"
+
+      - name: Start the export
+        if: steps.newest.outputs.new == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CYCLE: ${{ steps.newest.outputs.cycle }}
+        run: |
+          # A run already queued or running for the export means a cycle is
+          # on its way; let it land and check again next time.
+          busy=$(gh run list -R "$GITHUB_REPOSITORY" -w cps_live.yml -L 5 \
+            --json status -q '[.[] | select(.status != "completed")] | length')
+          if [ "${busy:-0}" -gt 0 ]; then
+            echo "an export is already queued or running; not starting another"
+            exit 0
+          fi
+          gh workflow run cps_live.yml -R "$GITHUB_REPOSITORY" --ref main -f cycle="$CYCLE"
+          echo "started CPS live map data for $CYCLE"
