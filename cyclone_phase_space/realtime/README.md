@@ -1004,11 +1004,24 @@ run for testing needs that same `storms/` sibling directory next to
 its output directory, populated by hand from this repo's `data/`, for
 the relative links to resolve.
 
-**Schedule and branch.** The `CPS live map data` workflow
-(`.github/workflows/cps_live.yml`) runs at 03:40, 09:40, 15:40 and
-21:40 UTC, about 3 h 40 min after each cycle, when the 0.25 degree
-f198 is usually posted; if it is not yet, the script falls back to the
-previous cycle. It installs `requirements.txt` (with the pip cache),
+**Schedule and branch.** The `CPS live check` workflow
+(`.github/workflows/cps_live_check.yml`) runs every 30 minutes (at :07
+and :37). It reads the cycle the map shows from the `cps-live`
+branch's `latest/index.json` and runs `check_cycle.py`, which finds
+the newest cycle whose 0.25 degree f198 is posted (NOMADS, else AWS;
+the same rule as `export_web.py`'s default cycle, standard library
+only, so no pip install). When that cycle is later than the one on the
+map, and no export is already queued or running, it starts the `CPS
+live map data` workflow (`.github/workflows/cps_live.yml`) for it with
+`workflow_dispatch`; otherwise it stops within seconds. GitHub delays
+scheduled runs by hours and drops some outright (the earlier four
+fixed slots at 03:40, 09:40, 15:40 and 21:40 UTC landed about twice a
+day in November 2026, so the 00Z and 12Z cycles never reached the
+map), so many short checks replace four slots that each had to land.
+Any other machine can start the export the same way, e.g. a cron job
+running `gh workflow run cps_live.yml -R jkrek17/cyclone -f
+cycle=YYYYMMDDHH` with a token that has Actions write access. The
+export installs `requirements.txt` (with the pip cache),
 runs `export_web.py` into a temporary directory, and publishes the
 result as the single commit of the orphan branch `cps-live`, under
 `latest/` (`index.json`, `legend.json`, `history.json`, `frames/`),
@@ -1028,8 +1041,9 @@ so a new cycle reaches viewers within about five minutes of the push.
 
 **Re-running or backfilling.** Actions > CPS live map data > Run
 workflow, with a cycle (YYYYMMDDHH) to publish that run instead of the
-newest; blank takes the newest complete cycle. The branch then holds
-that cycle until the next scheduled run replaces it. NOMADS keeps about
+newest; blank takes the newest complete cycle. An older cycle stays
+up only until the next check (within about 30 minutes), which starts
+the newest again. NOMADS keeps about
 10 days; older cycles come from the AWS bucket. Locally,
 `python3 export_web.py --cycle YYYYMMDDHH --out DIR` writes the same
 tree to `DIR`, which a local copy of the page can be pointed at.
