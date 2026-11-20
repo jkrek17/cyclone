@@ -1015,9 +1015,9 @@
     },
     {
       "name": "AUTO_261116_01",
-      "lat": 53.81,
-      "lon": -16.31,
-      "cycle": "2026111812",
+      "lat": 52.13,
+      "lon": -13.96,
+      "cycle": "2026111912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111612: 956.98 hPa, NATL.",
@@ -1036,9 +1036,9 @@
     },
     {
       "name": "AUTO_261116_03",
-      "lat": 79.32,
-      "lon": 69.54,
-      "cycle": "2026111812",
+      "lat": 76.76,
+      "lon": 97.04,
+      "cycle": "2026111912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111612: 974.21 hPa, 76.2N 41.8E.",
@@ -1057,9 +1057,9 @@
     },
     {
       "name": "AUTO_261117_01",
-      "lat": 58.59,
-      "lon": -173.31,
-      "cycle": "2026111812",
+      "lat": 61.41,
+      "lon": -172.54,
+      "cycle": "2026111912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111712: 955.76 hPa, NPAC.",
@@ -1078,9 +1078,9 @@
     },
     {
       "name": "AUTO_261117_03",
-      "lat": 54.46,
-      "lon": 8.99,
-      "cycle": "2026111812",
+      "lat": 59.47,
+      "lon": 21.82,
+      "cycle": "2026111912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111712: 972.98 hPa, NATL.",
@@ -1088,9 +1088,9 @@
     },
     {
       "name": "AUTO_261117_04",
-      "lat": 65.59,
-      "lon": -58.91,
-      "cycle": "2026111812",
+      "lat": 67.37,
+      "lon": -56.96,
+      "cycle": "2026111912",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111712: 978.47 hPa, NATL.",
@@ -1106,6 +1106,16 @@
       "notes": "Found automatically at 0 h of 2026111812: 976.73 hPa, NATL. Inactive from 2026111812: merged into AUTO_261117_03 at +18 h.",
       "active": false,
       "ended_cycle": "2026111812"
+    },
+    {
+      "name": "AUTO_261119_01",
+      "lat": 48.21,
+      "lon": 155.1,
+      "cycle": "2026111912",
+      "fhr0": 0,
+      "fhr1": null,
+      "notes": "Found automatically at 0 h of 2026111912: 972.17 hPa, NPAC.",
+      "active": true
     }
   ]
 }
