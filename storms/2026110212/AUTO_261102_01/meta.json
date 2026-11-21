@@ -1,0 +1,43 @@
+{
+  "cycle": "2026110212",
+  "name": "AUTO_261102_01",
+  "status": "ok",
+  "code_version": "ce171a9",
+  "seed": {
+    "lat": 58.17,
+    "lon": 175.54,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "automatic discovery at 0 h of 2026110212"
+  },
+  "start_fhr": 0,
+  "end_fhr": 6,
+  "fixes": 2,
+  "start": {
+    "lat": 58.17,
+    "lon": 175.54,
+    "mslp_hpa": 966.5
+  },
+  "end": {
+    "lat": 58.09,
+    "lon": 177.44,
+    "mslp_hpa": 967.6
+  },
+  "min_mslp_hpa": 966.5,
+  "onset_standard_h": null,
+  "completion_standard_h": null,
+  "onset_hart_h": null,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "1 0-6",
+  "class_sequence_standard": "1 0-6",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +12, +18 h (977 hPa at +18 h)",
+  "discovered": {
+    "lat": 58.17,
+    "lon": 175.54,
+    "mslp_hpa": 966.49,
+    "basin": "NPAC"
+  }
+}

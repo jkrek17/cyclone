@@ -1,0 +1,37 @@
+{
+  "cycle": "2026111212",
+  "name": "AUTO_261102_01",
+  "status": "ok",
+  "code_version": "9742050",
+  "seed": {
+    "lat": 58.1,
+    "lon": -158.67,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026111112 at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 0,
+  "fixes": 1,
+  "start": {
+    "lat": 57.97,
+    "lon": -151.99,
+    "mslp_hpa": 985.2
+  },
+  "end": {
+    "lat": 57.97,
+    "lon": -151.99,
+    "mslp_hpa": 985.2
+  },
+  "min_mslp_hpa": 985.2,
+  "onset_standard_h": 0,
+  "completion_standard_h": null,
+  "onset_hart_h": null,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "- 0",
+  "class_sequence_standard": "- 0",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +0, +6 h (991 hPa at +6 h)"
+}

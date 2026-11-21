@@ -1,0 +1,15 @@
+{
+  "cycle": "2026111012",
+  "name": "AUTO_261109_03",
+  "status": "merged",
+  "reason": "At 0 h of 2026111012 within 0 km of AUTO_261025_01; merged into AUTO_261025_01, marked inactive.",
+  "code_version": "3ccb284",
+  "seed": {
+    "lat": 49.97,
+    "lon": -148.22,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026110912 at +24 h"
+  },
+  "fsu_number": null
+}
