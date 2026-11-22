@@ -1020,8 +1020,9 @@
       "cycle": "2026112012",
       "fhr0": 0,
       "fhr1": null,
-      "notes": "Found automatically at 0 h of 2026111612: 956.98 hPa, NATL.",
-      "active": true
+      "notes": "Found automatically at 0 h of 2026111612: 956.98 hPa, NATL. Inactive from 2026112112: no closed low within 400 km of the seed.",
+      "active": false,
+      "ended_cycle": "2026112112"
     },
     {
       "name": "AUTO_261116_02",
@@ -1058,9 +1059,9 @@
     },
     {
       "name": "AUTO_261117_01",
-      "lat": 61.48,
-      "lon": -165.86,
-      "cycle": "2026112012",
+      "lat": 59.66,
+      "lon": -170.5,
+      "cycle": "2026112112",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111712: 955.76 hPa, NPAC.",
@@ -1079,9 +1080,9 @@
     },
     {
       "name": "AUTO_261117_03",
-      "lat": 65.21,
-      "lon": 11.25,
-      "cycle": "2026112012",
+      "lat": 63.98,
+      "lon": 11.2,
+      "cycle": "2026112112",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111712: 972.98 hPa, NATL.",
@@ -1089,9 +1090,9 @@
     },
     {
       "name": "AUTO_261117_04",
-      "lat": 69.8,
-      "lon": -60.04,
-      "cycle": "2026112012",
+      "lat": 70.75,
+      "lon": -63.9,
+      "cycle": "2026112112",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111712: 978.47 hPa, NATL.",
@@ -1110,12 +1111,22 @@
     },
     {
       "name": "AUTO_261119_01",
-      "lat": 53.15,
-      "lon": 161.68,
-      "cycle": "2026112012",
+      "lat": 55.99,
+      "lon": 169.54,
+      "cycle": "2026112112",
       "fhr0": 0,
       "fhr1": null,
       "notes": "Found automatically at 0 h of 2026111912: 972.17 hPa, NPAC.",
+      "active": true
+    },
+    {
+      "name": "AUTO_261121_01",
+      "lat": 52.23,
+      "lon": -177.56,
+      "cycle": "2026112112",
+      "fhr0": 0,
+      "fhr1": null,
+      "notes": "Found automatically at 0 h of 2026112112: 972.89 hPa, NPAC.",
       "active": true
     }
   ]
