@@ -1,0 +1,49 @@
+{
+  "cycle": "2026112312",
+  "name": "AUTO_261123_02",
+  "status": "ok",
+  "code_version": "74339e9",
+  "seed": {
+    "lat": 47.3,
+    "lon": -151.42,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "automatic discovery at 0 h of 2026112312"
+  },
+  "start_fhr": 0,
+  "end_fhr": 12,
+  "fixes": 3,
+  "start": {
+    "lat": 47.3,
+    "lon": -151.42,
+    "mslp_hpa": 966.4
+  },
+  "end": {
+    "lat": 46.81,
+    "lon": -147.29,
+    "mslp_hpa": 966.6
+  },
+  "min_mslp_hpa": 966.4,
+  "onset_standard_h": null,
+  "completion_standard_h": null,
+  "onset_hart_h": null,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "1 0-6, - 12",
+  "class_sequence_standard": "3 0, 1 6, - 12",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "merged into AUTO_261123_01 at +18 h",
+  "merged_into": {
+    "name": "AUTO_261123_01",
+    "fhr": 18,
+    "distance_km": 0
+  },
+  "note": "merged into AUTO_261123_01 at +18 h",
+  "discovered": {
+    "lat": 47.3,
+    "lon": -151.42,
+    "mslp_hpa": 966.45,
+    "basin": "NPAC"
+  }
+}
