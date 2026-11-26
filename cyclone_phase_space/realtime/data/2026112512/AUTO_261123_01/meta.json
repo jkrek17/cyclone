@@ -1,0 +1,43 @@
+{
+  "cycle": "2026112512",
+  "name": "AUTO_261123_01",
+  "status": "ok",
+  "code_version": "19451ab",
+  "seed": {
+    "lat": 45.28,
+    "lon": -144.72,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "stored seed of 2026112412; the track of 2026112412 has no fix at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 42,
+  "fixes": 7,
+  "start": {
+    "lat": 44.96,
+    "lon": -144.17,
+    "mslp_hpa": 978.8
+  },
+  "end": {
+    "lat": 69.38,
+    "lon": -146.68,
+    "mslp_hpa": 1009.8
+  },
+  "min_mslp_hpa": 978.8,
+  "onset_standard_h": 0,
+  "completion_standard_h": null,
+  "onset_hart_h": 0,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "4 0, 3 6, - 12-36, 1 42",
+  "class_sequence_standard": "4 0, 3 6, - 12-36, 3 42",
+  "fsu_number": 6,
+  "fsu": {
+    "number": 6,
+    "lat": 44.37,
+    "lon": -146.32,
+    "distance_km": 182,
+    "url": "http://moe.met.fsu.edu/cyclonephase/gfs/fcst/archive/26112512/6.html"
+  },
+  "track_end": "outside a closed low at +48, +54 h (1010 hPa at +54 h)"
+}

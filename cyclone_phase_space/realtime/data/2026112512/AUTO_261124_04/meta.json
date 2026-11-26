@@ -1,0 +1,37 @@
+{
+  "cycle": "2026112512",
+  "name": "AUTO_261124_04",
+  "status": "ok",
+  "code_version": "19451ab",
+  "seed": {
+    "lat": 55.54,
+    "lon": 155.21,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026112412 at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 0,
+  "fixes": 1,
+  "start": {
+    "lat": 55.29,
+    "lon": 155.49,
+    "mslp_hpa": 956.8
+  },
+  "end": {
+    "lat": 55.29,
+    "lon": 155.49,
+    "mslp_hpa": 956.8
+  },
+  "min_mslp_hpa": 956.8,
+  "onset_standard_h": 0,
+  "completion_standard_h": null,
+  "onset_hart_h": null,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "- 0",
+  "class_sequence_standard": "3 0",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "no minimum within 600 km of 55.3,155.5 at or below 992 hPa and within 1080 km of the last fix at +12 h"
+}
