@@ -1,0 +1,37 @@
+{
+  "cycle": "2026110212",
+  "name": "AUTO_261031_01",
+  "status": "ok",
+  "code_version": "ce171a9",
+  "seed": {
+    "lat": 80.24,
+    "lon": -125.71,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026110112 at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 78,
+  "fixes": 14,
+  "start": {
+    "lat": 80.28,
+    "lon": -122.25,
+    "mslp_hpa": 989.7
+  },
+  "end": {
+    "lat": 73.83,
+    "lon": -84.42,
+    "mslp_hpa": 1003.0
+  },
+  "min_mslp_hpa": 989.7,
+  "onset_standard_h": 0,
+  "completion_standard_h": 0,
+  "onset_hart_h": 24,
+  "completion_hart_h": 24,
+  "bands": "hart",
+  "class_sequence": "- 0-48, 4 54, 5 60-66, 6 72, - 78",
+  "class_sequence_standard": "- 0-48, 4 54-66, 6 72, - 78",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +84, +90 h (1005 hPa at +90 h)"
+}

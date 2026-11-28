@@ -1,0 +1,15 @@
+{
+  "cycle": "2026111212",
+  "name": "AUTO_261109_01",
+  "status": "lost",
+  "reason": "No closed low within 400 km of the seed 29.4N 153.2E at +0 h of 2026111212 (stored seed of 2026111112; the track of 2026111112 has no fix at +24 h); marked inactive.",
+  "code_version": "9742050",
+  "seed": {
+    "lat": 29.38,
+    "lon": 153.22,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "stored seed of 2026111112; the track of 2026111112 has no fix at +24 h"
+  },
+  "fsu_number": null
+}

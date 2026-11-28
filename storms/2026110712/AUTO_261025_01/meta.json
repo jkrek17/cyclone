@@ -1,0 +1,37 @@
+{
+  "cycle": "2026110712",
+  "name": "AUTO_261025_01",
+  "status": "ok",
+  "code_version": "abe7654",
+  "seed": {
+    "lat": 47.29,
+    "lon": 176.37,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026110612 at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 96,
+  "fixes": 16,
+  "start": {
+    "lat": 47.49,
+    "lon": 175.84,
+    "mslp_hpa": 994.3
+  },
+  "end": {
+    "lat": 49.61,
+    "lon": -139.34,
+    "mslp_hpa": 987.0
+  },
+  "min_mslp_hpa": 966.4,
+  "onset_standard_h": 0,
+  "completion_standard_h": 0,
+  "onset_hart_h": 12,
+  "completion_hart_h": 12,
+  "bands": "hart",
+  "class_sequence": "4 0, - 12, 4 18, - 24, 4 30, 3 36, 4 42, 3 48, 1 54-72, - 78-84, 4 90-96",
+  "class_sequence_standard": "4 0, - 12, 4 18, - 24, 4 30-42, 3 48, 1 54-72, - 78-84, 4 90-96",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +108, +114 h (1012 hPa at +114 h)"
+}

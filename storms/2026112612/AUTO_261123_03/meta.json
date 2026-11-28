@@ -1,0 +1,49 @@
+{
+  "cycle": "2026112612",
+  "name": "AUTO_261123_03",
+  "status": "ok",
+  "code_version": "06462ad",
+  "seed": {
+    "lat": 51.1,
+    "lon": -135.88,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "track of 2026112512 at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 18,
+  "fixes": 4,
+  "start": {
+    "lat": 51.93,
+    "lon": -134.32,
+    "mslp_hpa": 982.9
+  },
+  "end": {
+    "lat": 54.84,
+    "lon": -135.09,
+    "mslp_hpa": 1003.4
+  },
+  "min_mslp_hpa": 982.9,
+  "onset_standard_h": null,
+  "completion_standard_h": null,
+  "onset_hart_h": null,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "1 0-12, - 18",
+  "class_sequence_standard": "1 0-12, - 18",
+  "fsu_number": 5,
+  "fsu": {
+    "number": 5,
+    "lat": 52.32,
+    "lon": -134.32,
+    "distance_km": 43,
+    "url": "http://moe.met.fsu.edu/cyclonephase/gfs/fcst/archive/26112612/5.html"
+  },
+  "track_end": "merged into AUTO_261123_01 at +30 h",
+  "merged_into": {
+    "name": "AUTO_261123_01",
+    "fhr": 30,
+    "distance_km": 0
+  },
+  "note": "merged into AUTO_261123_01 at +30 h"
+}

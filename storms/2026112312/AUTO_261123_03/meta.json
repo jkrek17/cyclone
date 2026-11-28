@@ -1,0 +1,43 @@
+{
+  "cycle": "2026112312",
+  "name": "AUTO_261123_03",
+  "status": "ok",
+  "code_version": "74339e9",
+  "seed": {
+    "lat": 41.78,
+    "lon": -150.06,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "automatic discovery at 0 h of 2026112312"
+  },
+  "start_fhr": 0,
+  "end_fhr": 114,
+  "fixes": 20,
+  "start": {
+    "lat": 41.78,
+    "lon": -150.06,
+    "mslp_hpa": 973.0
+  },
+  "end": {
+    "lat": 56.57,
+    "lon": -137.14,
+    "mslp_hpa": 1013.7
+  },
+  "min_mslp_hpa": 967.8,
+  "onset_standard_h": 24,
+  "completion_standard_h": 24,
+  "onset_hart_h": null,
+  "completion_hart_h": 18,
+  "bands": "hart",
+  "class_sequence": "- 0, 5 6, 1 12-18, 4 24, 5 30, 1 36-60, 0 66, - 72-90, 1 96-102, - 108-114",
+  "class_sequence_standard": "- 0, 6 6, 0 12, 1 18, 4 24-30, 1 36-66, - 72-90, 1 96-102, - 108-114",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +120, +126 h (1014 hPa at +126 h)",
+  "discovered": {
+    "lat": 41.78,
+    "lon": -150.06,
+    "mslp_hpa": 972.97,
+    "basin": "NPAC"
+  }
+}

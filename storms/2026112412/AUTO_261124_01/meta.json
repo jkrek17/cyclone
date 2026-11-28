@@ -1,0 +1,49 @@
+{
+  "cycle": "2026112412",
+  "name": "AUTO_261124_01",
+  "status": "ok",
+  "code_version": "2e75d7d",
+  "seed": {
+    "lat": 53.25,
+    "lon": -143.0,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "automatic discovery at 0 h of 2026112412"
+  },
+  "start_fhr": 0,
+  "end_fhr": 42,
+  "fixes": 8,
+  "start": {
+    "lat": 53.25,
+    "lon": -143.0,
+    "mslp_hpa": 975.7
+  },
+  "end": {
+    "lat": 48.37,
+    "lon": -146.22,
+    "mslp_hpa": 989.6
+  },
+  "min_mslp_hpa": 975.2,
+  "onset_standard_h": null,
+  "completion_standard_h": null,
+  "onset_hart_h": null,
+  "completion_hart_h": null,
+  "bands": "hart",
+  "class_sequence": "1 0-6, 0 12, 1 18, 0 24-36, - 42",
+  "class_sequence_standard": "1 0-6, 0 12, 1 18, 0 24-36, - 42",
+  "fsu_number": 47,
+  "fsu": {
+    "number": 47,
+    "lat": 53.64,
+    "lon": -142.84,
+    "distance_km": 45,
+    "url": "http://moe.met.fsu.edu/cyclonephase/gfs/fcst/archive/26112412/47.html"
+  },
+  "track_end": "no minimum within 600 km of 47.0,-144.4 at or below 1014 hPa and within 1080 km of the last fix at +54 h",
+  "discovered": {
+    "lat": 53.25,
+    "lon": -143.0,
+    "mslp_hpa": 975.73,
+    "basin": "NPAC"
+  }
+}

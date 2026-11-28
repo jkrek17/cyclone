@@ -1,0 +1,37 @@
+{
+  "cycle": "2026112712",
+  "name": "AUTO_261123_03",
+  "status": "ok",
+  "code_version": "1aaa9f8",
+  "seed": {
+    "lat": 51.93,
+    "lon": -134.32,
+    "fhr0": 0,
+    "fhr1": null,
+    "source": "stored seed of 2026112612; the track of 2026112612 has no fix at +24 h"
+  },
+  "start_fhr": 0,
+  "end_fhr": 0,
+  "fixes": 1,
+  "start": {
+    "lat": 55.27,
+    "lon": -132.05,
+    "mslp_hpa": 1007.7
+  },
+  "end": {
+    "lat": 55.27,
+    "lon": -132.05,
+    "mslp_hpa": 1007.7
+  },
+  "min_mslp_hpa": 1007.7,
+  "onset_standard_h": null,
+  "completion_standard_h": 0,
+  "onset_hart_h": null,
+  "completion_hart_h": 0,
+  "bands": "hart",
+  "class_sequence": "- 0",
+  "class_sequence_standard": "- 0",
+  "fsu_number": null,
+  "fsu": null,
+  "track_end": "outside a closed low at +0, +12 h (1013 hPa at +12 h)"
+}
